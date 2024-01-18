@@ -4,6 +4,7 @@ function downloadXML() {
     var field2Value = document.getElementById('field2').value;
     var field3Value = document.getElementById('field3').value;
     var field4Value = document.getElementById('field4').value;
+    var field5Value = document.getElementById('field5').value;
 
     // Create XML content
     var xmlContent = '<?xml version="1.0" encoding="UTF-8"?>\n';
@@ -12,6 +13,7 @@ function downloadXML() {
     xmlContent += '  <field2>' + field2Value + '</field2>\n';
     xmlContent += '  <field3>' + field3Value + '</field3>\n';
     xmlContent += '  <field4>' + field4Value + '</field4>\n';
+    xmlContent += '  <field5>' + field4Value + '</field5>\n';
     xmlContent += '</data>';
 
     // Create Blob and download
