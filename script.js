@@ -13,7 +13,7 @@ function downloadXML() {
     xmlContent += '  <field2>' + field2Value + '</field2>\n';
     xmlContent += '  <field3>' + field3Value + '</field3>\n';
     xmlContent += '  <field4>' + field4Value + '</field4>\n';
-    xmlContent += '  <field5>' + field4Value + '</field5>\n';
+    xmlContent += '  <field5>' + field5Value + '</field5>\n';
     xmlContent += '</data>';
 
     // Create Blob and download
