@@ -1,20 +1,25 @@
-function downloadXML() {
-    // Get values from input fields
-    var field1Value = document.getElementById('field1').value;
-    var field2Value = document.getElementById('field2').value;
-    var field3Value = document.getElementById('field3').value;
-    var field4Value = document.getElementById('field4').value;
-    var field5Value = document.getElementById('field5').value;
+var GROUP_AMONT = 5;
+var DEFAULT_GROUP_FIELD_AMOUNT = 1;
 
+var fieldCountArr = []
+
+for (i = 0; i < GROUP_AMONT; i++) {
+    fieldCountArr.push(DEFAULT_GROUP_FIELD_AMOUNT);
+}
+
+function downloadXML() {
     // Create XML content
     var xmlContent = '<?xml version="1.0" encoding="UTF-8"?>\n';
     xmlContent += '<data>\n';
-    xmlContent += '  <field1>' + field1Value + '</field1>\n';
-    xmlContent += '  <field2>' + field2Value + '</field2>\n';
-    xmlContent += '  <field3>' + field3Value + '</field3>\n';
-    xmlContent += '  <field4>' + field4Value + '</field4>\n';
-    xmlContent += '  <field5>' + field5Value + '</field5>\n';
-    xmlContent += '</data>';
+    fieldCountArr.forEach((count, groupIndex)=>{
+        xmlContent += '  <group index="' + groupIndex + '">\n'
+        for(var i = 0; i < count; i++) {
+            var valueId = 'field' + (groupIndex + 1) + '-' + (i+1);
+            xmlContent += '    <item index="' + i + '">' + document.getElementById(valueId).value + '</item>\n';
+        }
+        xmlContent += '  </group>\n'
+    });
+    xmlContent += '</data>\n';
 
     // Create Blob and download
     var blob = new Blob([xmlContent], { type: 'text/xml' });
@@ -24,4 +29,25 @@ function downloadXML() {
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
+}
+
+function fieldAdd(fieldNum) {
+    fieldCountArr[fieldNum-1] += 1;
+
+    var container = document.getElementById('fieldAdd' + fieldNum + 'Container');
+
+    var fieldContainer = document.createElement('div');
+    fieldContainer.className = 'container';
+    fieldContainer.id = 'field' + fieldNum + '-' + fieldCountArr[fieldNum-1] + 'Container';
+    container.appendChild(fieldContainer);
+
+    var label = document.createElement('label');
+    label.for = 'field' + fieldNum + '-' + fieldCountArr[fieldNum-1];
+    label.textContent = '語法：';
+    fieldContainer.appendChild(label);
+
+    var input = document.createElement('input');
+    input.type = 'text';
+    input.id = 'field' + fieldNum + '-' + fieldCountArr[fieldNum-1];
+    fieldContainer.appendChild(input);
 }
