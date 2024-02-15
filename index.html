@@ -7,61 +7,10 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <div class="groupContainer">
-            <h3>前置宣告</h3>
-            <div class="container" id="fieldAdd1Container">
-                <div class="container" id="field1-1Container">
-                    <label for="field1-1">語法：</label>
-                    <input type="text" id="field1-1" />
-                </div>
-            </div>
-            <button class=fieldAddButton id=fieldAdd1 onclick="fieldAdd(1)">+</button>
-        </div>
-        <div class="groupContainer">
-            <h3>Count語法</h3>
-            <div class="container" id="fieldAdd2Container">
-                <div class="container" id="field2-1Container">
-                    <label for="field2-1">語法：</label>
-                    <input type="text" id="field2-1"/>
-                </div>
-            </div>
-            <button class=fieldAddButton id=fieldAdd2 onclick="fieldAdd(2)">+</button>
-        </div>
-        <div class="groupContainer">
-            <h3>異動前/後語法</h3>
-            <div class="container" id="fieldAdd3Container">
-                <div class="container" id="field3-1Container">
-                    <label for="field3-1">語法：</label>
-                    <input type="text" id="field3-1"/>
-                </div>
-            </div>
-            <button class=fieldAddButton id=fieldAdd3 onclick="fieldAdd(3)">+</button>
-        </div>
-        <div class="groupContainer">
-            <h3>異動語法</h3>
-            <div class="container" id="fieldAdd4Container">
-                <div class="container" id="field4-1Container">
-                    <label for="field4-1">語法：</label>
-                    <input type="text" id="field4-1"/>
-                </div>
-            </div>
-            <button class=fieldAddButton id=fieldAdd4 onclick="fieldAdd(4)">+</button>
-            <br>
-        </div>
-        <div class="groupContainer">
-            <h3>後置語法</h3>
-            <div class="container" id="fieldAdd5Container">
-                <div class="container" id="field5-1Container">
-                    <label for="field5-1">語法：</label>
-                    <input type="text" id="field5-1"/>
-                </div>
-            </div>
-            <button class=fieldAddButton id=fieldAdd5 onclick="fieldAdd(5)">+</button>
-        </div>
-        <br>
-        <div class="container">
-            <button onclick="downloadXML()">Download XML</button>
+    <div class="container" id="mainContainer">
+        <div class="inputContainer">
+            <label for="fileInput" id="fileInputLabel">Upload SQL File</label>
+            <input type="file" accept=".sql" id="fileInput" onchange="onFileInput()">
         </div>
     </div>
 
