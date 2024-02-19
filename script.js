@@ -43,6 +43,8 @@ const GROUP_TITLE = new Map ([
     ]
 ]);
 
+const SINGLE_COMMAND_INDICATOR = '/*--!*/';
+
 for (i = 0; i < GROUP_AMONT; i++) {
     fieldCountArr.push(DEFAULT_GROUP_FIELD_AMOUNT);
 }
@@ -82,7 +84,6 @@ function getTextGroupMap (textFromFileLoaded) {
     var groupName = '';
     for (var i = 0; i < textLines.length; i++) {
         textLines[i] = textLines[i].trim();
-        var text = textLines[i] + '\n';
         isGroupToMap = false;
 
         //* 若找不到區塊分割的判斷字串，則略過
@@ -90,6 +91,7 @@ function getTextGroupMap (textFromFileLoaded) {
         if (!groupName) {
             continue;
         }
+        var text = '';
 
         //*找到區塊分割的判斷字串後，尋找區塊的結束點
         var j;
