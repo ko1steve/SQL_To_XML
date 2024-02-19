@@ -5,6 +5,8 @@ var fieldCountArr = []
 
 var groupArr = [];
 
+var hasInit = false;
+
 const GROUP_SERACH = new Map([
     [
         '--#PreSQL', ['--#CountSQL', '--#SelectSQL', '--#MainSQL', '--#PostSQL']
@@ -46,14 +48,31 @@ for (i = 0; i < GROUP_AMONT; i++) {
 }
 
 function onFileInput () {
-    var fileInput = document.getElementById('fileInput').files[0];
+    var fileInput = document.getElementById('fileInput');
+    if (!fileInput.files.length > 0) {
+        return;
+    }
     var reader = new FileReader();
     reader.onload = function(event){
         var textFromFileLoaded = event.target.result;
         var textGroupMap = getTextGroupMap(textFromFileLoaded);
+        if (hasInit) {
+            resetPageContent();
+        }
         createPageContent(textGroupMap);
+        fileInput.files = null;
+        fileInput.value = null;
+        hasInit = true;
     };
-    reader.readAsText(fileInput, 'UTF-8');
+    reader.readAsText(fileInput.files[0], 'UTF-8');
+}
+
+function resetPageContent () {
+    var mainContainer = document.getElementById('mainContainer');
+    var allGroupsContainer = document.getElementById('allGroupsContainer');
+    var downloadButtonContainer = document.getElementById('downloadButtonContainer');
+    mainContainer.removeChild(allGroupsContainer);
+    mainContainer.removeChild(downloadButtonContainer);
 }
 
 function getTextGroupMap (textFromFileLoaded) {
@@ -147,6 +166,7 @@ function createSingleGroupContainer (groupName, text, parent) {
 function createDownloadButton (parent) {
     var container = document.createElement('div');
     container.className = 'container';
+    container.id = 'downloadButtonContainer';
     var button = document.createElement('button');
     button.id = 'downloadButton';
     button.textContent = 'Download as XML';
