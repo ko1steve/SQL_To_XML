@@ -1,0 +1,70 @@
+body {
+    font-family: 'Arial', sans-serif;
+    display: flex;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.container {
+    text-align: center;
+}
+
+.inputContainer {
+    padding: 10px;
+    margin: 10px;
+}
+
+.groupContainer {
+    border:solid 2px #4c84af;
+    border-radius: 5px;
+    padding: 10px;
+    margin: 10px;
+}
+
+input {
+    margin-bottom: 10px;
+    padding: 5px;
+    width: 50%;
+}
+
+button {
+    padding: 10px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#fileInputLabel {
+    border-radius: 5px;
+    background-color:lightcoral;
+    color: aliceblue;
+    font-weight: bolder;
+    font-size: 20px;
+    padding: 10px;
+    cursor: pointer;
+}
+
+#fileInput {
+    visibility: hidden;
+    width: 0px;
+    height: 0px;
+    margin-bottom: 0px;
+    padding: 0px;
+}
+
+#downloadButton {
+    margin: 10px;
+    border-radius: 5px;
+    color: aliceblue;
+    font-weight: bolder;
+    font-size: 20px;
+    padding: 10px;
+    cursor: pointer;
+}
+
+.command {
+    text-align: left;
+}
