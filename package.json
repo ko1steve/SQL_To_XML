@@ -1,0 +1,11 @@
+{
+  "name": "sqltoxmlonline",
+  "version": "1.0.0",
+  "description": "The is the web to input .sql file and download as .xml file.",
+  "main": "script.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
