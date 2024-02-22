@@ -57,11 +57,12 @@ function onFileInput () {
     var reader = new FileReader();
     reader.onload = function(event){
         var textFromFileLoaded = event.target.result;
-        var textGroupMap = getTextGroupMap(textFromFileLoaded);
+        var textLinesGroupMap = getTextGroupMap(textFromFileLoaded);
+        var commandGroupMap = getCommandGroupMap(textLinesGroupMap);
         if (hasInit) {
             resetPageContent();
         }
-        createPageContent(textGroupMap);
+        createPageContent(commandGroupMap);
         fileInput.files = null;
         fileInput.value = null;
         hasInit = true;
@@ -78,12 +79,11 @@ function resetPageContent () {
 }
 
 function getTextGroupMap (textFromFileLoaded) {
-    var textGroupMap = new Map();
+    var textLinesGroupMap = new Map();
     var textLines = textFromFileLoaded.split('\n');
     var isGroupToMap = false;
     var groupName = '';
     for (var i = 0; i < textLines.length; i++) {
-        textLines[i] = textLines[i].trim();
         isGroupToMap = false;
 
         //* 若找不到區塊分割的判斷字串，則略過
@@ -91,17 +91,17 @@ function getTextGroupMap (textFromFileLoaded) {
         if (!groupName) {
             continue;
         }
+        var searchEndArr = GROUP_SERACH.get(groupName);
         var text = '';
 
         //*找到區塊分割的判斷字串後，尋找區塊的結束點
         var j;
         for (j = i + 1; j < textLines.length; j++) {
             i = j - 1;
-            var searchEndArr = GROUP_SERACH.get(groupName);
             for (var k = 0; k < searchEndArr.length; k++) {
-                if (textLines[j].startsWith(searchEndArr[k])) {
+                if (textLines[j].trim().startsWith(searchEndArr[k])) {
                     //* 找到結束點後，將整個區塊指令儲存至 Map
-                    textGroupMap.set(groupName, text);
+                    textLinesGroupMap.set(groupName, text);
                     isGroupToMap = true;
                     break;
                 }
@@ -114,40 +114,83 @@ function getTextGroupMap (textFromFileLoaded) {
         }
         //* 如果直到最後都沒有出現結束點文字，則判斷結束點為最後一行文字
         if (j == textLines.length) {
-            textGroupMap.set(groupName, text);
+            textLinesGroupMap.set(groupName, text);
             isGroupToMap = true;
             break;
         }
     }
-    return textGroupMap;
+    return textLinesGroupMap;
 }
 
-function getGroupName (text) {
+function getCommandGroupMap (textLinesGroupMap) {
+    var commandGroupMap = new Map();
+    textLinesGroupMap.forEach((text, groupName)=>{
+        var textLines = text.split('\n');
+        var commamds = [];
+        var commandText = '';
+        var isAddToMap = false;
+        for (var i = 0; i < textLines.length; i++) {
+            isAddToMap = false;
+            if (!textLines[i].trim().startsWith(SINGLE_COMMAND_INDICATOR)) {
+                continue;
+            }
+            var commandText = '';
+            var newTextLine = textLines[i].replace(SINGLE_COMMAND_INDICATOR, '').trim();
+            if (newTextLine.length != 0) {
+                commandText = newTextLine + '\n';
+            }
+            var j;
+            for (j = i + 1; j < textLines.length; j++) { 
+                i = j - 1;
+                if (textLines[j].trim().startsWith(SINGLE_COMMAND_INDICATOR)){
+                    commamds.push(commandText);
+                    commandGroupMap.set(groupName, commamds);
+                    isAddToMap = true;
+                    break;
+                } else {
+                    commandText += textLines[j].replace(SINGLE_COMMAND_INDICATOR, '') + '\n';
+                }
+                if (isAddToMap) {
+                    break;
+                }
+            }
+            if (j == textLines.length) {
+                commamds.push(commandText);
+                commandGroupMap.set(groupName, commamds);
+                isAddToMap = true;
+                break;
+            }
+        }
+    });
+    return commandGroupMap;
+}
+
+function getGroupName (textLine) {
     var groupNames = Array.from(GROUP_SERACH.keys());
     for (let i = 0; i < groupNames.length; i++) {
-        if (text.startsWith(groupNames[i])) {
+        if (textLine.trim().startsWith(groupNames[i])) {
             return groupNames[i];
         }
     }
     return null;
 }
 
-function createPageContent (textGroupMap) {
+function createPageContent (commandGroupMap) {
     var mainContainer = document.getElementById('mainContainer');
 
     var container = document.createElement('div');
     container.id = 'allGroupsContainer';
     container.className = 'container';
 
-    textGroupMap.forEach((text, groupName)=>{
-        createSingleGroupContainer(groupName, text, container);
+    commandGroupMap.forEach((commands, groupName)=>{
+        createSingleGroupContainer(groupName, commands, container);
     });
     mainContainer.appendChild(container);
 
     createDownloadButton(mainContainer);
 }
 
-function createSingleGroupContainer (groupName, text, parent) {
+function createSingleGroupContainer (groupName, commands, parent) {
     var containerId = groupName.replace('--#', '')  + '-container';
     var container = document.createElement('div');
     container.id = containerId;
@@ -157,10 +200,13 @@ function createSingleGroupContainer (groupName, text, parent) {
     title.innerText = GROUP_TITLE.get(groupName);
     container.appendChild(title);
 
-    var paragraph = document.createElement('p');
-    paragraph.className = 'command';
-    paragraph.innerText = text;
-    container.appendChild(paragraph);
+    commands.forEach( (cmd, index) => {
+        var paragraph = document.createElement('p');
+        paragraph.id = groupName + '_command_' + index;
+        paragraph.className = 'command';
+        paragraph.innerText = cmd;
+        container.appendChild(paragraph);
+    });
 
     parent.appendChild(container);
 }
