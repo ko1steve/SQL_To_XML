@@ -1,13 +1,14 @@
-var GROUP_AMONT = 5;
-var DEFAULT_GROUP_FIELD_AMOUNT = 1;
+import 'src/styles.css'
 
-var fieldCountArr = []
+const GROUP_AMONT: number = 5;
+const DEFAULT_GROUP_FIELD_AMOUNT: number = 1;
 
+let fieldCountArr: Array<number> = []
 var groupArr = [];
 
 var hasInit = false;
 
-const GROUP_SERACH = new Map([
+const GROUP_SERACH = new Map<string, Array<string>> ([
     [
         '--#PreSQL', ['--#CountSQL', '--#SelectSQL', '--#MainSQL', '--#PostSQL']
     ],
@@ -25,7 +26,7 @@ const GROUP_SERACH = new Map([
     ]
 ]);
 
-const GROUP_TITLE = new Map ([
+const GROUP_TITLE = new Map<string, string> ([
     [
         '--#PreSQL', '前置宣告'
     ],
@@ -45,17 +46,22 @@ const GROUP_TITLE = new Map ([
 
 const SINGLE_COMMAND_INDICATOR = '/*--!*/';
 
-for (i = 0; i < GROUP_AMONT; i++) {
+for (let i = 0; i < GROUP_AMONT; i++) {
     fieldCountArr.push(DEFAULT_GROUP_FIELD_AMOUNT);
 }
 
-function onFileInput () {
-    var fileInput = document.getElementById('fileInput');
-    if (!fileInput.files.length > 0) {
+document.getElementById('fileInput').onchange = onFileInput;
+
+function onFileInput ():void {
+    let fileInput: HTMLInputElement = document.getElementById('fileInput') as HTMLInputElement;
+    if (!fileInput.files || fileInput.files.length === 0) {
         return;
     }
     var reader = new FileReader();
     reader.onload = function(event){
+        if (!event.target) {
+            return;
+        }
         var textFromFileLoaded = event.target.result;
         var textLinesGroupMap = getTextGroupMap(textFromFileLoaded);
         var commandGroupMap = getCommandGroupMap(textLinesGroupMap);
@@ -64,25 +70,32 @@ function onFileInput () {
         }
         createPageContent(commandGroupMap);
         fileInput.files = null;
-        fileInput.value = null;
+        fileInput.value = '';
         hasInit = true;
     };
     reader.readAsText(fileInput.files[0], 'UTF-8');
 }
 
 function resetPageContent () {
-    var mainContainer = document.getElementById('mainContainer');
-    var allGroupsContainer = document.getElementById('allGroupsContainer');
-    var downloadButtonContainer = document.getElementById('downloadButtonContainer');
-    mainContainer.removeChild(allGroupsContainer);
-    mainContainer.removeChild(downloadButtonContainer);
+    let mainContainer = document.getElementById('mainContainer');
+    let allGroupsContainer = document.getElementById('allGroupsContainer');
+    let downloadButtonContainer = document.getElementById('downloadButtonContainer');
+    if (!mainContainer) {
+        return;
+    }
+    if (allGroupsContainer) {
+        mainContainer.removeChild(allGroupsContainer);
+    }
+    if (downloadButtonContainer) {
+        mainContainer.removeChild(downloadButtonContainer);
+    }
 }
 
 function getTextGroupMap (textFromFileLoaded) {
     var textLinesGroupMap = new Map();
     var textLines = textFromFileLoaded.split('\n');
     var isGroupToMap = false;
-    var groupName = '';
+    let groupName: string = '';
     for (var i = 0; i < textLines.length; i++) {
         isGroupToMap = false;
 
@@ -91,7 +104,7 @@ function getTextGroupMap (textFromFileLoaded) {
         if (!groupName) {
             continue;
         }
-        var searchEndArr = GROUP_SERACH.get(groupName);
+        let searchEndArr: string[] = GROUP_SERACH.get(groupName) as Array<string>;
         var text = '';
 
         //*找到區塊分割的判斷字串後，尋找區塊的結束點
@@ -126,7 +139,7 @@ function getCommandGroupMap (textLinesGroupMap) {
     var commandGroupMap = new Map();
     textLinesGroupMap.forEach((text, groupName)=>{
         var textLines = text.split('\n');
-        var commamds = [];
+        var commamds: Array<string> = [];
         var commandText = '';
         var isAddToMap = false;
         for (var i = 0; i < textLines.length; i++) {
@@ -134,7 +147,7 @@ function getCommandGroupMap (textLinesGroupMap) {
             if (!textLines[i].trim().startsWith(SINGLE_COMMAND_INDICATOR)) {
                 continue;
             }
-            var commandText = '';
+            let commandText: string = '';
             var newTextLine = textLines[i].replace(SINGLE_COMMAND_INDICATOR, '').trim();
             if (newTextLine.length != 0) {
                 commandText = newTextLine + '\n';
@@ -165,20 +178,22 @@ function getCommandGroupMap (textLinesGroupMap) {
     return commandGroupMap;
 }
 
-function getGroupName (textLine) {
+function getGroupName (textLine: string): string {
     var groupNames = Array.from(GROUP_SERACH.keys());
     for (let i = 0; i < groupNames.length; i++) {
         if (textLine.trim().startsWith(groupNames[i])) {
             return groupNames[i];
         }
     }
-    return null;
+    return '';
 }
 
-function createPageContent (commandGroupMap) {
-    var mainContainer = document.getElementById('mainContainer');
-
-    var container = document.createElement('div');
+function createPageContent (commandGroupMap: Map<string, Array<string>>) {
+    let mainContainer = document.getElementById('mainContainer');
+    if (!mainContainer) {
+        return;
+    }
+    let container = document.createElement('div');
     container.id = 'allGroupsContainer';
     container.className = 'container';
 
@@ -191,17 +206,17 @@ function createPageContent (commandGroupMap) {
 }
 
 function createSingleGroupContainer (groupName, commands, parent) {
-    var containerId = groupName.replace('--#', '')  + '-container';
-    var container = document.createElement('div');
+    let containerId = groupName.replace('--#', '')  + '-container';
+    let container = document.createElement('div');
     container.id = containerId;
     container.className = 'groupContainer container';
 
-    var title = document.createElement('h3');
-    title.innerText = GROUP_TITLE.get(groupName);
+    let title = document.createElement('h3');
+    title.innerText = GROUP_TITLE.get(groupName) as string;
     container.appendChild(title);
 
     commands.forEach( (cmd, index) => {
-        var paragraph = document.createElement('p');
+        let paragraph = document.createElement('p');
         paragraph.id = groupName + '_command_' + index;
         paragraph.className = 'command';
         paragraph.innerText = cmd;
@@ -232,7 +247,7 @@ function downloadXML() {
         xmlContent += '  <group index="' + groupIndex + '">\n'
         for(var i = 0; i < count; i++) {
             var valueId = 'field' + (groupIndex + 1) + '-' + (i+1);
-            xmlContent += '    <item index="' + i + '">' + document.getElementById(valueId).value + '</item>\n';
+            // xmlContent += '    <item index="' + i + '">' + document.getElementById(valueId).value + '</item>\n';
         }
         xmlContent += '  </group>\n'
     });
@@ -245,25 +260,4 @@ function downloadXML() {
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-}
-
-function fieldAdd(fieldNum) {
-    fieldCountArr[fieldNum-1] += 1;
-
-    var container = document.getElementById('fieldAdd' + fieldNum + 'Container');
-
-    var fieldContainer = document.createElement('div');
-    fieldContainer.className = 'container';
-    fieldContainer.id = 'field' + fieldNum + '-' + fieldCountArr[fieldNum-1] + 'Container';
-    container.appendChild(fieldContainer);
-
-    var label = document.createElement('label');
-    label.for = 'field' + fieldNum + '-' + fieldCountArr[fieldNum-1];
-    label.textContent = '語法：';
-    fieldContainer.appendChild(label);
-
-    var input = document.createElement('input');
-    input.type = 'text';
-    input.id = 'field' + fieldNum + '-' + fieldCountArr[fieldNum-1];
-    fieldContainer.appendChild(input);
 }
