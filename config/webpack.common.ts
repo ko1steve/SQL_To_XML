@@ -1,5 +1,6 @@
 import * as Path from 'path';
 import * as HtmlWebpackPlugin from 'html-webpack-plugin';
+import * as ESLintPlugin from 'eslint-webpack-plugin';
 
 const appDir = Path.dirname( __dirname );
 
@@ -45,6 +46,9 @@ module.exports = {
 	target: 'web',
 
 	plugins: [
+		new ESLintPlugin({
+			extensions: ['ts', 'tsx'],
+		}),
 		new HtmlWebpackPlugin( {
 			file: Path.join( appDir, 'dist', 'index.html' ),
 			template: './index.html'

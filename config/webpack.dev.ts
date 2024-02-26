@@ -1,10 +1,10 @@
 import * as Path from 'path';
-import * as Merge from 'webpack-merge';
+import * as WebpackMerge from 'webpack-merge';
 import * as Common from './webpack.common';
 
 const appDir = Path.dirname( __dirname );
 
-module.exports = Merge( Common, {
+module.exports = WebpackMerge.merge( Common, {
 	output: {
 		path: Path.join( __dirname, './../dist' )
 	},
@@ -12,7 +12,7 @@ module.exports = Merge( Common, {
 	mode: 'development',
 
 	devServer: {
-		contentBase: Path.join( appDir, '../src' ),
+		static: Path.join( appDir, '../src' ),
 
 		port: 8018,
 

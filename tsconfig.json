@@ -14,17 +14,11 @@
 		"emitDecoratorMetadata": true,
 		"noUnusedLocals": false,
 		"baseUrl": "./",
-		"plugins": [{ "name": "typescript-plugin-css-modules" }]
+		"plugins": [{ "name": "typescript-plugin-css-modules" }],
+    "strictNullChecks": true
 	},
 	"exclude": [
 		"node_modules",
 		"dist"
-	],
-	"types": [
-		"pixi.js",
-		"tween.js",
-		"pixi-spine",
-		"currency-formatter",
-		"node-polyglot"
 	]
 }
