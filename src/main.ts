@@ -84,7 +84,10 @@ function getTextGroupMap (textFromFileLoaded: string): Map<string, string> {
         break
       }
       //* 找到結束點之前，不斷累加該行的指令文字
-      text += textLines[j] + '\n'
+      //* 累加前，先判斷指令是不是該忽略 
+      if (!isIgnoreText(textLines[j])) {
+        text += textLines[j] + '\n'
+      }
     }
     //* 如果直到最後都沒有出現結束點文字，則判斷結束點為最後一行文字
     if (j === textLines.length) {
@@ -94,6 +97,10 @@ function getTextGroupMap (textFromFileLoaded: string): Map<string, string> {
     }
   }
   return textLinesGroupMap
+}
+
+function isIgnoreText (text: string) {
+  return Config.IGNORED_COMMANDS.includes(text.trim().toUpperCase())
 }
 
 function getCommandGroupMap (textLinesGroupMap: Map<string, string>): Map<string, CommandData[]> {
