@@ -56,7 +56,7 @@ if (fileInput != null) {
   fileInput.onchange = onFileInput
 }
 
-function onFileInput(): void {
+function onFileInput (): void {
   if (fileInput?.files?.length === 0) {
     return
   }
@@ -81,7 +81,7 @@ function onFileInput(): void {
   }
 }
 
-function resetPageContent(): void {
+function resetPageContent (): void {
   const mainContainer: HTMLDivElement = document.getElementById('center-area') as HTMLDivElement
   const allGroupsContainer: HTMLDivElement = document.getElementById('allGroupsContainer') as HTMLDivElement
   const downloadButtonContainer: HTMLDivElement = document.getElementById('downloadButtonContainer') as HTMLDivElement
@@ -96,7 +96,7 @@ function resetPageContent(): void {
   }
 }
 
-function getTextGroupMap(textFromFileLoaded: string): Map<string, string> {
+function getTextGroupMap (textFromFileLoaded: string): Map<string, string> {
   const textLinesGroupMap: Map<string, string> = new Map<string, string>()
   const textLines: string[] = textFromFileLoaded.split('\n')
   let isGroupToMap = false
@@ -140,7 +140,7 @@ function getTextGroupMap(textFromFileLoaded: string): Map<string, string> {
   return textLinesGroupMap
 }
 
-function getCommandGroupMap(textLinesGroupMap): Map<string, string[]> {
+function getCommandGroupMap (textLinesGroupMap: Map<string, string>): Map<string, string[]> {
   const commandGroupMap = new Map<string, string[]>()
   textLinesGroupMap.forEach((text: string, groupName: string) => {
     const textLines = text.split('\n')
@@ -182,7 +182,7 @@ function getCommandGroupMap(textLinesGroupMap): Map<string, string[]> {
   return commandGroupMap
 }
 
-function getGroupName(textLine: string): string {
+function getGroupName (textLine: string): string {
   const groupNames: string[] = Array.from(GROUP_SERACH.keys())
   for (let i = 0; i < groupNames.length; i++) {
     if (textLine.trim().startsWith(groupNames[i])) {
@@ -192,7 +192,7 @@ function getGroupName(textLine: string): string {
   return ''
 }
 
-function createPageContent(commandGroupMap: Map<string, string[]>): void {
+function createPageContent (commandGroupMap: Map<string, string[]>): void {
   const mainContainer: HTMLDivElement = document.getElementById('center-area') as HTMLDivElement
   if (mainContainer == null) {
     return
@@ -209,7 +209,7 @@ function createPageContent(commandGroupMap: Map<string, string[]>): void {
   createDownloadButton(mainContainer)
 }
 
-function createSingleGroupContainer(groupName: string, commands, parent): void {
+function createSingleGroupContainer (groupName: string, commands, parent): void {
   const containerId = groupName.replace('--#', '') + '-container'
   const container = document.createElement('div')
   container.id = containerId
@@ -230,7 +230,7 @@ function createSingleGroupContainer(groupName: string, commands, parent): void {
   parent.appendChild(container)
 }
 
-function createDownloadButton(parent: HTMLElement): void {
+function createDownloadButton (parent: HTMLElement): void {
   const container = document.createElement('div')
   container.className = 'container'
   container.id = 'downloadButtonContainer'
@@ -244,7 +244,7 @@ function createDownloadButton(parent: HTMLElement): void {
   parent.appendChild(container)
 }
 
-function downloadXML(): void {
+function downloadXML (): void {
   let xmlContent = '<?xml version="1.0" encoding="UTF-8"?>\n'
   xmlContent += '<data>\n'
   fieldCountArr.forEach((count, groupIndex) => {
