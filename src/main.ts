@@ -1,54 +1,8 @@
 import 'src/styles.css'
 import 'bootstrap/dist/css/bootstrap.css'
-
-const GROUP_AMONT: number = 5
-const DEFAULT_GROUP_FIELD_AMOUNT: number = 1
-
-const fieldCountArr: number[] = []
+import * as Config from './config'
 
 let hasInit = false
-
-const GROUP_SERACH = new Map<string, string[]>([
-  [
-    '--#PreSQL', ['--#CountSQL', '--#SelectSQL', '--#MainSQL', '--#PostSQL']
-  ],
-  [
-    '--#CountSQL', ['--#SelectSQL', '--#MainSQL', '--#PostSQL']
-  ],
-  [
-    '--#SelectSQL', ['--#MainSQL', '--#PostSQL']
-  ],
-  [
-    '--#MainSQL', ['--#PostSQL']
-  ],
-  [
-    '--#PostSQL', []
-  ]
-])
-
-const GROUP_TITLE = new Map<string, string>([
-  [
-    '--#PreSQL', '前置宣告'
-  ],
-  [
-    '--#CountSQL', 'Count語法'
-  ],
-  [
-    '--#SelectSQL', '異動前/後語法'
-  ],
-  [
-    '--#MainSQL', '異動語法'
-  ],
-  [
-    '--#PostSQL', '後置語法'
-  ]
-])
-
-const SINGLE_COMMAND_INDICATOR = '/*--!*/'
-
-for (let i = 0; i < GROUP_AMONT; i++) {
-  fieldCountArr.push(DEFAULT_GROUP_FIELD_AMOUNT)
-}
 
 const fileInput: HTMLInputElement = document.getElementById('fileInput') as HTMLInputElement
 
@@ -109,7 +63,7 @@ function getTextGroupMap (textFromFileLoaded: string): Map<string, string> {
     if (groupName === '') {
       continue
     }
-    const searchEndArr: string[] = GROUP_SERACH.get(groupName) as string[]
+    const searchEndArr: string[] = Config.GROUP_SERACH.get(groupName) as string[]
     let text = ''
 
     //* 找到區塊分割的判斷字串後，尋找區塊的結束點
@@ -148,25 +102,25 @@ function getCommandGroupMap (textLinesGroupMap: Map<string, string>): Map<string
     let isAddToMap = false
     for (let i = 0; i < textLines.length; i++) {
       isAddToMap = false
-      if (!textLines[i].trim().startsWith(SINGLE_COMMAND_INDICATOR)) {
+      if (!textLines[i].trim().startsWith(Config.SINGLE_COMMAND_INDICATOR)) {
         continue
       }
       let commandText: string = ''
-      const newTextLine: string = textLines[i].replace(SINGLE_COMMAND_INDICATOR, '').trim()
+      const newTextLine: string = textLines[i].replace(Config.SINGLE_COMMAND_INDICATOR, '').trim()
       if (newTextLine.length !== 0) {
         commandText = newTextLine + '\n'
       }
       let j: number
       for (j = i + 1; j < textLines.length; j++) {
         i = j - 1
-        if (textLines[j].trim().startsWith(SINGLE_COMMAND_INDICATOR)) {
+        if (textLines[j].trim().startsWith(Config.SINGLE_COMMAND_INDICATOR)) {
           commandText = cleanEmptyLineAtCommandEnd(commandText)
           commamds.push(new CommandData(commandText))
           commandGroupMap.set(groupName, commamds)
           isAddToMap = true
           break
         } else {
-          commandText += textLines[j].replace(SINGLE_COMMAND_INDICATOR, '') + '\n'
+          commandText += textLines[j].replace(Config.SINGLE_COMMAND_INDICATOR, '') + '\n'
         }
         if (isAddToMap) {
           break
@@ -193,7 +147,7 @@ function cleanEmptyLineAtCommandEnd (commandText: string): string {
 }
 
 function getGroupName (textLine: string): string {
-  const groupNames: string[] = Array.from(GROUP_SERACH.keys())
+  const groupNames: string[] = Array.from(Config.GROUP_SERACH.keys())
   for (let i = 0; i < groupNames.length; i++) {
     if (textLine.trim().startsWith(groupNames[i])) {
       return groupNames[i]
@@ -225,8 +179,9 @@ function createSingleGroupContainer (groupName: string, commands: CommandData[],
   container.id = containerId
   container.className = 'groupContainer container'
 
-  const title = document.createElement('h3')
-  title.innerText = GROUP_TITLE.get(groupName) as string
+  const title = document.createElement('p')
+  title.className = 'fw-bold fs-3'
+  title.innerText = Config.GROUP_TITLE.get(groupName) as string
   container.appendChild(title)
 
   commands.forEach((command: CommandData, index: number) => {
@@ -254,33 +209,33 @@ function createDownloadButton (parent: HTMLElement): void {
   button.id = 'downloadButton'
   button.textContent = 'Download as XML'
   button.onclick = () => {
-    downloadXML()
+    // downloadXML()
   }
   container.appendChild(button)
   parent.appendChild(container)
 }
 
-function downloadXML (): void {
-  let xmlContent = '<?xml version="1.0" encoding="UTF-8"?>\n'
-  xmlContent += '<data>\n'
-  fieldCountArr.forEach((count, groupIndex) => {
-    xmlContent += '  <group index="' + groupIndex + '">\n'
-    for (let i = 0; i < count; i++) {
-      // var valueId = 'field' + (groupIndex + 1) + '-' + (i+1)
-      // xmlContent += '    <item index="' + i + '">' + document.getElementById(valueId).value + '</item>\n'
-    }
-    xmlContent += '  </group>\n'
-  })
-  xmlContent += '</data>\n'
+// function downloadXML (): void {
+//   let xmlContent = '<?xml version="1.0" encoding="UTF-8"?>\n'
+//   xmlContent += '<data>\n'
+//   fieldCountArr.forEach((count, groupIndex) => {
+//     xmlContent += '  <group index="' + groupIndex + '">\n'
+//     for (let i = 0; i < count; i++) {
+//       // var valueId = 'field' + (groupIndex + 1) + '-' + (i+1)
+//       // xmlContent += '    <item index="' + i + '">' + document.getElementById(valueId).value + '</item>\n'
+//     }
+//     xmlContent += '  </group>\n'
+//   })
+//   xmlContent += '</data>\n'
 
-  const blob = new Blob([xmlContent], { type: 'text/xml' })
-  const a = document.createElement('a')
-  a.href = URL.createObjectURL(blob)
-  a.download = 'data.xml'
-  document.body.appendChild(a)
-  a.click()
-  document.body.removeChild(a)
-}
+//   const blob = new Blob([xmlContent], { type: 'text/xml' })
+//   const a = document.createElement('a')
+//   a.href = URL.createObjectURL(blob)
+//   a.download = 'data.xml'
+//   document.body.appendChild(a)
+//   a.click()
+//   document.body.removeChild(a)
+// }
 
 function addClassName (element: HTMLElement, className: string): void {
   element.className += ' ' + className;
