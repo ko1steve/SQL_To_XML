@@ -70,8 +70,3 @@ button {
 .command-invalid {
   background-color: rgb(247, 132, 97);
 }
-
-.command-ignored {
-  color: grey;
-  text-decoration: line-through;
-}

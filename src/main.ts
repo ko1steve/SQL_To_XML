@@ -193,53 +193,46 @@ function createSingleGroupContainer (groupName: string, commands: CommandData[],
   title.innerText = Config.GROUP_TITLE.get(groupName) as string
   container.appendChild(title)
 
-  const paragraphs: HTMLParagraphElement[] = [];
+  const orderedList = document.createElement('ol')
+  container.appendChild(orderedList)
 
   commands.forEach((command: CommandData, index: number) => {
+    const listItem = document.createElement('li')
+    listItem.dataset.groupName = groupName
+    listItem.dataset.index = index.toString()
+    orderedList.appendChild(listItem)
+
     const paragraph = document.createElement('p')
     paragraph.id = groupName + '_command_' + index
     paragraph.className = 'command'
     paragraph.innerText = command.content
-    paragraph.dataset.groupName = groupName
-    paragraph.dataset.index = index.toString()
-    paragraph.addEventListener('pointerover', () => {
-      const groupName: string = paragraph.dataset.groupName as string
-      const index: number = +(paragraph.dataset.index as string)
+    if (commandGroupMap.has(groupName)) {
+      const commandData: CommandData[] = commandGroupMap.get(groupName) as CommandData[];
+      if (commandData[index].status === CommandStatus.invalid) {
+        addClassName(paragraph, 'command-invalid')
+      }
+    }
+    listItem.addEventListener('pointerover', () => {
+      const groupName: string = listItem.dataset.groupName as string
+      const index: number = +(listItem.dataset.index as string)
       if (commandGroupMap.has(groupName)) {
         const commandData: CommandData[] = commandGroupMap.get(groupName) as CommandData[];
-        switch (commandData[index].status) {
-          case CommandStatus.valid:
-            addClassName(paragraph, 'pointerover-command', 'command-valid')
-            break;
-          case CommandStatus.invalid:
-            addClassName(paragraph, 'pointerover-command', 'command-invalid')
-            break;
-          case CommandStatus.ignored:
-            addClassName(paragraph, 'pointerover-command', 'command-ignored')
-            break;
+        if (commandData[index].status === CommandStatus.valid) {
+          addClassName(listItem, 'pointerover-command', 'command-valid')
         }
       }
     });
-    paragraph.addEventListener('pointerout', () => {
-      const groupName: string = paragraph.dataset.groupName as string
-      const index: number = +(paragraph.dataset.index as string)
+    listItem.addEventListener('pointerout', () => {
+      const groupName: string = listItem.dataset.groupName as string
+      const index: number = +(listItem.dataset.index as string)
       if (commandGroupMap.has(groupName)) {
         const commandData: CommandData[] = commandGroupMap.get(groupName) as CommandData[];
-        switch (commandData[index].status) {
-          case CommandStatus.valid:
-            removeClassName(paragraph, 'pointerover-command', 'command-valid')
-            break;
-          case CommandStatus.invalid:
-            removeClassName(paragraph, 'pointerover-command', 'command-invalid')
-            break;
-          case CommandStatus.ignored:
-            removeClassName(paragraph, 'pointerover-command', 'command-ignored')
-            break;
+        if (commandData[index].status === CommandStatus.valid) {
+          removeClassName(listItem, 'pointerover-command', 'command-valid')
         }
       }
     });
-    container.appendChild(paragraph)
-    paragraphs.push(paragraph)
+    listItem.appendChild(paragraph)
   })
   parent.appendChild(container)
 }
