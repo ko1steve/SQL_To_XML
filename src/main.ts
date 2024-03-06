@@ -112,15 +112,19 @@ function getCommandGroupMap (textLinesGroupMap: Map<string, string>): Map<string
     let isAddToMap = false
     for (let i = 0; i < textLines.length; i++) {
       isAddToMap = false
+
+      //* 若找不到指令分割的判斷字串，則略過
       if (!textLines[i].trim().startsWith(Config.SINGLE_COMMAND_INDICATOR)) {
         continue
       }
       let commandText: string = ''
       const newTextLine: string = textLines[i].replace(Config.SINGLE_COMMAND_INDICATOR, '').trim()
+
       //* 判斷指令是不是該忽略 
       if (newTextLine.length !== 0 && !isIgnoreText(newTextLine)) {
         commandText = newTextLine + '\n'
       }
+      //* 找到指令分割的判斷字串後，尋找指令的結束點
       let j: number
       for (j = i + 1; j < textLines.length; j++) {
         i = j - 1
@@ -135,6 +139,7 @@ function getCommandGroupMap (textLinesGroupMap: Map<string, string>): Map<string
         } else if (!isIgnoreText(textLines[j])) {
           textLines[j] = textLines[j].replace(Config.SINGLE_COMMAND_INDICATOR, '')
           if (textLines[j].trim().length > 0) {
+            //* 找到結束點之前，不斷累加指令的內容
             commandText += textLines[j] + '\n'
           }
         }
@@ -142,6 +147,7 @@ function getCommandGroupMap (textLinesGroupMap: Map<string, string>): Map<string
           break
         }
       }
+      //* 如果直到最後都沒有出現結束點文字，則判斷結束點為最後一行文字
       if (j === textLines.length) {
         commandText = cleanEmptyLineAtCommandEnd(commandText)
         if (commandText.length > 0) {
