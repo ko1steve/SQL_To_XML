@@ -4,6 +4,8 @@ import * as Config from './config'
 
 let hasInit = false
 
+let commandGroupMap: Map<string, CommandData[]>
+
 const fileInput: HTMLInputElement = document.getElementById('fileInput') as HTMLInputElement
 
 if (fileInput != null) {
@@ -21,7 +23,7 @@ function onFileInput (): void {
     }
     const textFromFileLoaded: string = event.target.result as string
     const textLinesGroupMap: Map<string, string> = getTextGroupMap(textFromFileLoaded)
-    const commandGroupMap: Map<string, CommandData[]> = getCommandGroupMap(textLinesGroupMap)
+    commandGroupMap = getCommandGroupMap(textLinesGroupMap)
     if (hasInit) {
       resetPageContent()
     }
@@ -184,20 +186,54 @@ function createSingleGroupContainer (groupName: string, commands: CommandData[],
   title.innerText = Config.GROUP_TITLE.get(groupName) as string
   container.appendChild(title)
 
+  const paragraphs: HTMLParagraphElement[] = [];
+
   commands.forEach((command: CommandData, index: number) => {
     const paragraph = document.createElement('p')
     paragraph.id = groupName + '_command_' + index
     paragraph.className = 'command'
     paragraph.innerText = command.content
+    paragraph.dataset.groupName = groupName
+    paragraph.dataset.index = index.toString()
     paragraph.addEventListener('pointerover', () => {
-      addClassName(paragraph, 'pointerover-command');
+      const groupName: string = paragraph.dataset.groupName as string
+      const index: number = +(paragraph.dataset.index as string)
+      if (commandGroupMap.has(groupName)) {
+        const commandData: CommandData[] = commandGroupMap.get(groupName) as CommandData[];
+        switch (commandData[index].status) {
+          case CommandStatus.valid:
+            addClassName(paragraph, 'pointerover-command', 'command-valid')
+            break;
+          case CommandStatus.invalid:
+            addClassName(paragraph, 'pointerover-command', 'command-invalid')
+            break;
+          case CommandStatus.ignored:
+            addClassName(paragraph, 'pointerover-command', 'command-ignored')
+            break;
+        }
+      }
     });
     paragraph.addEventListener('pointerout', () => {
-      removeClassName(paragraph, 'pointerover-command');
+      const groupName: string = paragraph.dataset.groupName as string
+      const index: number = +(paragraph.dataset.index as string)
+      if (commandGroupMap.has(groupName)) {
+        const commandData: CommandData[] = commandGroupMap.get(groupName) as CommandData[];
+        switch (commandData[index].status) {
+          case CommandStatus.valid:
+            removeClassName(paragraph, 'pointerover-command', 'command-valid')
+            break;
+          case CommandStatus.invalid:
+            removeClassName(paragraph, 'pointerover-command', 'command-invalid')
+            break;
+          case CommandStatus.ignored:
+            removeClassName(paragraph, 'pointerover-command', 'command-ignored')
+            break;
+        }
+      }
     });
     container.appendChild(paragraph)
+    paragraphs.push(paragraph)
   })
-
   parent.appendChild(container)
 }
 
@@ -237,18 +273,18 @@ function createDownloadButton (parent: HTMLElement): void {
 //   document.body.removeChild(a)
 // }
 
-function addClassName (element: HTMLElement, className: string): void {
-  element.className += ' ' + className;
+function addClassName (element: HTMLElement, ...classNames: string[]): void {
+  classNames.forEach(className => element.className += ' ' + className)
 }
 
-function removeClassName (element: HTMLElement, className: string): void {
-  element.className = element.className.replace(className, '').trim();
+function removeClassName (element: HTMLElement, ...classNames: string[]): void {
+  classNames.forEach(className => element.className = element.className.replace(className, '').trim())
 }
 
 enum CommandStatus {
   valid = 'valid',
   invalid = 'invalid',
-  ignore = 'ignore'
+  ignored = 'ignored'
 }
 
 interface ICommandData {

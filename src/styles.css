@@ -61,5 +61,17 @@ button {
 
 .pointerover-command {
     border-radius: 5px;
-    background-color: rgb(194, 230, 241);
+}
+
+.command-valid {
+  background-color: rgb(194, 230, 241);
+}
+
+.command-invalid {
+  background-color: rgb(247, 132, 97);
+}
+
+.command-ignored {
+  color: grey;
+  text-decoration: line-through;
 }
