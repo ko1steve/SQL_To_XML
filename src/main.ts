@@ -67,7 +67,7 @@ function onFileInput (): void {
     }
     const textFromFileLoaded: string = event.target.result as string
     const textLinesGroupMap: Map<string, string> = getTextGroupMap(textFromFileLoaded)
-    const commandGroupMap: Map<string, string[]> = getCommandGroupMap(textLinesGroupMap)
+    const commandGroupMap: Map<string, CommandData[]> = getCommandGroupMap(textLinesGroupMap)
     if (hasInit) {
       resetPageContent()
     }
@@ -140,11 +140,11 @@ function getTextGroupMap (textFromFileLoaded: string): Map<string, string> {
   return textLinesGroupMap
 }
 
-function getCommandGroupMap (textLinesGroupMap: Map<string, string>): Map<string, string[]> {
-  const commandGroupMap = new Map<string, string[]>()
+function getCommandGroupMap (textLinesGroupMap: Map<string, string>): Map<string, CommandData[]> {
+  const commandGroupMap = new Map<string, CommandData[]>()
   textLinesGroupMap.forEach((text: string, groupName: string) => {
     const textLines = text.split('\n')
-    const commamds: string[] = []
+    const commamds: CommandData[] = []
     let isAddToMap = false
     for (let i = 0; i < textLines.length; i++) {
       isAddToMap = false
@@ -161,7 +161,7 @@ function getCommandGroupMap (textLinesGroupMap: Map<string, string>): Map<string
         i = j - 1
         if (textLines[j].trim().startsWith(SINGLE_COMMAND_INDICATOR)) {
           commandText = cleanEmptyLineAtCommandEnd(commandText)
-          commamds.push(commandText)
+          commamds.push(new CommandData(commandText))
           commandGroupMap.set(groupName, commamds)
           isAddToMap = true
           break
@@ -174,7 +174,7 @@ function getCommandGroupMap (textLinesGroupMap: Map<string, string>): Map<string
       }
       if (j === textLines.length) {
         commandText = cleanEmptyLineAtCommandEnd(commandText)
-        commamds.push(commandText)
+        commamds.push(new CommandData(commandText))
         commandGroupMap.set(groupName, commamds)
         isAddToMap = true
         break
@@ -202,7 +202,7 @@ function getGroupName (textLine: string): string {
   return ''
 }
 
-function createPageContent (commandGroupMap: Map<string, string[]>): void {
+function createPageContent (commandGroupMap: Map<string, CommandData[]>): void {
   const mainContainer: HTMLDivElement = document.getElementById('center-area') as HTMLDivElement
   if (mainContainer == null) {
     return
@@ -219,7 +219,7 @@ function createPageContent (commandGroupMap: Map<string, string[]>): void {
   createDownloadButton(mainContainer)
 }
 
-function createSingleGroupContainer (groupName: string, commands, parent): void {
+function createSingleGroupContainer (groupName: string, commands: CommandData[], parent: HTMLElement): void {
   const containerId = groupName.replace('--#', '') + '-container'
   const container = document.createElement('div')
   container.id = containerId
@@ -229,11 +229,11 @@ function createSingleGroupContainer (groupName: string, commands, parent): void 
   title.innerText = GROUP_TITLE.get(groupName) as string
   container.appendChild(title)
 
-  commands.forEach((cmd: string, index: number) => {
+  commands.forEach((command: CommandData, index: number) => {
     const paragraph = document.createElement('p')
     paragraph.id = groupName + '_command_' + index
     paragraph.className = 'command'
-    paragraph.innerText = cmd
+    paragraph.innerText = command.content
     paragraph.addEventListener('pointerover', () => {
       addClassName(paragraph, 'pointerover-command');
     });
@@ -288,4 +288,34 @@ function addClassName (element: HTMLElement, className: string): void {
 
 function removeClassName (element: HTMLElement, className: string): void {
   element.className = element.className.replace(className, '').trim();
+}
+
+enum CommandStatus {
+  valid = 'valid',
+  invalid = 'invalid',
+  ignore = 'ignore'
+}
+
+interface ICommandData {
+  content: string
+  status: CommandStatus
+}
+
+class CommandData implements ICommandData {
+
+  protected _content: string;
+  protected _status: CommandStatus;
+
+  constructor (content: string, status = CommandStatus.valid) {
+    this._content = content;
+    this._status = status;
+  }
+
+  public get content (): string {
+    return this._content
+  }
+
+  public get status (): CommandStatus {
+    return this._status
+  }
 }
