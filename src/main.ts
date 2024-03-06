@@ -160,6 +160,7 @@ function getCommandGroupMap (textLinesGroupMap: Map<string, string>): Map<string
       for (j = i + 1; j < textLines.length; j++) {
         i = j - 1
         if (textLines[j].trim().startsWith(SINGLE_COMMAND_INDICATOR)) {
+          commandText = cleanEmptyLineAtCommandEnd(commandText)
           commamds.push(commandText)
           commandGroupMap.set(groupName, commamds)
           isAddToMap = true
@@ -172,6 +173,7 @@ function getCommandGroupMap (textLinesGroupMap: Map<string, string>): Map<string
         }
       }
       if (j === textLines.length) {
+        commandText = cleanEmptyLineAtCommandEnd(commandText)
         commamds.push(commandText)
         commandGroupMap.set(groupName, commamds)
         isAddToMap = true
@@ -180,6 +182,14 @@ function getCommandGroupMap (textLinesGroupMap: Map<string, string>): Map<string
     }
   })
   return commandGroupMap
+}
+
+function cleanEmptyLineAtCommandEnd (commandText: string): string {
+  while (commandText.endsWith('\n')) {
+    const i: number = commandText.lastIndexOf('\n')
+    commandText = commandText.substring(0, i).trim()
+  }
+  return commandText;
 }
 
 function getGroupName (textLine: string): string {
