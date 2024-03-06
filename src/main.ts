@@ -1,4 +1,5 @@
 import 'src/styles.css'
+import 'bootstrap/dist/css/bootstrap.css'
 
 const GROUP_AMONT: number = 5
 const DEFAULT_GROUP_FIELD_AMOUNT: number = 1
@@ -59,14 +60,14 @@ function onFileInput (): void {
   if (fileInput?.files?.length === 0) {
     return
   }
-  const reader = new FileReader()
+  const reader: FileReader = new FileReader()
   reader.onload = function (event) {
     if (event.target == null) {
       return
     }
     const textFromFileLoaded: string = event.target.result as string
-    const textLinesGroupMap = getTextGroupMap(textFromFileLoaded)
-    const commandGroupMap = getCommandGroupMap(textLinesGroupMap)
+    const textLinesGroupMap: Map<string, string> = getTextGroupMap(textFromFileLoaded)
+    const commandGroupMap: Map<string, string[]> = getCommandGroupMap(textLinesGroupMap)
     if (hasInit) {
       resetPageContent()
     }
@@ -81,9 +82,9 @@ function onFileInput (): void {
 }
 
 function resetPageContent (): void {
-  const mainContainer: HTMLDivElement = document.getElementById('mainContainer') as HTMLDivElement
-  const allGroupsContainer = document.getElementById('allGroupsContainer')
-  const downloadButtonContainer = document.getElementById('downloadButtonContainer')
+  const mainContainer: HTMLDivElement = document.getElementById('center-area') as HTMLDivElement
+  const allGroupsContainer: HTMLDivElement = document.getElementById('allGroupsContainer') as HTMLDivElement
+  const downloadButtonContainer: HTMLDivElement = document.getElementById('downloadButtonContainer') as HTMLDivElement
   if (mainContainer == null) {
     return
   }
@@ -96,7 +97,7 @@ function resetPageContent (): void {
 }
 
 function getTextGroupMap (textFromFileLoaded: string): Map<string, string> {
-  const textLinesGroupMap = new Map()
+  const textLinesGroupMap: Map<string, string> = new Map<string, string>()
   const textLines: string[] = textFromFileLoaded.split('\n')
   let isGroupToMap = false
   let groupName: string = ''
@@ -139,7 +140,7 @@ function getTextGroupMap (textFromFileLoaded: string): Map<string, string> {
   return textLinesGroupMap
 }
 
-function getCommandGroupMap (textLinesGroupMap): Map<string, string[]> {
+function getCommandGroupMap (textLinesGroupMap: Map<string, string>): Map<string, string[]> {
   const commandGroupMap = new Map<string, string[]>()
   textLinesGroupMap.forEach((text: string, groupName: string) => {
     const textLines = text.split('\n')
@@ -192,7 +193,7 @@ function getGroupName (textLine: string): string {
 }
 
 function createPageContent (commandGroupMap: Map<string, string[]>): void {
-  const mainContainer: HTMLDivElement = document.getElementById('mainContainer') as HTMLDivElement
+  const mainContainer: HTMLDivElement = document.getElementById('center-area') as HTMLDivElement
   if (mainContainer == null) {
     return
   }
@@ -223,6 +224,12 @@ function createSingleGroupContainer (groupName: string, commands, parent): void 
     paragraph.id = groupName + '_command_' + index
     paragraph.className = 'command'
     paragraph.innerText = cmd
+    paragraph.addEventListener('pointerover', () => {
+      addClassName(paragraph, 'pointerover-command');
+    });
+    paragraph.addEventListener('pointerout', () => {
+      removeClassName(paragraph, 'pointerover-command');
+    });
     container.appendChild(paragraph)
   })
 
@@ -263,4 +270,12 @@ function downloadXML (): void {
   document.body.appendChild(a)
   a.click()
   document.body.removeChild(a)
+}
+
+function addClassName (element: HTMLElement, className: string): void {
+  element.className += ' ' + className;
+}
+
+function removeClassName (element: HTMLElement, className: string): void {
+  element.className = element.className.replace(className, '').trim();
 }
