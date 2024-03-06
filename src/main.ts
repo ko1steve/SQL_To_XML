@@ -224,6 +224,12 @@ function createSingleGroupContainer (groupName: string, commands, parent): void 
     paragraph.id = groupName + '_command_' + index
     paragraph.className = 'command'
     paragraph.innerText = cmd
+    paragraph.addEventListener('pointerover', () => {
+      addClassName(paragraph, 'pointerover-command');
+    });
+    paragraph.addEventListener('pointerout', () => {
+      removeClassName(paragraph, 'pointerover-command');
+    });
     container.appendChild(paragraph)
   })
 
@@ -264,4 +270,12 @@ function downloadXML (): void {
   document.body.appendChild(a)
   a.click()
   document.body.removeChild(a)
+}
+
+function addClassName (element: HTMLElement, className: string): void {
+  element.className += ' ' + className;
+}
+
+function removeClassName (element: HTMLElement, className: string): void {
+  element.className = element.className.replace(className, '').trim();
 }
