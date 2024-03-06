@@ -84,10 +84,7 @@ function getTextGroupMap (textFromFileLoaded: string): Map<string, string> {
         break
       }
       //* 找到結束點之前，不斷累加該行的指令文字
-      //* 累加前，先判斷指令是不是該忽略 
-      if (!isIgnoreText(textLines[j])) {
-        text += textLines[j] + '\n'
-      }
+      text += textLines[j] + '\n'
     }
     //* 如果直到最後都沒有出現結束點文字，則判斷結束點為最後一行文字
     if (j === textLines.length) {
@@ -100,7 +97,11 @@ function getTextGroupMap (textFromFileLoaded: string): Map<string, string> {
 }
 
 function isIgnoreText (text: string) {
-  return Config.IGNORED_COMMANDS.includes(text.trim().toUpperCase())
+  text = text.trim()
+  if (text.endsWith(';')) {
+    text = text.substring(0, text.length - 1)
+  }
+  return Config.IGNORED_COMMANDS.includes(text.toUpperCase())
 }
 
 function getCommandGroupMap (textLinesGroupMap: Map<string, string>): Map<string, CommandData[]> {
@@ -116,7 +117,8 @@ function getCommandGroupMap (textLinesGroupMap: Map<string, string>): Map<string
       }
       let commandText: string = ''
       const newTextLine: string = textLines[i].replace(Config.SINGLE_COMMAND_INDICATOR, '').trim()
-      if (newTextLine.length !== 0) {
+      //* 判斷指令是不是該忽略 
+      if (newTextLine.length !== 0 && !isIgnoreText(newTextLine)) {
         commandText = newTextLine + '\n'
       }
       let j: number
@@ -124,12 +126,17 @@ function getCommandGroupMap (textLinesGroupMap: Map<string, string>): Map<string
         i = j - 1
         if (textLines[j].trim().startsWith(Config.SINGLE_COMMAND_INDICATOR)) {
           commandText = cleanEmptyLineAtCommandEnd(commandText)
-          commamds.push(new CommandData(commandText))
-          commandGroupMap.set(groupName, commamds)
+          if (commandText.length > 0) {
+            commamds.push(new CommandData(commandText))
+            commandGroupMap.set(groupName, commamds)
+          }
           isAddToMap = true
           break
-        } else {
-          commandText += textLines[j].replace(Config.SINGLE_COMMAND_INDICATOR, '') + '\n'
+        } else if (!isIgnoreText(textLines[j])) {
+          textLines[j] = textLines[j].replace(Config.SINGLE_COMMAND_INDICATOR, '')
+          if (textLines[j].trim().length > 0) {
+            commandText += textLines[j] + '\n'
+          }
         }
         if (isAddToMap) {
           break
@@ -137,8 +144,10 @@ function getCommandGroupMap (textLinesGroupMap: Map<string, string>): Map<string
       }
       if (j === textLines.length) {
         commandText = cleanEmptyLineAtCommandEnd(commandText)
-        commamds.push(new CommandData(commandText))
-        commandGroupMap.set(groupName, commamds)
+        if (commandText.length > 0) {
+          commamds.push(new CommandData(commandText))
+          commandGroupMap.set(groupName, commamds)
+        }
         isAddToMap = true
         break
       }
