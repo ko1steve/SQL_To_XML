@@ -12,7 +12,7 @@ if (fileInput != null) {
   fileInput.onchange = onFileInput
 }
 
-function onFileInput (): void {
+function onFileInput(): void {
   if (fileInput?.files?.length === 0) {
     return
   }
@@ -37,7 +37,7 @@ function onFileInput (): void {
   }
 }
 
-function resetPageContent (): void {
+function resetPageContent(): void {
   const mainContainer: HTMLDivElement = document.getElementById('center-area') as HTMLDivElement
   const allGroupsContainer: HTMLDivElement = document.getElementById('allGroupsContainer') as HTMLDivElement
   const downloadButtonContainer: HTMLDivElement = document.getElementById('downloadButtonContainer') as HTMLDivElement
@@ -52,7 +52,7 @@ function resetPageContent (): void {
   }
 }
 
-function getTextGroupMap (textFromFileLoaded: string): Map<string, string> {
+function getTextGroupMap(textFromFileLoaded: string): Map<string, string> {
   const textLinesGroupMap: Map<string, string> = new Map<string, string>()
   const textLines: string[] = textFromFileLoaded.split('\n')
   let isGroupToMap = false
@@ -96,7 +96,7 @@ function getTextGroupMap (textFromFileLoaded: string): Map<string, string> {
   return textLinesGroupMap
 }
 
-function isIgnoreText (text: string) {
+function isIgnoreCommand(text: string) {
   text = text.trim()
   if (text.endsWith(';')) {
     text = text.substring(0, text.length - 1)
@@ -104,14 +104,28 @@ function isIgnoreText (text: string) {
   return Config.IGNORED_COMMANDS.includes(text.toUpperCase())
 }
 
-function getCommandGroupMap (textLinesGroupMap: Map<string, string>): Map<string, CommandData[]> {
+function isValidCommand(text: string): boolean {
+  text = text.trim()
+  if (text.endsWith(';')) {
+    text = text.substring(0, text.length - 1)
+  }
+  let result = true
+  Config.INVALID_COMMANDS.forEach(e => {
+    if (text.toUpperCase().indexOf(e) > -1) {
+      result = false
+    }
+  })
+  return result
+}
+
+function getCommandGroupMap(textLinesGroupMap: Map<string, string>): Map<string, CommandData[]> {
   const commandGroupMap = new Map<string, CommandData[]>()
   textLinesGroupMap.forEach((text: string, groupName: string) => {
     const textLines = text.split('\n')
     const commamds: CommandData[] = []
-    let isAddToMap = false
     for (let i = 0; i < textLines.length; i++) {
-      isAddToMap = false
+      let isAddToMap = false
+      let isCommandValid = true;
 
       //* 若找不到指令分割的判斷字串，則略過
       if (!textLines[i].trim().startsWith(Config.SINGLE_COMMAND_INDICATOR)) {
@@ -121,7 +135,8 @@ function getCommandGroupMap (textLinesGroupMap: Map<string, string>): Map<string
       const newTextLine: string = textLines[i].replace(Config.SINGLE_COMMAND_INDICATOR, '').trim()
 
       //* 判斷指令是不是該忽略 
-      if (newTextLine.length !== 0 && !isIgnoreText(newTextLine)) {
+      if (newTextLine.length !== 0 && !isIgnoreCommand(newTextLine)) {
+        isCommandValid = isValidCommand(newTextLine)
         commandText = newTextLine + '\n'
       }
       //* 找到指令分割的判斷字串後，尋找指令的結束點
@@ -131,14 +146,16 @@ function getCommandGroupMap (textLinesGroupMap: Map<string, string>): Map<string
         if (textLines[j].trim().startsWith(Config.SINGLE_COMMAND_INDICATOR)) {
           commandText = cleanEmptyLineAtCommandEnd(commandText)
           if (commandText.length > 0) {
-            commamds.push(new CommandData(commandText))
+            const commandStatus: CommandStatus = isCommandValid ? CommandStatus.valid : CommandStatus.invalid
+            commamds.push(new CommandData(commandText, commandStatus))
             commandGroupMap.set(groupName, commamds)
           }
           isAddToMap = true
           break
-        } else if (!isIgnoreText(textLines[j])) {
+        } else if (!isIgnoreCommand(textLines[j])) {
           textLines[j] = textLines[j].replace(Config.SINGLE_COMMAND_INDICATOR, '')
           if (textLines[j].trim().length > 0) {
+            isCommandValid = isValidCommand(textLines[j])
             //* 找到結束點之前，不斷累加指令的內容
             commandText += textLines[j] + '\n'
           }
@@ -151,7 +168,8 @@ function getCommandGroupMap (textLinesGroupMap: Map<string, string>): Map<string
       if (j === textLines.length) {
         commandText = cleanEmptyLineAtCommandEnd(commandText)
         if (commandText.length > 0) {
-          commamds.push(new CommandData(commandText))
+          const commandStatus: CommandStatus = isCommandValid ? CommandStatus.valid : CommandStatus.invalid
+          commamds.push(new CommandData(commandText, commandStatus))
           commandGroupMap.set(groupName, commamds)
         }
         isAddToMap = true
@@ -162,7 +180,7 @@ function getCommandGroupMap (textLinesGroupMap: Map<string, string>): Map<string
   return commandGroupMap
 }
 
-function cleanEmptyLineAtCommandEnd (commandText: string): string {
+function cleanEmptyLineAtCommandEnd(commandText: string): string {
   while (commandText.endsWith('\n')) {
     const i: number = commandText.lastIndexOf('\n')
     commandText = commandText.substring(0, i).trim()
@@ -170,7 +188,7 @@ function cleanEmptyLineAtCommandEnd (commandText: string): string {
   return commandText;
 }
 
-function getGroupName (textLine: string): string {
+function getGroupName(textLine: string): string {
   const groupNames: string[] = Array.from(Config.GROUP_SERACH.keys())
   for (let i = 0; i < groupNames.length; i++) {
     if (textLine.trim().startsWith(groupNames[i])) {
@@ -180,7 +198,7 @@ function getGroupName (textLine: string): string {
   return ''
 }
 
-function createPageContent (commandGroupMap: Map<string, CommandData[]>): void {
+function createPageContent(commandGroupMap: Map<string, CommandData[]>): void {
   const mainContainer: HTMLDivElement = document.getElementById('center-area') as HTMLDivElement
   if (mainContainer == null) {
     return
@@ -197,7 +215,7 @@ function createPageContent (commandGroupMap: Map<string, CommandData[]>): void {
   createDownloadButton(mainContainer)
 }
 
-function createSingleGroupContainer (groupName: string, commands: CommandData[], parent: HTMLElement): void {
+function createSingleGroupContainer(groupName: string, commands: CommandData[], parent: HTMLElement): void {
   const containerId = groupName.replace('--#', '') + '-container'
   const container = document.createElement('div')
   container.id = containerId
@@ -215,44 +233,27 @@ function createSingleGroupContainer (groupName: string, commands: CommandData[],
     const listItem = document.createElement('li')
     listItem.dataset.groupName = groupName
     listItem.dataset.index = index.toString()
+    if (command.status === CommandStatus.invalid) {
+      addClassName(listItem, 'command-invalid')
+    }
+    listItem.addEventListener('pointerover', () => {
+      addClassName(listItem, 'pointerover-command')
+    });
+    listItem.addEventListener('pointerout', () => {
+      removeClassName(listItem, 'pointerover-command')
+    });
     orderedList.appendChild(listItem)
 
     const paragraph = document.createElement('p')
     paragraph.id = groupName + '_command_' + index
     paragraph.className = 'command'
     paragraph.innerText = command.content
-    if (commandGroupMap.has(groupName)) {
-      const commandData: CommandData[] = commandGroupMap.get(groupName) as CommandData[];
-      if (commandData[index].status === CommandStatus.invalid) {
-        addClassName(paragraph, 'command-invalid')
-      }
-    }
-    listItem.addEventListener('pointerover', () => {
-      const groupName: string = listItem.dataset.groupName as string
-      const index: number = +(listItem.dataset.index as string)
-      if (commandGroupMap.has(groupName)) {
-        const commandData: CommandData[] = commandGroupMap.get(groupName) as CommandData[];
-        if (commandData[index].status === CommandStatus.valid) {
-          addClassName(listItem, 'pointerover-command', 'command-valid')
-        }
-      }
-    });
-    listItem.addEventListener('pointerout', () => {
-      const groupName: string = listItem.dataset.groupName as string
-      const index: number = +(listItem.dataset.index as string)
-      if (commandGroupMap.has(groupName)) {
-        const commandData: CommandData[] = commandGroupMap.get(groupName) as CommandData[];
-        if (commandData[index].status === CommandStatus.valid) {
-          removeClassName(listItem, 'pointerover-command', 'command-valid')
-        }
-      }
-    });
     listItem.appendChild(paragraph)
   })
   parent.appendChild(container)
 }
 
-function createDownloadButton (parent: HTMLElement): void {
+function createDownloadButton(parent: HTMLElement): void {
   const container = document.createElement('div')
   container.className = 'container'
   container.id = 'downloadButtonContainer'
@@ -288,11 +289,11 @@ function createDownloadButton (parent: HTMLElement): void {
 //   document.body.removeChild(a)
 // }
 
-function addClassName (element: HTMLElement, ...classNames: string[]): void {
+function addClassName(element: HTMLElement, ...classNames: string[]): void {
   classNames.forEach(className => element.className += ' ' + className)
 }
 
-function removeClassName (element: HTMLElement, ...classNames: string[]): void {
+function removeClassName(element: HTMLElement, ...classNames: string[]): void {
   classNames.forEach(className => element.className = element.className.replace(className, '').trim())
 }
 
@@ -312,16 +313,16 @@ class CommandData implements ICommandData {
   protected _content: string;
   protected _status: CommandStatus;
 
-  constructor (content: string, status = CommandStatus.valid) {
+  constructor(content: string, status = CommandStatus.valid) {
     this._content = content;
     this._status = status;
   }
 
-  public get content (): string {
+  public get content(): string {
     return this._content
   }
 
-  public get status (): CommandStatus {
+  public get status(): CommandStatus {
     return this._status
   }
 }

@@ -37,3 +37,5 @@ export const GROUP_TITLE = new Map<string, string>([
 export const SINGLE_COMMAND_INDICATOR = '/*--!*/'
 
 export const IGNORED_COMMANDS = ['GO']
+
+export const INVALID_COMMANDS = ['COMMIT'] 
