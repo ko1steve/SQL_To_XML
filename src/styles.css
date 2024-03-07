@@ -57,6 +57,11 @@ button {
 .command {
     text-align: left;
     margin: 5px;
+    font-family: Consolas;
+}
+
+li{
+  font-family: Consolas;
 }
 
 .pointerover-command {
