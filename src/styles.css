@@ -72,3 +72,11 @@ li{
 .command-invalid {
   color: crimson;
 }
+
+.nav-item {
+  font-size: 20px;
+}
+
+.nav-link {
+  min-width: 400px;
+}
