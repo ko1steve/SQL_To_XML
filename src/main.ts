@@ -1,10 +1,13 @@
 import 'src/styles.css'
 import 'bootstrap/dist/css/bootstrap.css'
-import * as Config from './config'
+import 'bootstrap/dist/js/bootstrap.bundle'
+import { GroupName, IMainConfig, MainConfig } from './config'
 
-let hasInit = false
+const mainConfig: IMainConfig = new MainConfig();
 
-let commandGroupMap: Map<string, CommandData[]>
+let hasInit: boolean = false
+
+let commandGroupMap: Map<GroupName, CommandData[]>
 
 const fileInput: HTMLInputElement = document.getElementById('fileInput') as HTMLInputElement
 
@@ -56,16 +59,16 @@ function getTextGroupMap(textFromFileLoaded: string): Map<string, string> {
   const textLinesGroupMap: Map<string, string> = new Map<string, string>()
   const textLines: string[] = textFromFileLoaded.split('\n')
   let isGroupToMap = false
-  let groupName: string = ''
+  let groupName: GroupName | null
   for (let i = 0; i < textLines.length; i++) {
     isGroupToMap = false
 
     //* 若找不到區塊分割的判斷字串，則略過
     groupName = getGroupName(textLines[i])
-    if (groupName === '') {
+    if (groupName === null) {
       continue
     }
-    const searchEndArr: string[] = Config.GROUP_SERACH.get(groupName) as string[]
+    const searchEndArr: string[] = mainConfig.groupSearch.get(groupName) as string[]
     let text = ''
 
     //* 找到區塊分割的判斷字串後，尋找區塊的結束點
@@ -101,7 +104,7 @@ function isIgnoreCommand(text: string) {
   if (text.endsWith(';')) {
     text = text.substring(0, text.length - 1)
   }
-  return Config.IGNORED_COMMANDS.includes(text.toUpperCase())
+  return mainConfig.ignoredCommands.includes(text.toUpperCase())
 }
 
 function isValidCommand(text: string): boolean {
@@ -110,7 +113,7 @@ function isValidCommand(text: string): boolean {
     text = text.substring(0, text.length - 1)
   }
   let result = true
-  Config.INVALID_COMMANDS.forEach(e => {
+  mainConfig.invalidCommands.forEach(e => {
     if (text.toUpperCase().indexOf(e) > -1) {
       result = false
     }
@@ -118,9 +121,9 @@ function isValidCommand(text: string): boolean {
   return result
 }
 
-function getCommandGroupMap(textLinesGroupMap: Map<string, string>): Map<string, CommandData[]> {
-  const commandGroupMap = new Map<string, CommandData[]>()
-  textLinesGroupMap.forEach((text: string, groupName: string) => {
+function getCommandGroupMap(textLinesGroupMap: Map<string, string>): Map<GroupName, CommandData[]> {
+  const commandGroupMap = new Map<GroupName, CommandData[]>()
+  textLinesGroupMap.forEach((text: string, groupName: GroupName) => {
     const textLines = text.split('\n')
     const commamds: CommandData[] = []
     for (let i = 0; i < textLines.length; i++) {
@@ -128,11 +131,11 @@ function getCommandGroupMap(textLinesGroupMap: Map<string, string>): Map<string,
       let isCommandValid = true;
 
       //* 若找不到指令分割的判斷字串，則略過
-      if (!textLines[i].trim().startsWith(Config.SINGLE_COMMAND_INDICATOR)) {
+      if (!textLines[i].trim().startsWith(mainConfig.singleCommandIndicator)) {
         continue
       }
       let commandText: string = ''
-      const newTextLine: string = textLines[i].replace(Config.SINGLE_COMMAND_INDICATOR, '').trim()
+      const newTextLine: string = textLines[i].replace(mainConfig.singleCommandIndicator, '').trim()
 
       //* 判斷指令是不是該忽略 
       if (newTextLine.length !== 0 && !isIgnoreCommand(newTextLine)) {
@@ -143,7 +146,7 @@ function getCommandGroupMap(textLinesGroupMap: Map<string, string>): Map<string,
       let j: number
       for (j = i + 1; j < textLines.length; j++) {
         i = j - 1
-        if (textLines[j].trim().startsWith(Config.SINGLE_COMMAND_INDICATOR)) {
+        if (textLines[j].trim().startsWith(mainConfig.singleCommandIndicator)) {
           commandText = cleanEmptyLineAtCommandEnd(commandText)
           if (commandText.length > 0) {
             const commandStatus: CommandStatus = isCommandValid ? CommandStatus.valid : CommandStatus.invalid
@@ -153,7 +156,7 @@ function getCommandGroupMap(textLinesGroupMap: Map<string, string>): Map<string,
           isAddToMap = true
           break
         } else if (!isIgnoreCommand(textLines[j])) {
-          textLines[j] = textLines[j].replace(Config.SINGLE_COMMAND_INDICATOR, '')
+          textLines[j] = textLines[j].replace(mainConfig.singleCommandIndicator, '')
           if (textLines[j].trim().length > 0) {
             isCommandValid = isValidCommand(textLines[j])
             //* 找到結束點之前，不斷累加指令的內容
@@ -188,17 +191,18 @@ function cleanEmptyLineAtCommandEnd(commandText: string): string {
   return commandText;
 }
 
-function getGroupName(textLine: string): string {
-  const groupNames: string[] = Array.from(Config.GROUP_SERACH.keys())
-  for (let i = 0; i < groupNames.length; i++) {
-    if (textLine.trim().startsWith(groupNames[i])) {
+function getGroupName(textLine: string): GroupName | null {
+  const groupNames: GroupName[] = Array.from(mainConfig.groupIndicators.keys())
+  const groupIndicators: string[] = Array.from(mainConfig.groupIndicators.values())
+  for (let i = 0; i < groupIndicators.length; i++) {
+    if (textLine.trim().startsWith(groupIndicators[i])) {
       return groupNames[i]
     }
   }
-  return ''
+  return null
 }
 
-function createPageContent(commandGroupMap: Map<string, CommandData[]>): void {
+function createPageContent(commandGroupMap: Map<GroupName, CommandData[]>): void {
   const mainContainer: HTMLDivElement = document.getElementById('center-area') as HTMLDivElement
   if (mainContainer == null) {
     return
@@ -215,7 +219,7 @@ function createPageContent(commandGroupMap: Map<string, CommandData[]>): void {
   createDownloadButton(mainContainer)
 }
 
-function createSingleGroupContainer(groupName: string, commands: CommandData[], parent: HTMLElement): void {
+function createSingleGroupContainer(groupName: GroupName, commands: CommandData[], parent: HTMLElement): void {
   const containerId = groupName.replace('--#', '') + '-container'
   const container = document.createElement('div')
   container.id = containerId
@@ -223,7 +227,7 @@ function createSingleGroupContainer(groupName: string, commands: CommandData[], 
 
   const title = document.createElement('p')
   title.className = 'fw-bold fs-3'
-  title.innerText = Config.GROUP_TITLE.get(groupName) as string
+  title.innerText = mainConfig.groupTitles.get(groupName) as string
   container.appendChild(title)
 
   const orderedList = document.createElement('ol')
