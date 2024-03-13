@@ -266,7 +266,7 @@ function createPageContent(commandGroupMap: Map<GroupType, CommandData[]>, eleme
   }
 }
 
-function createSingleGroupContainer(groupName: GroupType, commands: CommandData[], parent: HTMLElement, elementConfig: IElementConifg, commandType: CommandType): void {
+function createSingleGroupContainer(groupType: GroupType, commands: CommandData[], parent: HTMLElement, elementConfig: IElementConifg, commandType: CommandType): void {
   const config: ISingleGroupContainerConfig = elementConfig.allGroupsContainer.singleGroupContainerConfig;
 
   const container = document.createElement('div')
@@ -274,9 +274,9 @@ function createSingleGroupContainer(groupName: GroupType, commands: CommandData[
   parent.appendChild(container)
 
   const title = document.createElement('p')
-  title.id = config.title.id.replace('{groupName}', groupName)
+  title.id = config.title.id.replace('{groupType}', groupType)
   title.className = config.title.className
-  title.innerText = mainConfig.groupSettingMap.get(groupName)?.title as string
+  title.innerText = mainConfig.groupSettingMap.get(groupType)?.title as string
   container.appendChild(title)
 
   if (commands.length === 0) {
@@ -289,8 +289,6 @@ function createSingleGroupContainer(groupName: GroupType, commands: CommandData[
 
   commands.forEach((command: CommandData, index: number) => {
     const listItem = document.createElement('li')
-    listItem.dataset.groupName = groupName
-    listItem.dataset.index = index.toString()
     if (command.status === CommandStatus.invalid) {
       addClassName(listItem, 'command-invalid')
     }
@@ -303,7 +301,7 @@ function createSingleGroupContainer(groupName: GroupType, commands: CommandData[
     orderedList.appendChild(listItem)
 
     const paragraph = document.createElement('p')
-    paragraph.id = config.paragraph.id.replace('{groupName}', groupName).replace('{index}', index.toString())
+    paragraph.id = config.paragraph.id.replace('{groupType}', groupType).replace('{index}', index.toString())
     paragraph.className = config.paragraph.className
     paragraph.innerText = command.content
     listItem.appendChild(paragraph)

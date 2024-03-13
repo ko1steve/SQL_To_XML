@@ -57,11 +57,11 @@ export class MainConfig implements IMainConfig {
           singleGroupContainerConfig: {
             className: 'groupContainer container',
             title: {
-              id: '{groupName}-title-DML',
+              id: '{groupType}-title-DML',
               className: 'fw-bold fs-3'
             },
             paragraph: {
-              id: '{groupName}-command-{index}-DML',
+              id: '{groupType}-command-{index}-DML',
               className: 'command'
             }
           } as ISingleGroupContainerConfig
@@ -84,11 +84,11 @@ export class MainConfig implements IMainConfig {
           singleGroupContainerConfig: {
             className: 'groupContainer container',
             title: {
-              id: '{groupName}-title-DDL',
+              id: '{groupType}-title-DDL',
               className: 'fw-bold fs-3'
             },
             paragraph: {
-              id: '{groupName}-command-{index}-DDL',
+              id: '{groupType}-command-{index}-DDL',
               className: 'command'
             }
           } as ISingleGroupContainerConfig
