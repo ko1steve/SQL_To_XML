@@ -14,28 +14,28 @@ export class MainConfig implements IMainConfig {
       GroupType.CountSQL, {
         title: 'Count語法',
         indicator: '--#CountSQL',
-        searchEndPattern: ['--#SelectSQL', '--#MainSQL', '--#PostSQL']
+        searchEndPattern: ['--#PreSQL', '--#SelectSQL', '--#MainSQL', '--#PostSQL']
       } as IGroupSetting
     ],
     [
       GroupType.SelectSQL, {
         title: '異動前/後語法',
         indicator: '--#SelectSQL',
-        searchEndPattern: ['--#MainSQL', '--#PostSQL']
+        searchEndPattern: ['--#PreSQL', '--#CountSQL', '--#MainSQL', '--#PostSQL']
       } as IGroupSetting
     ],
     [
       GroupType.MainSQL, {
         title: '異動語法',
         indicator: '--#MainSQL',
-        searchEndPattern: ['--#PostSQL']
+        searchEndPattern: ['--#PreSQL', '--#CountSQL', '--#SelectSQL', '--#PostSQL']
       } as IGroupSetting
     ],
     [
       GroupType.PostSQL, {
         title: '後置語法',
         indicator: '--#PostSQL',
-        searchEndPattern: []
+        searchEndPattern: ['--#PreSQL', '--#CountSQL', '--#SelectSQL', '--#MainSQL']
       } as IGroupSetting
     ]
   ])
