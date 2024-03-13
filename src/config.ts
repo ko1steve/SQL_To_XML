@@ -2,37 +2,37 @@
 
 export class MainConfig implements IMainConfig {
 
-  public groupSettingMap: Map<GroupName, IGroupSetting> = new Map<GroupName, IGroupSetting>([
+  public groupSettingMap: Map<GroupType, IGroupSetting> = new Map<GroupType, IGroupSetting>([
     [
-      GroupName.PreSQL, {
+      GroupType.PreSQL, {
         title: '前置宣告',
         indicator: '--#PreSQL',
         searchEndPattern: ['--#CountSQL', '--#SelectSQL', '--#MainSQL', '--#PostSQL']
       } as IGroupSetting
     ],
     [
-      GroupName.CountSQL, {
+      GroupType.CountSQL, {
         title: 'Count語法',
         indicator: '--#CountSQL',
         searchEndPattern: ['--#SelectSQL', '--#MainSQL', '--#PostSQL']
       } as IGroupSetting
     ],
     [
-      GroupName.SelectSQL, {
+      GroupType.SelectSQL, {
         title: '異動前/後語法',
         indicator: '--#SelectSQL',
         searchEndPattern: ['--#MainSQL', '--#PostSQL']
       } as IGroupSetting
     ],
     [
-      GroupName.MainSQL, {
+      GroupType.MainSQL, {
         title: '異動語法',
         indicator: '--#MainSQL',
         searchEndPattern: ['--#PostSQL']
       } as IGroupSetting
     ],
     [
-      GroupName.PostSQL, {
+      GroupType.PostSQL, {
         title: '後置語法',
         indicator: '--#PostSQL',
         searchEndPattern: []
@@ -103,10 +103,24 @@ export class MainConfig implements IMainConfig {
     ]
   ])
 
+  public checkCommandGroup: Map<CommandType, GroupType[]> = new Map<CommandType, GroupType[]>([
+    [
+      CommandType.DML, [
+        GroupType.CountSQL, GroupType.SelectSQL, GroupType.MainSQL
+      ]
+    ],
+    [
+      CommandType.DDL, [
+        GroupType.MainSQL
+      ]
+    ]
+  ])
+
 }
 
 export interface IMainConfig {
-  groupSettingMap: Map<GroupName, IGroupSetting>;
+  checkCommandGroup: Map<CommandType, GroupType[]>
+  groupSettingMap: Map<GroupType, IGroupSetting>
   singleCommandIndicator: string
   ignoredCommands: string[]
   invalidCommands: string[]
@@ -144,7 +158,7 @@ export interface IDownloadButtonContainer extends IHTMLElementConfig {
   downloadButton: IHTMLElementConfig
 }
 
-export enum GroupName {
+export enum GroupType {
   PreSQL = 'PreSQL',
   CountSQL = 'CountSQL',
   SelectSQL = 'SelectSQL',
