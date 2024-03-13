@@ -14,12 +14,12 @@ const hasInitMap: Map<CommandType, boolean> = new Map([
   ]
 ])
 
-const isInValidMap: Map<CommandType, boolean> = new Map([
+const commandValidMap: Map<CommandType, boolean> = new Map([
   [
-    CommandType.DML, false
+    CommandType.DML, true
   ],
   [
-    CommandType.DDL, false
+    CommandType.DDL, true
   ]
 ])
 
@@ -48,7 +48,7 @@ function onFileInput(fileInput: HTMLInputElement): void {
   if (commandType === CommandType.NONE) {
     return
   }
-  isInValidMap.set(commandType, false)
+  commandValidMap.set(commandType, true)
 
   const elementConfig: IElementConifg = mainConfig.elementConfigMap.get(commandType) as IElementConifg
 
@@ -58,8 +58,15 @@ function onFileInput(fileInput: HTMLInputElement): void {
       return
     }
     const textFromFileLoaded: string = event.target.result as string
+
     const textLinesGroupMap: Map<string, string> = getTextGroupMap(textFromFileLoaded)
     commandGroupMap = getCommandGroupMap(textLinesGroupMap, commandType)
+
+    const commandGroupValid: boolean = checkCommandGroupValid(commandGroupMap, commandType)
+    if (!commandGroupValid) {
+      commandValidMap.set(commandType, false)
+    }
+
     if (hasInitMap.has(commandType) && hasInitMap.get(commandType)) {
       resetPageContent(elementConfig, commandType)
     }
@@ -71,6 +78,20 @@ function onFileInput(fileInput: HTMLInputElement): void {
   if (fileInput.files != null) {
     reader.readAsText(fileInput.files[0], 'UTF-8')
   }
+}
+
+function checkCommandGroupValid(commandGroupMap: Map<GroupType, CommandData[]>, commandType: CommandType): boolean {
+  if (!mainConfig.checkCommandGroup.has(commandType)) {
+    return false
+  }
+  const checkGroupNames: GroupType[] = mainConfig.checkCommandGroup.get(commandType) as GroupType[]
+  let countCheck: number = 0
+  commandGroupMap.forEach((commands: CommandData[], groupType: GroupType) => {
+    if (checkGroupNames.includes(groupType) && commands.length > 0) {
+      countCheck++
+    }
+  })
+  return countCheck === checkGroupNames.length
 }
 
 function resetPageContent(elementConfig: IElementConifg, commandType: CommandType): void {
@@ -186,7 +207,7 @@ function getCommandGroupMap(textLinesGroupMap: Map<string, string>, commandType:
             commamds.push(new CommandData(commandText, commandStatus))
             commandGroupMap.set(groupName, commamds)
             if (!isCommandValid) {
-              isInValidMap.set(commandType, true)
+              commandValidMap.set(commandType, false)
             }
           }
           isAddToMap = true
@@ -253,8 +274,8 @@ function createPageContent(commandGroupMap: Map<GroupType, CommandData[]>, eleme
   })
   centerArea.appendChild(container)
 
-  const isInvalid: boolean = isInValidMap.has(commandType) && (isInValidMap.get(commandType) as boolean)
-  if (!isInvalid) {
+  const isValid: boolean = commandValidMap.has(commandType) && (commandValidMap.get(commandType) as boolean)
+  if (isValid) {
     createDownloadButton(centerArea, elementConfig)
   }
 }
