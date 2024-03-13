@@ -6,8 +6,12 @@ import { GroupName, IElementConifg, IGroupSetting, IMainConfig, ISingleGroupCont
 const mainConfig: IMainConfig = new MainConfig();
 
 const hasInitMap: Map<SqlType, boolean> = new Map([
-  [SqlType.DML, false],
-  [SqlType.DDL, false]
+  [
+    SqlType.DML, false
+  ],
+  [
+    SqlType.DDL, false
+  ]
 ])
 
 let commandGroupMap: Map<GroupName, CommandData[]>
@@ -36,7 +40,6 @@ function onFileInput(fileInput: HTMLInputElement): void {
     return
   }
   const elementConfig: IElementConifg = mainConfig.elementConfigMap.get(sqlType) as IElementConifg
-  console.error(sqlType, elementConfig);
 
   const reader: FileReader = new FileReader()
   reader.onload = function (event) {
@@ -62,7 +65,7 @@ function onFileInput(fileInput: HTMLInputElement): void {
 function resetPageContent(elementConfig: IElementConifg, sqlType: SqlType): void {
   const centerArea: HTMLDivElement = document.getElementById('center-area-' + sqlType) as HTMLDivElement
   const allGroupsContainer: HTMLDivElement = document.getElementById(elementConfig.allGroupsContainer.id) as HTMLDivElement
-  const downloadButtonContainer: HTMLDivElement = document.getElementById('downloadButtonContainer') as HTMLDivElement
+  const downloadButtonContainer: HTMLDivElement = document.getElementById(elementConfig.downloadButtonContainer.id) as HTMLDivElement
   if (centerArea == null) {
     return
   }
@@ -236,7 +239,7 @@ function createPageContent(commandGroupMap: Map<GroupName, CommandData[]>, eleme
   })
   centerArea.appendChild(container)
 
-  createDownloadButton(centerArea)
+  createDownloadButton(centerArea, elementConfig)
 }
 
 function createSingleGroupContainer(groupName: GroupName, commands: CommandData[], parent: HTMLElement, elementConfig: IElementConifg): void {
@@ -278,13 +281,16 @@ function createSingleGroupContainer(groupName: GroupName, commands: CommandData[
   parent.appendChild(container)
 }
 
-function createDownloadButton(parent: HTMLElement): void {
+function createDownloadButton(parent: HTMLElement, elementConfig: IElementConifg): void {
+  const config = elementConfig.downloadButtonContainer
   const container = document.createElement('div')
-  container.id = 'downloadButtonContainer'
-  container.className = 'container'
+  container.id = config.id
+  container.className = config.className
   const button = document.createElement('button')
-  button.className = 'downloadButton'
-  button.textContent = 'Download as XML'
+  button.className = config.downloadButton.className
+  if (config.downloadButton.textContent) {
+    button.textContent = config.downloadButton.textContent
+  }
   button.onclick = () => {
     // downloadXML()
   }
