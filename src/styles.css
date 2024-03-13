@@ -79,4 +79,11 @@ li{
 
 .nav-link {
   min-width: 400px;
+  border-width: 1px;
+  border-color:dimgrey;
+  border-style: solid;
+}
+
+#commandTypeTabs {
+  margin-bottom: 10px;
 }

@@ -1,6 +1,6 @@
-import 'src/styles.css'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap/dist/js/bootstrap.bundle'
+import 'src/styles.css'
 import { GroupName, IElementConifg, IGroupSetting, IMainConfig, ISingleGroupContainerConfig, MainConfig, SqlType } from './config'
 
 const mainConfig: IMainConfig = new MainConfig();
