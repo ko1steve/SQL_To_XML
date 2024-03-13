@@ -62,11 +62,6 @@ function onFileInput(fileInput: HTMLInputElement): void {
     const textLinesGroupMap: Map<string, string> = getTextGroupMap(textFromFileLoaded)
     commandGroupMap = getCommandGroupMap(textLinesGroupMap, commandType)
 
-    const commandGroupValid: boolean = checkCommandGroupValid(commandGroupMap, commandType)
-    if (!commandGroupValid) {
-      commandValidMap.set(commandType, false)
-    }
-
     if (hasInitMap.has(commandType) && hasInitMap.get(commandType)) {
       resetPageContent(elementConfig, commandType)
     }
@@ -78,20 +73,6 @@ function onFileInput(fileInput: HTMLInputElement): void {
   if (fileInput.files != null) {
     reader.readAsText(fileInput.files[0], 'UTF-8')
   }
-}
-
-function checkCommandGroupValid(commandGroupMap: Map<GroupType, CommandData[]>, commandType: CommandType): boolean {
-  if (!mainConfig.checkCommandGroup.has(commandType)) {
-    return false
-  }
-  const checkGroupNames: GroupType[] = mainConfig.checkCommandGroup.get(commandType) as GroupType[]
-  let countCheck: number = 0
-  commandGroupMap.forEach((commands: CommandData[], groupType: GroupType) => {
-    if (checkGroupNames.includes(groupType) && commands.length > 0) {
-      countCheck++
-    }
-  })
-  return countCheck === checkGroupNames.length
 }
 
 function resetPageContent(elementConfig: IElementConifg, commandType: CommandType): void {
@@ -265,14 +246,19 @@ function createPageContent(commandGroupMap: Map<GroupType, CommandData[]>, eleme
     return
   }
   const config = elementConfig.allGroupsContainer
+
   const container = document.createElement('div')
   container.id = config.id
   container.className = config.className
-
-  commandGroupMap.forEach((commands, groupName) => {
-    createSingleGroupContainer(groupName, commands, container, elementConfig)
-  })
   centerArea.appendChild(container)
+
+  mainConfig.groupShowOrder.forEach(groupType => {
+    let commands: CommandData[] = []
+    if (commandGroupMap.has(groupType)) {
+      commands = commandGroupMap.get(groupType) as CommandData[]
+    }
+    createSingleGroupContainer(groupType, commands, container, elementConfig, commandType)
+  })
 
   const isValid: boolean = commandValidMap.has(commandType) && (commandValidMap.get(commandType) as boolean)
   if (isValid) {
@@ -280,11 +266,12 @@ function createPageContent(commandGroupMap: Map<GroupType, CommandData[]>, eleme
   }
 }
 
-function createSingleGroupContainer(groupName: GroupType, commands: CommandData[], parent: HTMLElement, elementConfig: IElementConifg): void {
+function createSingleGroupContainer(groupName: GroupType, commands: CommandData[], parent: HTMLElement, elementConfig: IElementConifg, commandType: CommandType): void {
   const config: ISingleGroupContainerConfig = elementConfig.allGroupsContainer.singleGroupContainerConfig;
 
   const container = document.createElement('div')
   container.className = config.className
+  parent.appendChild(container)
 
   const title = document.createElement('p')
   title.id = config.title.id.replace('{groupName}', groupName)
@@ -292,6 +279,11 @@ function createSingleGroupContainer(groupName: GroupType, commands: CommandData[
   title.innerText = mainConfig.groupSettingMap.get(groupName)?.title as string
   container.appendChild(title)
 
+  if (commands.length === 0) {
+    addClassName(title, 'command-invalid')
+    commandValidMap.set(commandType, false)
+    return
+  }
   const orderedList = document.createElement('ol')
   container.appendChild(orderedList)
 
@@ -316,7 +308,6 @@ function createSingleGroupContainer(groupName: GroupType, commands: CommandData[
     paragraph.innerText = command.content
     listItem.appendChild(paragraph)
   })
-  parent.appendChild(container)
 }
 
 function createDownloadButton(parent: HTMLElement, elementConfig: IElementConifg): void {

@@ -2,6 +2,8 @@
 
 export class MainConfig implements IMainConfig {
 
+  public groupShowOrder: GroupType[] = [GroupType.PreSQL, GroupType.CountSQL, GroupType.SelectSQL, GroupType.MainSQL, GroupType.PostSQL]
+
   public groupSettingMap: Map<GroupType, IGroupSetting> = new Map<GroupType, IGroupSetting>([
     [
       GroupType.PreSQL, {
@@ -119,6 +121,7 @@ export class MainConfig implements IMainConfig {
 }
 
 export interface IMainConfig {
+  groupShowOrder: GroupType[]
   checkCommandGroup: Map<CommandType, GroupType[]>
   groupSettingMap: Map<GroupType, IGroupSetting>
   singleCommandIndicator: string
