@@ -1,16 +1,16 @@
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap/dist/js/bootstrap.bundle'
 import 'src/styles.css'
-import { GroupName, IElementConifg, IGroupSetting, IMainConfig, ISingleGroupContainerConfig, MainConfig, SqlType } from './config'
+import { GroupName, IElementConifg, IGroupSetting, IMainConfig, ISingleGroupContainerConfig, MainConfig, CommandType } from './config'
 
 const mainConfig: IMainConfig = new MainConfig();
 
-const hasInitMap: Map<SqlType, boolean> = new Map([
+const hasInitMap: Map<CommandType, boolean> = new Map([
   [
-    SqlType.DML, false
+    CommandType.DML, false
   ],
   [
-    SqlType.DDL, false
+    CommandType.DDL, false
   ]
 ])
 
@@ -30,13 +30,13 @@ function onFileInput(fileInput: HTMLInputElement): void {
   if (fileInput?.files?.length === 0) {
     return
   }
-  let sqlType: SqlType = SqlType.NONE;
-  Object.values(SqlType).forEach(e => {
+  let sqlType: CommandType = CommandType.NONE;
+  Object.values(CommandType).forEach(e => {
     if (e.toString() === fileInput.dataset.sqlType) {
       sqlType = e
     }
   })
-  if (sqlType == SqlType.NONE) {
+  if (sqlType == CommandType.NONE) {
     return
   }
   const elementConfig: IElementConifg = mainConfig.elementConfigMap.get(sqlType) as IElementConifg
@@ -62,7 +62,7 @@ function onFileInput(fileInput: HTMLInputElement): void {
   }
 }
 
-function resetPageContent(elementConfig: IElementConifg, sqlType: SqlType): void {
+function resetPageContent(elementConfig: IElementConifg, sqlType: CommandType): void {
   const centerArea: HTMLDivElement = document.getElementById('center-area-' + sqlType) as HTMLDivElement
   const allGroupsContainer: HTMLDivElement = document.getElementById(elementConfig.allGroupsContainer.id) as HTMLDivElement
   const downloadButtonContainer: HTMLDivElement = document.getElementById(elementConfig.downloadButtonContainer.id) as HTMLDivElement
@@ -224,7 +224,7 @@ function getGroupName(textLine: string): GroupName | null {
   return null
 }
 
-function createPageContent(commandGroupMap: Map<GroupName, CommandData[]>, elementConfig: IElementConifg, sqlType: SqlType): void {
+function createPageContent(commandGroupMap: Map<GroupName, CommandData[]>, elementConfig: IElementConifg, sqlType: CommandType): void {
   const centerArea: HTMLDivElement = document.getElementById('center-area-' + sqlType) as HTMLDivElement
   if (centerArea == null) {
     return

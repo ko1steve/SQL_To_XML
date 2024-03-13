@@ -46,9 +46,9 @@ export class MainConfig implements IMainConfig {
 
   public invalidCommands: string[] = ['COMMIT']
 
-  public elementConfigMap: Map<SqlType, IElementConifg> = new Map<SqlType, IElementConifg>([
+  public elementConfigMap: Map<CommandType, IElementConifg> = new Map<CommandType, IElementConifg>([
     [
-      SqlType.DML, {
+      CommandType.DML, {
         allGroupsContainer: {
           id: 'allGroupsContainer-DML',
           className: 'container',
@@ -75,7 +75,7 @@ export class MainConfig implements IMainConfig {
       } as IElementConifg
     ],
     [
-      SqlType.DDL, {
+      CommandType.DDL, {
         allGroupsContainer: {
           id: 'allGroupsContainer-DDL',
           className: 'container',
@@ -116,10 +116,10 @@ export interface IMainConfig {
   singleCommandIndicator: string
   ignoredCommands: string[]
   invalidCommands: string[]
-  elementConfigMap: Map<SqlType, IElementConifg>
+  elementConfigMap: Map<CommandType, IElementConifg>
 }
 
-export enum SqlType {
+export enum CommandType {
   DDL = 'DDL',
   DML = 'DML',
   NONE = 'NONE'
