@@ -105,12 +105,6 @@ export class MainConfig implements IMainConfig {
 
 }
 
-export interface IGroupSetting {
-  title: string;
-  indicator: string;
-  searchEndPattern: string[];
-}
-
 export interface IMainConfig {
   groupSettingMap: Map<GroupName, IGroupSetting>;
   singleCommandIndicator: string
@@ -119,10 +113,10 @@ export interface IMainConfig {
   elementConfigMap: Map<CommandType, IElementConifg>
 }
 
-export enum CommandType {
-  DDL = 'DDL',
-  DML = 'DML',
-  NONE = 'NONE'
+export interface IGroupSetting {
+  title: string;
+  indicator: string;
+  searchEndPattern: string[];
 }
 
 export interface IHTMLElementConfig {
@@ -156,4 +150,10 @@ export enum GroupName {
   SelectSQL = 'SelectSQL',
   MainSQL = 'MainSQL',
   PostSQL = 'PostSQL'
+}
+
+export enum CommandType {
+  DDL = 'DDL',
+  DML = 'DML',
+  NONE = 'NONE'
 }
