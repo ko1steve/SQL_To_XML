@@ -1,7 +1,7 @@
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap/dist/js/bootstrap.bundle'
 import 'src/styles.css'
-import { GroupType, IElementConifg, IGroupSetting, IMainConfig, ISingleGroupContainerConfig, MainConfig, CommandType } from './config'
+import { GroupType, IElementConifg, IGroupSetting, IMainConfig, ISingleGroupContainerConfig, MainConfig, CommandType, ErrorType } from './config'
 
 const mainConfig: IMainConfig = new MainConfig();
 
@@ -24,6 +24,8 @@ const commandValidMap: Map<CommandType, boolean> = new Map([
 ])
 
 let commandGroupMap: Map<GroupType, CommandData[]>
+
+let errorMessagesMap: Map<CommandType, string[]>
 
 const fileInputDdl: HTMLInputElement = document.getElementById('fileInput-DDL') as HTMLInputElement
 const fileInputDml: HTMLInputElement = document.getElementById('fileInput-DML') as HTMLInputElement
@@ -57,8 +59,15 @@ function onFileInput(fileInput: HTMLInputElement): void {
     if (event.target == null) {
       return
     }
+    errorMessagesMap = new Map([
+      [
+        CommandType.DML, []
+      ],
+      [
+        CommandType.DDL, []
+      ]
+    ])
     const textFromFileLoaded: string = event.target.result as string
-
     const textLinesGroupMap: Map<string, string> = getTextGroupMap(textFromFileLoaded)
     commandGroupMap = getCommandGroupMap(textLinesGroupMap, commandType)
 
@@ -263,6 +272,12 @@ function createPageContent(commandGroupMap: Map<GroupType, CommandData[]>, eleme
   const isValid: boolean = commandValidMap.has(commandType) && (commandValidMap.get(commandType) as boolean)
   if (isValid) {
     createDownloadButton(centerArea, elementConfig)
+  } else {
+    const rightArea: HTMLDivElement = document.getElementById('right-area-' + commandType) as HTMLDivElement
+    if (rightArea == null) {
+      return
+    }
+    createErrorMessage(rightArea, elementConfig, commandType)
   }
 }
 
@@ -280,8 +295,13 @@ function createSingleGroupContainer(groupType: GroupType, commands: CommandData[
   container.appendChild(title)
 
   if (commands.length === 0) {
+    let errorMessage: string = mainConfig.errorMessageMap.get(ErrorType.CONTENT_NOT_FOUND_ERROR) as string
+    errorMessage = errorMessage.replace('{groupType}', groupType)
     addClassName(title, 'command-invalid')
     commandValidMap.set(commandType, false)
+    const errorMessages: string[] = errorMessagesMap.get(commandType) as string[]
+    errorMessages.push(errorMessage)
+    errorMessagesMap.set(commandType, errorMessages)
     return
   }
   const orderedList = document.createElement('ol')
@@ -346,6 +366,25 @@ function createDownloadButton(parent: HTMLElement, elementConfig: IElementConifg
 //   a.click()
 //   document.body.removeChild(a)
 // }
+
+function createErrorMessage(rightArea: HTMLDivElement, elementConfig: IElementConifg, commandType: CommandType) {
+  if (!errorMessagesMap.has(commandType)) {
+    return
+  }
+  const config = elementConfig.errorMessageContainer
+
+  const errorMessageContainer: HTMLDivElement = document.createElement('div')
+  errorMessageContainer.id = config.id
+  rightArea.appendChild(errorMessageContainer)
+
+  const errorMessages: string[] = errorMessagesMap.get(commandType) as string[]
+  errorMessages.forEach(e => {
+    const span: HTMLSpanElement = document.createElement('span')
+    span.className = config.errorMessage.className
+    span.innerText = e
+    errorMessageContainer.appendChild(span)
+  })
+}
 
 function addClassName(element: HTMLElement, ...classNames: string[]): void {
   classNames.forEach(className => element.className += ' ' + className)

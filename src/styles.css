@@ -73,6 +73,10 @@ li{
   color: crimson;
 }
 
+.error-message {
+  color: crimson;
+}
+
 .nav-item {
   font-size: 20px;
 }

@@ -64,7 +64,7 @@ export class MainConfig implements IMainConfig {
               id: '{groupType}-command-{index}-DML',
               className: 'command'
             }
-          } as ISingleGroupContainerConfig
+          }
         },
         downloadButtonContainer: {
           id: 'downloadButtonContainer-DML',
@@ -73,7 +73,13 @@ export class MainConfig implements IMainConfig {
             className: 'downloadButton',
             textContent: 'Download as XML'
           }
-        } as IDownloadButtonContainer
+        },
+        errorMessageContainer: {
+          id: 'errorMessageContainer-DML',
+          errorMessage: {
+            className: 'error-message'
+          }
+        }
       } as IElementConifg
     ],
     [
@@ -91,7 +97,7 @@ export class MainConfig implements IMainConfig {
               id: '{groupType}-command-{index}-DDL',
               className: 'command'
             }
-          } as ISingleGroupContainerConfig
+          }
         },
         downloadButtonContainer: {
           id: 'downloadButtonContainer-DDL',
@@ -100,7 +106,13 @@ export class MainConfig implements IMainConfig {
             className: 'downloadButton',
             textContent: 'Download as XML'
           }
-        } as IDownloadButtonContainer
+        },
+        errorMessageContainer: {
+          id: 'errorMessageContainer-DDL',
+          errorMessage: {
+            className: 'error-message'
+          }
+        }
       } as IElementConifg
     ]
   ])
@@ -118,6 +130,12 @@ export class MainConfig implements IMainConfig {
     ]
   ])
 
+  public errorMessageMap: Map<ErrorType, string> = new Map<ErrorType, string>([
+    [
+      ErrorType.CONTENT_NOT_FOUND_ERROR, 'ContentNotFountError: Group "{groupType}" is not defind. 請檢查 SQL 檔案是否有包含該類別的指令。'
+    ]
+  ])
+
 }
 
 export interface IMainConfig {
@@ -128,6 +146,7 @@ export interface IMainConfig {
   ignoredCommands: string[]
   invalidCommands: string[]
   elementConfigMap: Map<CommandType, IElementConifg>
+  errorMessageMap: Map<ErrorType, string>
 }
 
 export interface IGroupSetting {
@@ -146,6 +165,7 @@ export interface IHTMLElementConfig {
 export interface IElementConifg {
   allGroupsContainer: IAllGroupsContainerConfig
   downloadButtonContainer: IDownloadButtonContainer
+  errorMessageContainer: IErrorMessageContainer
 }
 
 export interface IAllGroupsContainerConfig extends IHTMLElementConfig {
@@ -161,6 +181,10 @@ export interface IDownloadButtonContainer extends IHTMLElementConfig {
   downloadButton: IHTMLElementConfig
 }
 
+export interface IErrorMessageContainer extends IHTMLElementConfig {
+  errorMessage: IHTMLElementConfig
+}
+
 export enum GroupType {
   PreSQL = 'PreSQL',
   CountSQL = 'CountSQL',
@@ -173,4 +197,8 @@ export enum CommandType {
   DDL = 'DDL',
   DML = 'DML',
   NONE = 'NONE'
+}
+
+export enum ErrorType {
+  CONTENT_NOT_FOUND_ERROR = 'CONTENT_NOT_FOUND_ERROR'
 }
