@@ -57,16 +57,18 @@ button {
 .command {
     text-align: left;
     margin: 5px;
+    font-family: Consolas;
+}
+
+li{
+  font-family: Consolas;
 }
 
 .pointerover-command {
-    border-radius: 5px;
-}
-
-.command-valid {
+  border-radius: 5px;
   background-color: rgb(194, 230, 241);
 }
 
 .command-invalid {
-  background-color: rgb(247, 132, 97);
+  color: crimson;
 }
