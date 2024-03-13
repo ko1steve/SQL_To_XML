@@ -1,21 +1,46 @@
-import 'src/styles.css'
 import 'bootstrap/dist/css/bootstrap.css'
-import * as Config from './config'
+import 'bootstrap/dist/js/bootstrap.bundle'
+import 'src/styles.css'
+import { GroupName, IElementConifg, IGroupSetting, IMainConfig, ISingleGroupContainerConfig, MainConfig, CommandType } from './config'
 
-let hasInit = false
+const mainConfig: IMainConfig = new MainConfig();
 
-let commandGroupMap: Map<string, CommandData[]>
+const hasInitMap: Map<CommandType, boolean> = new Map([
+  [
+    CommandType.DML, false
+  ],
+  [
+    CommandType.DDL, false
+  ]
+])
 
-const fileInput: HTMLInputElement = document.getElementById('fileInput') as HTMLInputElement
+let commandGroupMap: Map<GroupName, CommandData[]>
 
-if (fileInput != null) {
-  fileInput.onchange = onFileInput
+const fileInputDdl: HTMLInputElement = document.getElementById('fileInput-DDL') as HTMLInputElement
+const fileInputDml: HTMLInputElement = document.getElementById('fileInput-DML') as HTMLInputElement
+
+if (fileInputDdl != null) {
+  fileInputDdl.onchange = onFileInput.bind(this, fileInputDdl)
+}
+if (fileInputDml != null) {
+  fileInputDml.onchange = onFileInput.bind(this, fileInputDml)
 }
 
-function onFileInput(): void {
+function onFileInput(fileInput: HTMLInputElement): void {
   if (fileInput?.files?.length === 0) {
     return
   }
+  let sqlType: CommandType = CommandType.NONE;
+  Object.values(CommandType).forEach(e => {
+    if (e.toString() === fileInput.dataset.sqlType) {
+      sqlType = e
+    }
+  })
+  if (sqlType == CommandType.NONE) {
+    return
+  }
+  const elementConfig: IElementConifg = mainConfig.elementConfigMap.get(sqlType) as IElementConifg
+
   const reader: FileReader = new FileReader()
   reader.onload = function (event) {
     if (event.target == null) {
@@ -24,31 +49,31 @@ function onFileInput(): void {
     const textFromFileLoaded: string = event.target.result as string
     const textLinesGroupMap: Map<string, string> = getTextGroupMap(textFromFileLoaded)
     commandGroupMap = getCommandGroupMap(textLinesGroupMap)
-    if (hasInit) {
-      resetPageContent()
+    if (hasInitMap.has(sqlType) && hasInitMap.get(sqlType)) {
+      resetPageContent(elementConfig, sqlType)
     }
-    createPageContent(commandGroupMap)
+    createPageContent(commandGroupMap, elementConfig, sqlType)
     fileInput.files = null
     fileInput.value = ''
-    hasInit = true
+    hasInitMap.set(sqlType, true)
   }
   if (fileInput.files != null) {
     reader.readAsText(fileInput.files[0], 'UTF-8')
   }
 }
 
-function resetPageContent(): void {
-  const mainContainer: HTMLDivElement = document.getElementById('center-area') as HTMLDivElement
-  const allGroupsContainer: HTMLDivElement = document.getElementById('allGroupsContainer') as HTMLDivElement
-  const downloadButtonContainer: HTMLDivElement = document.getElementById('downloadButtonContainer') as HTMLDivElement
-  if (mainContainer == null) {
+function resetPageContent(elementConfig: IElementConifg, sqlType: CommandType): void {
+  const centerArea: HTMLDivElement = document.getElementById('center-area-' + sqlType) as HTMLDivElement
+  const allGroupsContainer: HTMLDivElement = document.getElementById(elementConfig.allGroupsContainer.id) as HTMLDivElement
+  const downloadButtonContainer: HTMLDivElement = document.getElementById(elementConfig.downloadButtonContainer.id) as HTMLDivElement
+  if (centerArea == null) {
     return
   }
   if (allGroupsContainer != null) {
-    mainContainer.removeChild(allGroupsContainer)
+    centerArea.removeChild(allGroupsContainer)
   }
   if (downloadButtonContainer != null) {
-    mainContainer.removeChild(downloadButtonContainer)
+    centerArea.removeChild(downloadButtonContainer)
   }
 }
 
@@ -56,16 +81,16 @@ function getTextGroupMap(textFromFileLoaded: string): Map<string, string> {
   const textLinesGroupMap: Map<string, string> = new Map<string, string>()
   const textLines: string[] = textFromFileLoaded.split('\n')
   let isGroupToMap = false
-  let groupName: string = ''
+  let groupName: GroupName | null
   for (let i = 0; i < textLines.length; i++) {
     isGroupToMap = false
 
     //* 若找不到區塊分割的判斷字串，則略過
     groupName = getGroupName(textLines[i])
-    if (groupName === '') {
+    if (groupName === null) {
       continue
     }
-    const searchEndArr: string[] = Config.GROUP_SERACH.get(groupName) as string[]
+    const searchEndArr: string[] = mainConfig.groupSettingMap.get(groupName)?.searchEndPattern as string[]
     let text = ''
 
     //* 找到區塊分割的判斷字串後，尋找區塊的結束點
@@ -101,7 +126,7 @@ function isIgnoreCommand(text: string) {
   if (text.endsWith(';')) {
     text = text.substring(0, text.length - 1)
   }
-  return Config.IGNORED_COMMANDS.includes(text.toUpperCase())
+  return mainConfig.ignoredCommands.includes(text.toUpperCase())
 }
 
 function isValidCommand(text: string): boolean {
@@ -110,7 +135,7 @@ function isValidCommand(text: string): boolean {
     text = text.substring(0, text.length - 1)
   }
   let result = true
-  Config.INVALID_COMMANDS.forEach(e => {
+  mainConfig.invalidCommands.forEach(e => {
     if (text.toUpperCase().indexOf(e) > -1) {
       result = false
     }
@@ -118,9 +143,9 @@ function isValidCommand(text: string): boolean {
   return result
 }
 
-function getCommandGroupMap(textLinesGroupMap: Map<string, string>): Map<string, CommandData[]> {
-  const commandGroupMap = new Map<string, CommandData[]>()
-  textLinesGroupMap.forEach((text: string, groupName: string) => {
+function getCommandGroupMap(textLinesGroupMap: Map<string, string>): Map<GroupName, CommandData[]> {
+  const commandGroupMap = new Map<GroupName, CommandData[]>()
+  textLinesGroupMap.forEach((text: string, groupName: GroupName) => {
     const textLines = text.split('\n')
     const commamds: CommandData[] = []
     for (let i = 0; i < textLines.length; i++) {
@@ -128,11 +153,11 @@ function getCommandGroupMap(textLinesGroupMap: Map<string, string>): Map<string,
       let isCommandValid = true;
 
       //* 若找不到指令分割的判斷字串，則略過
-      if (!textLines[i].trim().startsWith(Config.SINGLE_COMMAND_INDICATOR)) {
+      if (!textLines[i].trim().startsWith(mainConfig.singleCommandIndicator)) {
         continue
       }
       let commandText: string = ''
-      const newTextLine: string = textLines[i].replace(Config.SINGLE_COMMAND_INDICATOR, '').trim()
+      const newTextLine: string = textLines[i].replace(mainConfig.singleCommandIndicator, '').trim()
 
       //* 判斷指令是不是該忽略 
       if (newTextLine.length !== 0 && !isIgnoreCommand(newTextLine)) {
@@ -143,7 +168,7 @@ function getCommandGroupMap(textLinesGroupMap: Map<string, string>): Map<string,
       let j: number
       for (j = i + 1; j < textLines.length; j++) {
         i = j - 1
-        if (textLines[j].trim().startsWith(Config.SINGLE_COMMAND_INDICATOR)) {
+        if (textLines[j].trim().startsWith(mainConfig.singleCommandIndicator)) {
           commandText = cleanEmptyLineAtCommandEnd(commandText)
           if (commandText.length > 0) {
             const commandStatus: CommandStatus = isCommandValid ? CommandStatus.valid : CommandStatus.invalid
@@ -153,7 +178,7 @@ function getCommandGroupMap(textLinesGroupMap: Map<string, string>): Map<string,
           isAddToMap = true
           break
         } else if (!isIgnoreCommand(textLines[j])) {
-          textLines[j] = textLines[j].replace(Config.SINGLE_COMMAND_INDICATOR, '')
+          textLines[j] = textLines[j].replace(mainConfig.singleCommandIndicator, '')
           if (textLines[j].trim().length > 0) {
             isCommandValid = isValidCommand(textLines[j])
             //* 找到結束點之前，不斷累加指令的內容
@@ -188,42 +213,45 @@ function cleanEmptyLineAtCommandEnd(commandText: string): string {
   return commandText;
 }
 
-function getGroupName(textLine: string): string {
-  const groupNames: string[] = Array.from(Config.GROUP_SERACH.keys())
-  for (let i = 0; i < groupNames.length; i++) {
-    if (textLine.trim().startsWith(groupNames[i])) {
+function getGroupName(textLine: string): GroupName | null {
+  const groupNames: GroupName[] = Array.from(mainConfig.groupSettingMap.keys())
+  const groupSetting: IGroupSetting[] = Array.from(mainConfig.groupSettingMap.values())
+  for (let i = 0; i < groupSetting.length; i++) {
+    if (textLine.trim().startsWith(groupSetting[i].indicator)) {
       return groupNames[i]
     }
   }
-  return ''
+  return null
 }
 
-function createPageContent(commandGroupMap: Map<string, CommandData[]>): void {
-  const mainContainer: HTMLDivElement = document.getElementById('center-area') as HTMLDivElement
-  if (mainContainer == null) {
+function createPageContent(commandGroupMap: Map<GroupName, CommandData[]>, elementConfig: IElementConifg, sqlType: CommandType): void {
+  const centerArea: HTMLDivElement = document.getElementById('center-area-' + sqlType) as HTMLDivElement
+  if (centerArea == null) {
     return
   }
+  const config = elementConfig.allGroupsContainer
   const container = document.createElement('div')
-  container.id = 'allGroupsContainer'
-  container.className = 'container'
+  container.id = config.id
+  container.className = config.className
 
   commandGroupMap.forEach((commands, groupName) => {
-    createSingleGroupContainer(groupName, commands, container)
+    createSingleGroupContainer(groupName, commands, container, elementConfig)
   })
-  mainContainer.appendChild(container)
+  centerArea.appendChild(container)
 
-  createDownloadButton(mainContainer)
+  createDownloadButton(centerArea, elementConfig)
 }
 
-function createSingleGroupContainer(groupName: string, commands: CommandData[], parent: HTMLElement): void {
-  const containerId = groupName.replace('--#', '') + '-container'
+function createSingleGroupContainer(groupName: GroupName, commands: CommandData[], parent: HTMLElement, elementConfig: IElementConifg): void {
+  const config: ISingleGroupContainerConfig = elementConfig.allGroupsContainer.singleGroupContainerConfig;
+
   const container = document.createElement('div')
-  container.id = containerId
-  container.className = 'groupContainer container'
+  container.className = config.className
 
   const title = document.createElement('p')
-  title.className = 'fw-bold fs-3'
-  title.innerText = Config.GROUP_TITLE.get(groupName) as string
+  title.id = config.title.id.replace('{groupName}', groupName)
+  title.className = config.title.className
+  title.innerText = mainConfig.groupSettingMap.get(groupName)?.title as string
   container.appendChild(title)
 
   const orderedList = document.createElement('ol')
@@ -245,21 +273,24 @@ function createSingleGroupContainer(groupName: string, commands: CommandData[], 
     orderedList.appendChild(listItem)
 
     const paragraph = document.createElement('p')
-    paragraph.id = groupName + '_command_' + index
-    paragraph.className = 'command'
+    paragraph.id = config.paragraph.id.replace('{groupName}', groupName).replace('{index}', index.toString())
+    paragraph.className = config.paragraph.className
     paragraph.innerText = command.content
     listItem.appendChild(paragraph)
   })
   parent.appendChild(container)
 }
 
-function createDownloadButton(parent: HTMLElement): void {
+function createDownloadButton(parent: HTMLElement, elementConfig: IElementConifg): void {
+  const config = elementConfig.downloadButtonContainer
   const container = document.createElement('div')
-  container.className = 'container'
-  container.id = 'downloadButtonContainer'
+  container.id = config.id
+  container.className = config.className
   const button = document.createElement('button')
-  button.id = 'downloadButton'
-  button.textContent = 'Download as XML'
+  button.className = config.downloadButton.className
+  if (config.downloadButton.textContent) {
+    button.textContent = config.downloadButton.textContent
+  }
   button.onclick = () => {
     // downloadXML()
   }

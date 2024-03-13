@@ -26,7 +26,7 @@ button {
     cursor: pointer;
 }
 
-#fileInputLabel {
+.fileInputLabel {
     border-radius: 5px;
     background-color:lightcoral;
     color: aliceblue;
@@ -36,7 +36,7 @@ button {
     cursor: pointer;
 }
 
-#fileInput {
+.fileInput {
     visibility: hidden;
     width: 0px;
     height: 0px;
@@ -44,7 +44,7 @@ button {
     padding: 0px;
 }
 
-#downloadButton {
+.downloadButton {
     margin: 10px;
     border-radius: 5px;
     color: aliceblue;
@@ -71,4 +71,19 @@ li{
 
 .command-invalid {
   color: crimson;
+}
+
+.nav-item {
+  font-size: 20px;
+}
+
+.nav-link {
+  min-width: 400px;
+  border-width: 1px;
+  border-color:dimgrey;
+  border-style: solid;
+}
+
+#commandTypeTabs {
+  margin-bottom: 10px;
 }

@@ -8,16 +8,46 @@
 </head>
 
 <body>
-  <div class="text-center container" id="mainContainer">
-    <div class="row">
-      <div class="col-2 col-md-3" id="left-area">Warning Area</div>
-      <div class="col-8 col-md-6" id="center-area">
-        <div class="" id="input-container">
-          <label for="fileInput" id="fileInputLabel">Upload SQL File</label>
-          <input type="file" accept=".sql" id="fileInput">
+  <ul class="nav nav-pills justify-content-center" id="commandTypeTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button class="nav-link active" id="dml-tab" data-bs-toggle="tab" data-bs-target="#dml" type="button" role="tab"
+        aria-controls="dml" aria-selected="true">DML</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="ddl-tab" data-bs-toggle="tab" data-bs-target="#ddl" type="button" role="tab"
+        aria-controls="ddl" aria-selected="false">DDL</button>
+    </li>
+  </ul>
+  <div class="tab-content" id="commandTypeTabsContent">
+    <!-- DML -->
+    <div class="tab-pane fade show active" id="dml" role="tabpanel" aria-labelledby="dml-tab">
+      <div class="text-center container">
+        <div class="row">
+          <div class="col-2 col-md-3" id="left-area-DML"></div>
+          <div class="col-8 col-md-6" id="center-area-DML">
+            <div>
+              <label for="fileInput-DML" class="fileInputLabel">Upload SQL File</label>
+              <input type="file" accept=".sql" id="fileInput-DML" class="fileInput" data-sql-type="DML">
+            </div>
+          </div>
+          <div class="col-2 col-md-3" id="right-area-DML"></div>
         </div>
       </div>
-      <div class="col-2 col-md-3" id="right-area">Error Area</div>
+    </div>
+    <!-- DDL -->
+    <div class="tab-pane fade" id="ddl" role="tabpanel" aria-labelledby="ddl-tab">
+      <div class="text-center container">
+        <div class="row">
+          <div class="col-2 col-md-3" id="left-area-DDL"></div>
+          <div class="col-8 col-md-6" id="center-area-DDL">
+            <div>
+              <label for="fileInput-DDL" class="fileInputLabel">Upload SQL File</label>
+              <input type="file" accept=".sql" id="fileInput-DDL" class="fileInput" data-sql-type="DDL">
+            </div>
+          </div>
+          <div class="col-2 col-md-3" id="right-area-DDL"></div>
+        </div>
+      </div>
     </div>
   </div>
 </body>
