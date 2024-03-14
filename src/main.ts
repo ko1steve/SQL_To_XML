@@ -1,7 +1,7 @@
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap/dist/js/bootstrap.bundle'
 import 'src/styles.css'
-import { GroupType, IElementConifg, IGroupSetting, IMainConfig, ISingleGroupContainerConfig, MainConfig, CommandType, ErrorType } from './config'
+import { GroupType, IElementConifg, IGroupSetting, IMainConfig, IGroupContainerConfig, MainConfig, CommandType, ErrorType } from './config'
 
 const mainConfig: IMainConfig = new MainConfig();
 
@@ -24,8 +24,6 @@ const commandValidMap: Map<CommandType, boolean> = new Map([
 ])
 
 let commandGroupMap: Map<GroupType, CommandData[]>
-
-let errorMessagesMap: Map<CommandType, string[]>
 
 const fileInputDdl: HTMLInputElement = document.getElementById('fileInput-DDL') as HTMLInputElement
 const fileInputDml: HTMLInputElement = document.getElementById('fileInput-DML') as HTMLInputElement
@@ -59,22 +57,16 @@ function onFileInput(fileInput: HTMLInputElement): void {
     if (event.target == null) {
       return
     }
-    errorMessagesMap = new Map([
-      [
-        CommandType.DML, []
-      ],
-      [
-        CommandType.DDL, []
-      ]
-    ])
     const textFromFileLoaded: string = event.target.result as string
     const textLinesGroupMap: Map<string, string> = getTextGroupMap(textFromFileLoaded)
     commandGroupMap = getCommandGroupMap(textLinesGroupMap, commandType)
 
+    const mainContainer: HTMLDivElement = document.getElementById('content-with-upload-' + commandType) as HTMLDivElement
+
     if (hasInitMap.has(commandType) && hasInitMap.get(commandType)) {
-      resetPageContent(elementConfig, commandType)
+      resetPageContent(mainContainer, commandType)
     }
-    createPageContent(commandGroupMap, elementConfig, commandType)
+    createPageContent(mainContainer, commandGroupMap, elementConfig, commandType)
     fileInput.files = null
     fileInput.value = ''
     hasInitMap.set(commandType, true)
@@ -84,19 +76,12 @@ function onFileInput(fileInput: HTMLInputElement): void {
   }
 }
 
-function resetPageContent(elementConfig: IElementConifg, commandType: CommandType): void {
-  const centerArea: HTMLDivElement = document.getElementById('center-area-' + commandType) as HTMLDivElement
-  const allGroupsContainer: HTMLDivElement = document.getElementById(elementConfig.allGroupsContainer.id) as HTMLDivElement
-  const downloadButtonContainer: HTMLDivElement = document.getElementById(elementConfig.downloadButtonContainer.id) as HTMLDivElement
-  if (centerArea == null) {
+function resetPageContent(mainContainer: HTMLDivElement, commandType: CommandType): void {
+  const contentContainer: HTMLDivElement = document.getElementById('content-container-' + commandType) as HTMLDivElement
+  if (contentContainer == null) {
     return
   }
-  if (allGroupsContainer != null) {
-    centerArea.removeChild(allGroupsContainer)
-  }
-  if (downloadButtonContainer != null) {
-    centerArea.removeChild(downloadButtonContainer)
-  }
+  mainContainer.removeChild(contentContainer)
 }
 
 function getTextGroupMap(textFromFileLoaded: string): Map<string, string> {
@@ -249,63 +234,75 @@ function getGroupName(textLine: string): GroupType | null {
   return null
 }
 
-function createPageContent(commandGroupMap: Map<GroupType, CommandData[]>, elementConfig: IElementConifg, commandType: CommandType): void {
-  const centerArea: HTMLDivElement = document.getElementById('center-area-' + commandType) as HTMLDivElement
-  if (centerArea == null) {
-    return
-  }
-  const config = elementConfig.allGroupsContainer
+function createPageContent(mainContainer: HTMLDivElement, commandGroupMap: Map<GroupType, CommandData[]>, elementConfig: IElementConifg, commandType: CommandType): void {
+  const contentContainer: HTMLDivElement = document.createElement('div') as HTMLDivElement
+  contentContainer.id = 'content-container-' + commandType
+  mainContainer.appendChild(contentContainer)
 
-  const container = document.createElement('div')
-  container.id = config.id
-  container.className = config.className
-  centerArea.appendChild(container)
+  const config = elementConfig.allGroupContainer
 
   mainConfig.groupShowOrder.forEach(groupType => {
     let commands: CommandData[] = []
     if (commandGroupMap.has(groupType)) {
       commands = commandGroupMap.get(groupType) as CommandData[]
     }
-    createSingleGroupContainer(groupType, commands, container, elementConfig, commandType)
+    const allGroupContainer: HTMLDivElement = document.createElement('div') as HTMLDivElement
+    allGroupContainer.id = config.id
+    allGroupContainer.className = config.className
+    contentContainer.appendChild(allGroupContainer)
+    createGroupContainer(groupType, commands, allGroupContainer, elementConfig, commandType)
   })
 
   const isValid: boolean = commandValidMap.has(commandType) && (commandValidMap.get(commandType) as boolean)
   if (isValid) {
-    createDownloadButton(centerArea, elementConfig)
-  } else {
-    const rightArea: HTMLDivElement = document.getElementById('right-area-' + commandType) as HTMLDivElement
-    if (rightArea == null) {
-      return
-    }
-    createErrorMessage(rightArea, elementConfig, commandType)
+    createDownloadButton(contentContainer, elementConfig)
   }
 }
 
-function createSingleGroupContainer(groupType: GroupType, commands: CommandData[], parent: HTMLElement, elementConfig: IElementConifg, commandType: CommandType): void {
-  const config: ISingleGroupContainerConfig = elementConfig.allGroupsContainer.singleGroupContainerConfig;
+function createGroupContainer(groupType: GroupType, commands: CommandData[], parent: HTMLElement, elementConfig: IElementConifg, commandType: CommandType): void {
+  const config: IGroupContainerConfig = elementConfig.allGroupContainer.groupContainer;
 
-  const container = document.createElement('div')
-  container.className = config.className
-  parent.appendChild(container)
+  const groupContainer: HTMLDivElement = document.createElement('div')
+  groupContainer.id = config.id
+  groupContainer.className = config.className
+  parent.appendChild(groupContainer)
+
+  const warningMessageContainer = document.createElement('div')
+  warningMessageContainer.id = config.warningMessageContainer.id
+  warningMessageContainer.className = config.warningMessageContainer.className
+  groupContainer.appendChild(warningMessageContainer)
+  addClassName(warningMessageContainer, 'invisble')
+
+  const commandContainer = document.createElement('div')
+  commandContainer.id = config.commandContainer.id.replace('{groupType}', groupType)
+  commandContainer.className = config.commandContainer.className
+  groupContainer.appendChild(commandContainer)
+
+  const errorMessageContainer: HTMLDivElement = document.createElement('div')
+  errorMessageContainer.id = config.errorMessageContainer.id
+  errorMessageContainer.className = config.errorMessageContainer.className
+  groupContainer.appendChild(errorMessageContainer)
 
   const title = document.createElement('p')
-  title.id = config.title.id.replace('{groupType}', groupType)
-  title.className = config.title.className
+  title.id = config.commandContainer.title.id.replace('{groupType}', groupType)
+  title.className = config.commandContainer.title.className
   title.innerText = mainConfig.groupSettingMap.get(groupType)?.title as string
-  container.appendChild(title)
+  commandContainer.appendChild(title)
 
   if (commands.length === 0) {
     let errorMessage: string = mainConfig.errorMessageMap.get(ErrorType.CONTENT_NOT_FOUND_ERROR) as string
     errorMessage = errorMessage.replace('{groupType}', groupType)
     addClassName(title, 'command-invalid')
     commandValidMap.set(commandType, false)
-    const errorMessages: string[] = errorMessagesMap.get(commandType) as string[]
-    errorMessages.push(errorMessage)
-    errorMessagesMap.set(commandType, errorMessages)
+    const span: HTMLSpanElement = document.createElement('span')
+    span.className = config.errorMessageContainer.errorMessage.className
+    span.innerText = errorMessage
+    errorMessageContainer.appendChild(span)
     return
   }
+  addClassName(errorMessageContainer, 'invisble')
   const orderedList = document.createElement('ol')
-  container.appendChild(orderedList)
+  commandContainer.appendChild(orderedList)
 
   commands.forEach((command: CommandData, index: number) => {
     const listItem = document.createElement('li')
@@ -321,8 +318,8 @@ function createSingleGroupContainer(groupType: GroupType, commands: CommandData[
     orderedList.appendChild(listItem)
 
     const paragraph = document.createElement('p')
-    paragraph.id = config.paragraph.id.replace('{groupType}', groupType).replace('{index}', index.toString())
-    paragraph.className = config.paragraph.className
+    paragraph.id = config.commandContainer.paragraph.id.replace('{groupType}', groupType).replace('{index}', index.toString())
+    paragraph.className = config.commandContainer.paragraph.className
     paragraph.innerText = command.content
     listItem.appendChild(paragraph)
   })
@@ -366,25 +363,6 @@ function createDownloadButton(parent: HTMLElement, elementConfig: IElementConifg
 //   a.click()
 //   document.body.removeChild(a)
 // }
-
-function createErrorMessage(rightArea: HTMLDivElement, elementConfig: IElementConifg, commandType: CommandType) {
-  if (!errorMessagesMap.has(commandType)) {
-    return
-  }
-  const config = elementConfig.errorMessageContainer
-
-  const errorMessageContainer: HTMLDivElement = document.createElement('div')
-  errorMessageContainer.id = config.id
-  rightArea.appendChild(errorMessageContainer)
-
-  const errorMessages: string[] = errorMessagesMap.get(commandType) as string[]
-  errorMessages.forEach(e => {
-    const span: HTMLSpanElement = document.createElement('span')
-    span.className = config.errorMessage.className
-    span.innerText = e
-    errorMessageContainer.appendChild(span)
-  })
-}
 
 function addClassName(element: HTMLElement, ...classNames: string[]): void {
   classNames.forEach(className => element.className += ' ' + className)

@@ -51,18 +51,33 @@ export class MainConfig implements IMainConfig {
   public elementConfigMap: Map<CommandType, IElementConifg> = new Map<CommandType, IElementConifg>([
     [
       CommandType.DML, {
-        allGroupsContainer: {
-          id: 'allGroupsContainer-DML',
-          className: 'container',
-          singleGroupContainerConfig: {
-            className: 'groupContainer container',
-            title: {
-              id: '{groupType}-title-DML',
-              className: 'fw-bold fs-3'
+        allGroupContainer: {
+          id: 'allGroupContainer-DML',
+          className: 'container text-center',
+          groupContainer: {
+            className: 'groupContainer row',
+            warningMessageContainer: {
+              id: 'warningMessageContainer-DML',
+              className: 'col-2 col-md-3 warningContainer'
             },
-            paragraph: {
-              id: '{groupType}-command-{index}-DML',
-              className: 'command'
+            commandContainer: {
+              id: 'commandContainer-{groupType}-DML',
+              className: 'col-8 col-md-6 commandContainer',
+              title: {
+                id: '{groupType}-title-DML',
+                className: 'fw-bold fs-3'
+              },
+              paragraph: {
+                id: '{groupType}-command-{index}-DML',
+                className: 'command'
+              }
+            },
+            errorMessageContainer: {
+              id: 'errorMessageContainer-DML',
+              className: 'col-2 col-md-3 errorMessageContainer',
+              errorMessage: {
+                className: 'error-message'
+              }
             }
           }
         },
@@ -73,29 +88,38 @@ export class MainConfig implements IMainConfig {
             className: 'downloadButton',
             textContent: 'Download as XML'
           }
-        },
-        errorMessageContainer: {
-          id: 'errorMessageContainer-DML',
-          errorMessage: {
-            className: 'error-message'
-          }
         }
       } as IElementConifg
     ],
     [
       CommandType.DDL, {
-        allGroupsContainer: {
-          id: 'allGroupsContainer-DDL',
-          className: 'container',
-          singleGroupContainerConfig: {
-            className: 'groupContainer container',
-            title: {
-              id: '{groupType}-title-DDL',
-              className: 'fw-bold fs-3'
+        allGroupContainer: {
+          id: 'allGroupContainer-DDL',
+          className: 'container text-center',
+          groupContainer: {
+            className: 'groupContainer row',
+            warningMessageContainer: {
+              id: 'warningMessageContainer-DDL',
+              className: 'col-2 col-md-3 warningContainer'
             },
-            paragraph: {
-              id: '{groupType}-command-{index}-DDL',
-              className: 'command'
+            commandContainer: {
+              id: 'commandContainer-{groupType}-DDL',
+              className: 'col-8 col-md-6 commandContainer',
+              title: {
+                id: '{groupType}-title-DDL',
+                className: 'fw-bold fs-3'
+              },
+              paragraph: {
+                id: '{groupType}-command-{index}-DDL',
+                className: 'command'
+              }
+            },
+            errorMessageContainer: {
+              id: 'errorMessageContainer-DDL',
+              className: 'col-2 col-md-3 errorMessageContainer',
+              errorMessage: {
+                className: 'error-message'
+              }
             }
           }
         },
@@ -105,12 +129,6 @@ export class MainConfig implements IMainConfig {
           downloadButton: {
             className: 'downloadButton',
             textContent: 'Download as XML'
-          }
-        },
-        errorMessageContainer: {
-          id: 'errorMessageContainer-DDL',
-          errorMessage: {
-            className: 'error-message'
           }
         }
       } as IElementConifg
@@ -163,22 +181,31 @@ export interface IHTMLElementConfig {
 }
 
 export interface IElementConifg {
-  allGroupsContainer: IAllGroupsContainerConfig
+  allGroupContainer: IAllGroupContainerConfig
   downloadButtonContainer: IDownloadButtonContainer
+}
+
+export interface IAllGroupContainerConfig extends IHTMLElementConfig {
+  groupContainer: IGroupContainerConfig
+}
+
+export interface IGroupContainerConfig extends IHTMLElementConfig {
+  warningMessageContainer: IWarningMessageContainer
+  commandContainer: ICommandContainer
   errorMessageContainer: IErrorMessageContainer
-}
-
-export interface IAllGroupsContainerConfig extends IHTMLElementConfig {
-  singleGroupContainerConfig: ISingleGroupContainerConfig
-}
-
-export interface ISingleGroupContainerConfig extends IHTMLElementConfig {
-  title: IHTMLElementConfig
-  paragraph: IHTMLElementConfig
 }
 
 export interface IDownloadButtonContainer extends IHTMLElementConfig {
   downloadButton: IHTMLElementConfig
+}
+
+export interface ICommandContainer extends IHTMLElementConfig {
+  title: IHTMLElementConfig
+  paragraph: IHTMLElementConfig
+}
+
+export interface IWarningMessageContainer extends IHTMLElementConfig {
+  warningMessage: IHTMLElementConfig
 }
 
 export interface IErrorMessageContainer extends IHTMLElementConfig {

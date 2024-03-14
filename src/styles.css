@@ -4,11 +4,30 @@
     width: 100%;
 }
 
-.groupContainer {
-    border:solid 2px #4c84af;
+.warningContainer {
+    border: solid 2px orange;
     border-radius: 5px;
     padding: 10px;
-    margin: 10px;
+    position: relative;
+    margin-bottom: 15px;
+}
+
+.commandContainer {
+    border: solid 2px #4c84af;
+    border-radius: 5px;
+    padding: 10px;
+    position: relative;
+    margin-bottom: 15px;
+}
+
+.errorMessageContainer {
+    border: none 2px crimson;
+    border-radius: 5px;
+    padding: 10px;
+    font-weight: bold;
+    text-align: left;
+    position: relative;
+    margin-bottom: 15px;
 }
 
 input {
@@ -42,6 +61,10 @@ button {
     height: 0px;
     margin-bottom: 0px;
     padding: 0px;
+}
+
+.upload-button-container {
+  margin: 15px;
 }
 
 .downloadButton {
@@ -90,4 +113,8 @@ li{
 
 #commandTypeTabs {
   margin-bottom: 10px;
+}
+
+.invisble {
+  visibility: hidden;
 }
