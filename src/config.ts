@@ -2,40 +2,42 @@
 
 export class MainConfig implements IMainConfig {
 
-  public groupSettingMap: Map<GroupName, IGroupSetting> = new Map<GroupName, IGroupSetting>([
+  public groupShowOrder: GroupType[] = [GroupType.PreSQL, GroupType.CountSQL, GroupType.SelectSQL, GroupType.MainSQL, GroupType.PostSQL]
+
+  public groupSettingMap: Map<GroupType, IGroupSetting> = new Map<GroupType, IGroupSetting>([
     [
-      GroupName.PreSQL, {
+      GroupType.PreSQL, {
         title: '前置宣告',
         indicator: '--#PreSQL',
         searchEndPattern: ['--#CountSQL', '--#SelectSQL', '--#MainSQL', '--#PostSQL']
       } as IGroupSetting
     ],
     [
-      GroupName.CountSQL, {
+      GroupType.CountSQL, {
         title: 'Count語法',
         indicator: '--#CountSQL',
-        searchEndPattern: ['--#SelectSQL', '--#MainSQL', '--#PostSQL']
+        searchEndPattern: ['--#PreSQL', '--#SelectSQL', '--#MainSQL', '--#PostSQL']
       } as IGroupSetting
     ],
     [
-      GroupName.SelectSQL, {
+      GroupType.SelectSQL, {
         title: '異動前/後語法',
         indicator: '--#SelectSQL',
-        searchEndPattern: ['--#MainSQL', '--#PostSQL']
+        searchEndPattern: ['--#PreSQL', '--#CountSQL', '--#MainSQL', '--#PostSQL']
       } as IGroupSetting
     ],
     [
-      GroupName.MainSQL, {
+      GroupType.MainSQL, {
         title: '異動語法',
         indicator: '--#MainSQL',
-        searchEndPattern: ['--#PostSQL']
+        searchEndPattern: ['--#PreSQL', '--#CountSQL', '--#SelectSQL', '--#PostSQL']
       } as IGroupSetting
     ],
     [
-      GroupName.PostSQL, {
+      GroupType.PostSQL, {
         title: '後置語法',
         indicator: '--#PostSQL',
-        searchEndPattern: []
+        searchEndPattern: ['--#PreSQL', '--#CountSQL', '--#SelectSQL', '--#MainSQL']
       } as IGroupSetting
     ]
   ])
@@ -49,20 +51,35 @@ export class MainConfig implements IMainConfig {
   public elementConfigMap: Map<CommandType, IElementConifg> = new Map<CommandType, IElementConifg>([
     [
       CommandType.DML, {
-        allGroupsContainer: {
-          id: 'allGroupsContainer-DML',
-          className: 'container',
-          singleGroupContainerConfig: {
-            className: 'groupContainer container',
-            title: {
-              id: '{groupName}-title-DML',
-              className: 'fw-bold fs-3'
+        allGroupContainer: {
+          id: 'allGroupContainer-DML',
+          className: 'container text-center',
+          groupContainer: {
+            className: 'groupContainer row',
+            warningMessageContainer: {
+              id: 'warningMessageContainer-DML',
+              className: 'col-2 col-md-3 warningContainer'
             },
-            paragraph: {
-              id: '{groupName}-command-{index}-DML',
-              className: 'command'
+            commandContainer: {
+              id: 'commandContainer-{groupType}-DML',
+              className: 'col-8 col-md-6 commandContainer',
+              title: {
+                id: '{groupType}-title-DML',
+                className: 'fw-bold fs-3'
+              },
+              paragraph: {
+                id: '{groupType}-command-{index}-DML',
+                className: 'command'
+              }
+            },
+            errorMessageContainer: {
+              id: 'errorMessageContainer-DML',
+              className: 'col-2 col-md-3 errorMessageContainer',
+              errorMessage: {
+                className: 'error-message'
+              }
             }
-          } as ISingleGroupContainerConfig
+          }
         },
         downloadButtonContainer: {
           id: 'downloadButtonContainer-DML',
@@ -71,25 +88,40 @@ export class MainConfig implements IMainConfig {
             className: 'downloadButton',
             textContent: 'Download as XML'
           }
-        } as IDownloadButtonContainer
+        }
       } as IElementConifg
     ],
     [
       CommandType.DDL, {
-        allGroupsContainer: {
-          id: 'allGroupsContainer-DDL',
-          className: 'container',
-          singleGroupContainerConfig: {
-            className: 'groupContainer container',
-            title: {
-              id: '{groupName}-title-DDL',
-              className: 'fw-bold fs-3'
+        allGroupContainer: {
+          id: 'allGroupContainer-DDL',
+          className: 'container text-center',
+          groupContainer: {
+            className: 'groupContainer row',
+            warningMessageContainer: {
+              id: 'warningMessageContainer-DDL',
+              className: 'col-2 col-md-3 warningContainer'
             },
-            paragraph: {
-              id: '{groupName}-command-{index}-DDL',
-              className: 'command'
+            commandContainer: {
+              id: 'commandContainer-{groupType}-DDL',
+              className: 'col-8 col-md-6 commandContainer',
+              title: {
+                id: '{groupType}-title-DDL',
+                className: 'fw-bold fs-3'
+              },
+              paragraph: {
+                id: '{groupType}-command-{index}-DDL',
+                className: 'command'
+              }
+            },
+            errorMessageContainer: {
+              id: 'errorMessageContainer-DDL',
+              className: 'col-2 col-md-3 errorMessageContainer',
+              errorMessage: {
+                className: 'error-message'
+              }
             }
-          } as ISingleGroupContainerConfig
+          }
         },
         downloadButtonContainer: {
           id: 'downloadButtonContainer-DDL',
@@ -98,31 +130,47 @@ export class MainConfig implements IMainConfig {
             className: 'downloadButton',
             textContent: 'Download as XML'
           }
-        } as IDownloadButtonContainer
+        }
       } as IElementConifg
     ]
   ])
 
+  public checkCommandGroup: Map<CommandType, GroupType[]> = new Map<CommandType, GroupType[]>([
+    [
+      CommandType.DML, [
+        GroupType.CountSQL, GroupType.SelectSQL, GroupType.MainSQL
+      ]
+    ],
+    [
+      CommandType.DDL, [
+        GroupType.MainSQL
+      ]
+    ]
+  ])
+
+  public errorMessageMap: Map<ErrorType, string> = new Map<ErrorType, string>([
+    [
+      ErrorType.CONTENT_NOT_FOUND_ERROR, 'ContentNotFoundError: Group "{groupType}" is not defind. 請檢查 SQL 檔案是否有包含該類別的指令。'
+    ]
+  ])
+
+}
+
+export interface IMainConfig {
+  groupShowOrder: GroupType[]
+  checkCommandGroup: Map<CommandType, GroupType[]>
+  groupSettingMap: Map<GroupType, IGroupSetting>
+  singleCommandIndicator: string
+  ignoredCommands: string[]
+  invalidCommands: string[]
+  elementConfigMap: Map<CommandType, IElementConifg>
+  errorMessageMap: Map<ErrorType, string>
 }
 
 export interface IGroupSetting {
   title: string;
   indicator: string;
   searchEndPattern: string[];
-}
-
-export interface IMainConfig {
-  groupSettingMap: Map<GroupName, IGroupSetting>;
-  singleCommandIndicator: string
-  ignoredCommands: string[]
-  invalidCommands: string[]
-  elementConfigMap: Map<CommandType, IElementConifg>
-}
-
-export enum CommandType {
-  DDL = 'DDL',
-  DML = 'DML',
-  NONE = 'NONE'
 }
 
 export interface IHTMLElementConfig {
@@ -133,27 +181,51 @@ export interface IHTMLElementConfig {
 }
 
 export interface IElementConifg {
-  allGroupsContainer: IAllGroupsContainerConfig
+  allGroupContainer: IAllGroupContainerConfig
   downloadButtonContainer: IDownloadButtonContainer
 }
 
-export interface IAllGroupsContainerConfig extends IHTMLElementConfig {
-  singleGroupContainerConfig: ISingleGroupContainerConfig
+export interface IAllGroupContainerConfig extends IHTMLElementConfig {
+  groupContainer: IGroupContainerConfig
 }
 
-export interface ISingleGroupContainerConfig extends IHTMLElementConfig {
-  title: IHTMLElementConfig
-  paragraph: IHTMLElementConfig
+export interface IGroupContainerConfig extends IHTMLElementConfig {
+  warningMessageContainer: IWarningMessageContainer
+  commandContainer: ICommandContainer
+  errorMessageContainer: IErrorMessageContainer
 }
 
 export interface IDownloadButtonContainer extends IHTMLElementConfig {
   downloadButton: IHTMLElementConfig
 }
 
-export enum GroupName {
+export interface ICommandContainer extends IHTMLElementConfig {
+  title: IHTMLElementConfig
+  paragraph: IHTMLElementConfig
+}
+
+export interface IWarningMessageContainer extends IHTMLElementConfig {
+  warningMessage: IHTMLElementConfig
+}
+
+export interface IErrorMessageContainer extends IHTMLElementConfig {
+  errorMessage: IHTMLElementConfig
+}
+
+export enum GroupType {
   PreSQL = 'PreSQL',
   CountSQL = 'CountSQL',
   SelectSQL = 'SelectSQL',
   MainSQL = 'MainSQL',
   PostSQL = 'PostSQL'
+}
+
+export enum CommandType {
+  DDL = 'DDL',
+  DML = 'DML',
+  NONE = 'NONE'
+}
+
+export enum ErrorType {
+  CONTENT_NOT_FOUND_ERROR = 'CONTENT_NOT_FOUND_ERROR'
 }

@@ -1,7 +1,7 @@
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap/dist/js/bootstrap.bundle'
 import 'src/styles.css'
-import { GroupName, IElementConifg, IGroupSetting, IMainConfig, ISingleGroupContainerConfig, MainConfig, CommandType } from './config'
+import { GroupType, IElementConifg, IGroupSetting, IMainConfig, IGroupContainerConfig, MainConfig, CommandType, ErrorType } from './config'
 
 const mainConfig: IMainConfig = new MainConfig();
 
@@ -14,7 +14,16 @@ const hasInitMap: Map<CommandType, boolean> = new Map([
   ]
 ])
 
-let commandGroupMap: Map<GroupName, CommandData[]>
+const commandValidMap: Map<CommandType, boolean> = new Map([
+  [
+    CommandType.DML, true
+  ],
+  [
+    CommandType.DDL, true
+  ]
+])
+
+let commandGroupMap: Map<GroupType, CommandData[]>
 
 const fileInputDdl: HTMLInputElement = document.getElementById('fileInput-DDL') as HTMLInputElement
 const fileInputDml: HTMLInputElement = document.getElementById('fileInput-DML') as HTMLInputElement
@@ -30,16 +39,18 @@ function onFileInput(fileInput: HTMLInputElement): void {
   if (fileInput?.files?.length === 0) {
     return
   }
-  let sqlType: CommandType = CommandType.NONE;
+  let commandType: CommandType = CommandType.NONE;
   Object.values(CommandType).forEach(e => {
     if (e.toString() === fileInput.dataset.sqlType) {
-      sqlType = e
+      commandType = e
     }
   })
-  if (sqlType == CommandType.NONE) {
+  if (commandType === CommandType.NONE) {
     return
   }
-  const elementConfig: IElementConifg = mainConfig.elementConfigMap.get(sqlType) as IElementConifg
+  commandValidMap.set(commandType, true)
+
+  const elementConfig: IElementConifg = mainConfig.elementConfigMap.get(commandType) as IElementConifg
 
   const reader: FileReader = new FileReader()
   reader.onload = function (event) {
@@ -48,40 +59,36 @@ function onFileInput(fileInput: HTMLInputElement): void {
     }
     const textFromFileLoaded: string = event.target.result as string
     const textLinesGroupMap: Map<string, string> = getTextGroupMap(textFromFileLoaded)
-    commandGroupMap = getCommandGroupMap(textLinesGroupMap)
-    if (hasInitMap.has(sqlType) && hasInitMap.get(sqlType)) {
-      resetPageContent(elementConfig, sqlType)
+    commandGroupMap = getCommandGroupMap(textLinesGroupMap, commandType)
+
+    const mainContainer: HTMLDivElement = document.getElementById('content-with-upload-' + commandType) as HTMLDivElement
+
+    if (hasInitMap.has(commandType) && hasInitMap.get(commandType)) {
+      resetPageContent(mainContainer, commandType)
     }
-    createPageContent(commandGroupMap, elementConfig, sqlType)
+    createPageContent(mainContainer, commandGroupMap, elementConfig, commandType)
     fileInput.files = null
     fileInput.value = ''
-    hasInitMap.set(sqlType, true)
+    hasInitMap.set(commandType, true)
   }
   if (fileInput.files != null) {
     reader.readAsText(fileInput.files[0], 'UTF-8')
   }
 }
 
-function resetPageContent(elementConfig: IElementConifg, sqlType: CommandType): void {
-  const centerArea: HTMLDivElement = document.getElementById('center-area-' + sqlType) as HTMLDivElement
-  const allGroupsContainer: HTMLDivElement = document.getElementById(elementConfig.allGroupsContainer.id) as HTMLDivElement
-  const downloadButtonContainer: HTMLDivElement = document.getElementById(elementConfig.downloadButtonContainer.id) as HTMLDivElement
-  if (centerArea == null) {
+function resetPageContent(mainContainer: HTMLDivElement, commandType: CommandType): void {
+  const contentContainer: HTMLDivElement = document.getElementById('content-container-' + commandType) as HTMLDivElement
+  if (contentContainer == null) {
     return
   }
-  if (allGroupsContainer != null) {
-    centerArea.removeChild(allGroupsContainer)
-  }
-  if (downloadButtonContainer != null) {
-    centerArea.removeChild(downloadButtonContainer)
-  }
+  mainContainer.removeChild(contentContainer)
 }
 
 function getTextGroupMap(textFromFileLoaded: string): Map<string, string> {
   const textLinesGroupMap: Map<string, string> = new Map<string, string>()
   const textLines: string[] = textFromFileLoaded.split('\n')
   let isGroupToMap = false
-  let groupName: GroupName | null
+  let groupName: GroupType | null
   for (let i = 0; i < textLines.length; i++) {
     isGroupToMap = false
 
@@ -143,9 +150,9 @@ function isValidCommand(text: string): boolean {
   return result
 }
 
-function getCommandGroupMap(textLinesGroupMap: Map<string, string>): Map<GroupName, CommandData[]> {
-  const commandGroupMap = new Map<GroupName, CommandData[]>()
-  textLinesGroupMap.forEach((text: string, groupName: GroupName) => {
+function getCommandGroupMap(textLinesGroupMap: Map<string, string>, commandType: CommandType): Map<GroupType, CommandData[]> {
+  const commandGroupMap = new Map<GroupType, CommandData[]>()
+  textLinesGroupMap.forEach((text: string, groupName: GroupType) => {
     const textLines = text.split('\n')
     const commamds: CommandData[] = []
     for (let i = 0; i < textLines.length; i++) {
@@ -174,6 +181,9 @@ function getCommandGroupMap(textLinesGroupMap: Map<string, string>): Map<GroupNa
             const commandStatus: CommandStatus = isCommandValid ? CommandStatus.valid : CommandStatus.invalid
             commamds.push(new CommandData(commandText, commandStatus))
             commandGroupMap.set(groupName, commamds)
+            if (!isCommandValid) {
+              commandValidMap.set(commandType, false)
+            }
           }
           isAddToMap = true
           break
@@ -213,8 +223,8 @@ function cleanEmptyLineAtCommandEnd(commandText: string): string {
   return commandText;
 }
 
-function getGroupName(textLine: string): GroupName | null {
-  const groupNames: GroupName[] = Array.from(mainConfig.groupSettingMap.keys())
+function getGroupName(textLine: string): GroupType | null {
+  const groupNames: GroupType[] = Array.from(mainConfig.groupSettingMap.keys())
   const groupSetting: IGroupSetting[] = Array.from(mainConfig.groupSettingMap.values())
   for (let i = 0; i < groupSetting.length; i++) {
     if (textLine.trim().startsWith(groupSetting[i].indicator)) {
@@ -224,43 +234,78 @@ function getGroupName(textLine: string): GroupName | null {
   return null
 }
 
-function createPageContent(commandGroupMap: Map<GroupName, CommandData[]>, elementConfig: IElementConifg, sqlType: CommandType): void {
-  const centerArea: HTMLDivElement = document.getElementById('center-area-' + sqlType) as HTMLDivElement
-  if (centerArea == null) {
-    return
-  }
-  const config = elementConfig.allGroupsContainer
-  const container = document.createElement('div')
-  container.id = config.id
-  container.className = config.className
+function createPageContent(mainContainer: HTMLDivElement, commandGroupMap: Map<GroupType, CommandData[]>, elementConfig: IElementConifg, commandType: CommandType): void {
+  const contentContainer: HTMLDivElement = document.createElement('div') as HTMLDivElement
+  contentContainer.id = 'content-container-' + commandType
+  mainContainer.appendChild(contentContainer)
 
-  commandGroupMap.forEach((commands, groupName) => {
-    createSingleGroupContainer(groupName, commands, container, elementConfig)
+  const config = elementConfig.allGroupContainer
+
+  mainConfig.groupShowOrder.forEach(groupType => {
+    let commands: CommandData[] = []
+    if (commandGroupMap.has(groupType)) {
+      commands = commandGroupMap.get(groupType) as CommandData[]
+    }
+    const allGroupContainer: HTMLDivElement = document.createElement('div') as HTMLDivElement
+    allGroupContainer.id = config.id
+    allGroupContainer.className = config.className
+    contentContainer.appendChild(allGroupContainer)
+    createGroupContainer(groupType, commands, allGroupContainer, elementConfig, commandType)
   })
-  centerArea.appendChild(container)
 
-  createDownloadButton(centerArea, elementConfig)
+  const isValid: boolean = commandValidMap.has(commandType) && (commandValidMap.get(commandType) as boolean)
+  if (isValid) {
+    createDownloadButton(contentContainer, elementConfig)
+  }
 }
 
-function createSingleGroupContainer(groupName: GroupName, commands: CommandData[], parent: HTMLElement, elementConfig: IElementConifg): void {
-  const config: ISingleGroupContainerConfig = elementConfig.allGroupsContainer.singleGroupContainerConfig;
+function createGroupContainer(groupType: GroupType, commands: CommandData[], parent: HTMLElement, elementConfig: IElementConifg, commandType: CommandType): void {
+  const config: IGroupContainerConfig = elementConfig.allGroupContainer.groupContainer;
 
-  const container = document.createElement('div')
-  container.className = config.className
+  const groupContainer: HTMLDivElement = document.createElement('div')
+  groupContainer.id = config.id
+  groupContainer.className = config.className
+  parent.appendChild(groupContainer)
+
+  const warningMessageContainer = document.createElement('div')
+  warningMessageContainer.id = config.warningMessageContainer.id
+  warningMessageContainer.className = config.warningMessageContainer.className
+  groupContainer.appendChild(warningMessageContainer)
+  addClassName(warningMessageContainer, 'invisble')
+
+  const commandContainer = document.createElement('div')
+  commandContainer.id = config.commandContainer.id.replace('{groupType}', groupType)
+  commandContainer.className = config.commandContainer.className
+  groupContainer.appendChild(commandContainer)
+
+  const errorMessageContainer: HTMLDivElement = document.createElement('div')
+  errorMessageContainer.id = config.errorMessageContainer.id
+  errorMessageContainer.className = config.errorMessageContainer.className
+  groupContainer.appendChild(errorMessageContainer)
 
   const title = document.createElement('p')
-  title.id = config.title.id.replace('{groupName}', groupName)
-  title.className = config.title.className
-  title.innerText = mainConfig.groupSettingMap.get(groupName)?.title as string
-  container.appendChild(title)
+  title.id = config.commandContainer.title.id.replace('{groupType}', groupType)
+  title.className = config.commandContainer.title.className
+  title.innerText = mainConfig.groupSettingMap.get(groupType)?.title as string
+  commandContainer.appendChild(title)
 
+  if (commands.length === 0) {
+    let errorMessage: string = mainConfig.errorMessageMap.get(ErrorType.CONTENT_NOT_FOUND_ERROR) as string
+    errorMessage = errorMessage.replace('{groupType}', groupType)
+    addClassName(title, 'command-invalid')
+    commandValidMap.set(commandType, false)
+    const span: HTMLSpanElement = document.createElement('span')
+    span.className = config.errorMessageContainer.errorMessage.className
+    span.innerText = errorMessage
+    errorMessageContainer.appendChild(span)
+    return
+  }
+  addClassName(errorMessageContainer, 'invisble')
   const orderedList = document.createElement('ol')
-  container.appendChild(orderedList)
+  commandContainer.appendChild(orderedList)
 
   commands.forEach((command: CommandData, index: number) => {
     const listItem = document.createElement('li')
-    listItem.dataset.groupName = groupName
-    listItem.dataset.index = index.toString()
     if (command.status === CommandStatus.invalid) {
       addClassName(listItem, 'command-invalid')
     }
@@ -273,12 +318,11 @@ function createSingleGroupContainer(groupName: GroupName, commands: CommandData[
     orderedList.appendChild(listItem)
 
     const paragraph = document.createElement('p')
-    paragraph.id = config.paragraph.id.replace('{groupName}', groupName).replace('{index}', index.toString())
-    paragraph.className = config.paragraph.className
+    paragraph.id = config.commandContainer.paragraph.id.replace('{groupType}', groupType).replace('{index}', index.toString())
+    paragraph.className = config.commandContainer.paragraph.className
     paragraph.innerText = command.content
     listItem.appendChild(paragraph)
   })
-  parent.appendChild(container)
 }
 
 function createDownloadButton(parent: HTMLElement, elementConfig: IElementConifg): void {
