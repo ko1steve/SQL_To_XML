@@ -168,16 +168,16 @@ export interface IMainConfig {
 }
 
 export interface IGroupSetting {
-  title: string;
-  indicator: string;
-  searchEndPattern: string[];
+  title: string
+  indicator: string
+  searchEndPattern: string[]
 }
 
 export interface IHTMLElementConfig {
-  id: string;
-  className: string;
-  innerText?: string;
-  textContent?: string;
+  id: string
+  className: string
+  innerText?: string
+  textContent?: string
 }
 
 export interface IElementConifg {
