@@ -1,8 +1,8 @@
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap/dist/js/bootstrap.bundle'
 import 'src/styles.css'
-import { CommandType } from './config'
-import { TabContent } from './component/tabContent'
+import { CommandType } from './mainConfig'
+import { TabContentComponent } from './component/tabContent/tabContentComponent'
 
 const fileInputDdl: HTMLInputElement = document.getElementById('fileInput-DDL') as HTMLInputElement
 const fileInputDml: HTMLInputElement = document.getElementById('fileInput-DML') as HTMLInputElement
@@ -14,7 +14,7 @@ if (fileInputDml != null) {
   fileInputDml.onchange = onFileInput.bind(this, fileInputDml)
 }
 
-const tabContentMap: Map<CommandType, TabContent> = new Map()
+const tabContentMap: Map<CommandType, TabContentComponent> = new Map()
 
 function onFileInput(fileInput: HTMLInputElement): void {
   if (fileInput?.files?.length === 0) {
@@ -36,10 +36,10 @@ function onFileInput(fileInput: HTMLInputElement): void {
     }
     const textFromFileLoaded: string = event.target.result as string
     if (tabContentMap.has(commandType)) {
-      const tabContent: TabContent = tabContentMap.get(commandType) as TabContent
+      const tabContent: TabContentComponent = tabContentMap.get(commandType) as TabContentComponent
       tabContent.resetPageContent(textFromFileLoaded)
     } else {
-      const tabContent = new TabContent(commandType, textFromFileLoaded)
+      const tabContent = new TabContentComponent(commandType, textFromFileLoaded)
       tabContentMap.set(commandType, tabContent)
     }
     fileInput.files = null

@@ -1,24 +1,17 @@
-import { CommandType, ErrorType, GroupType, IElementConifg, IGroupContainerConfig, IGroupSetting, MainConfig } from "src/config";
+import { CommandType, ErrorType, GroupType, IGroupSetting, MainConfig } from "src/mainConfig";
+import { IGroupContainerConfig, ITabContentConfig } from "./tabContentConfig";
 
-export class TabContent {
+export class TabContentComponent {
 
   protected mainConfig: MainConfig
   protected commandType: CommandType = CommandType.NONE
   protected textFromFileLoaded: string
 
-  protected commandValidMap: Map<CommandType, boolean> = new Map([
-    [
-      CommandType.DML, true
-    ],
-    [
-      CommandType.DDL, true
-    ]
-  ])
+  protected commandValid: boolean = true
 
   protected commandGroupMap: Map<GroupType, CommandData[]>
 
   constructor(commandType: CommandType, textFromFileLoaded: string) {
-    console.error('constructor : ' + commandType);
     this.commandType = commandType
     this.textFromFileLoaded = textFromFileLoaded
     this.initConfig()
@@ -28,22 +21,22 @@ export class TabContent {
 
   protected initConfig(): void {
     this.mainConfig = new MainConfig()
-    this.commandValidMap.set(this.commandType, true)
+    this.commandValid = true
   }
 
   protected getCommandGroup(): void {
     const textLinesGroupMap: Map<string, string> = this.getTextGroupMap(this.textFromFileLoaded)
-    this.commandGroupMap = this.getCommandGroupMap(textLinesGroupMap, this.commandType)
+    this.commandGroupMap = this.getCommandGroupMap(textLinesGroupMap)
   }
 
   protected createContent(): void {
-    const mainContainer: HTMLDivElement = document.getElementById('content-with-upload-' + this.commandType) as HTMLDivElement
-    const elementConfig: IElementConifg = this.mainConfig.elementConfigMap.get(this.commandType) as IElementConifg
+    const mainContainer: HTMLDivElement = document.getElementById('main-container-' + this.commandType) as HTMLDivElement
+    const elementConfig: ITabContentConfig = this.mainConfig.tabContentConfigMap.get(this.commandType) as ITabContentConfig
     this.createPageContent(mainContainer, this.commandGroupMap, elementConfig)
   }
 
   public resetPageContent(textFromFileLoaded: string): void {
-    const mainContainer: HTMLDivElement = document.getElementById('content-with-upload-' + this.commandType) as HTMLDivElement
+    const mainContainer: HTMLDivElement = document.getElementById('main-container-' + this.commandType) as HTMLDivElement
     const contentContainer: HTMLDivElement = document.getElementById('content-container-' + this.commandType) as HTMLDivElement
     if (contentContainer == null) {
       return
@@ -120,7 +113,7 @@ export class TabContent {
     return result
   }
 
-  protected getCommandGroupMap(textLinesGroupMap: Map<string, string>, commandType: CommandType): Map<GroupType, CommandData[]> {
+  protected getCommandGroupMap(textLinesGroupMap: Map<string, string>): Map<GroupType, CommandData[]> {
     const commandGroupMap = new Map<GroupType, CommandData[]>()
     textLinesGroupMap.forEach((text: string, groupName: GroupType) => {
       const textLines = text.split('\n')
@@ -152,7 +145,7 @@ export class TabContent {
               commamds.push(new CommandData(commandText, commandStatus))
               commandGroupMap.set(groupName, commamds)
               if (!isCommandValid) {
-                this.commandValidMap.set(commandType, false)
+                this.commandValid = false
               }
             }
             isAddToMap = true
@@ -204,36 +197,28 @@ export class TabContent {
     return null
   }
 
-  protected createPageContent(mainContainer: HTMLDivElement, commandGroupMap: Map<GroupType, CommandData[]>, elementConfig: IElementConifg): void {
+  protected createPageContent(mainContainer: HTMLDivElement, commandGroupMap: Map<GroupType, CommandData[]>, elementConfig: ITabContentConfig): void {
     const contentContainer: HTMLDivElement = document.createElement('div') as HTMLDivElement
     contentContainer.id = 'content-container-' + this.commandType
     mainContainer.appendChild(contentContainer)
-
-    const config = elementConfig.allGroupContainer
 
     this.mainConfig.groupShowOrder.forEach(groupType => {
       let commands: CommandData[] = []
       if (commandGroupMap.has(groupType)) {
         commands = commandGroupMap.get(groupType) as CommandData[]
       }
-      const allGroupContainer: HTMLDivElement = document.createElement('div') as HTMLDivElement
-      allGroupContainer.id = config.id
-      allGroupContainer.className = config.className
-      contentContainer.appendChild(allGroupContainer)
-      this.createGroupContainer(groupType, commands, allGroupContainer, elementConfig)
+      this.createGroupContainer(groupType, commands, contentContainer, elementConfig)
     })
-
-    const isValid: boolean = this.commandValidMap.has(this.commandType) && (this.commandValidMap.get(this.commandType) as boolean)
-    if (isValid) {
+    if (this.commandValid) {
       this.createDownloadButton(contentContainer, elementConfig)
     }
   }
 
-  protected createGroupContainer(groupType: GroupType, commands: CommandData[], parent: HTMLElement, elementConfig: IElementConifg): void {
-    const config: IGroupContainerConfig = elementConfig.allGroupContainer.groupContainer;
+  protected createGroupContainer(groupType: GroupType, commands: CommandData[], parent: HTMLElement, elementConfig: ITabContentConfig): void {
+    const config: IGroupContainerConfig = elementConfig.groupContainer;
 
     const groupContainer: HTMLDivElement = document.createElement('div')
-    groupContainer.id = config.id
+    groupContainer.id = config.id.replace('{groupType}', groupType)
     groupContainer.className = config.className
     parent.appendChild(groupContainer)
 
@@ -260,10 +245,10 @@ export class TabContent {
     commandContainer.appendChild(title)
 
     if (commands.length === 0) {
+      this.commandValid = false
       let errorMessage: string = this.mainConfig.errorMessageMap.get(ErrorType.CONTENT_NOT_FOUND_ERROR) as string
       errorMessage = errorMessage.replace('{groupType}', groupType)
       this.addClassName(title, 'command-invalid')
-      this.commandValidMap.set(this.commandType, false)
       const span: HTMLSpanElement = document.createElement('span')
       span.className = config.errorMessageContainer.errorMessage.className
       span.innerText = errorMessage
@@ -295,7 +280,7 @@ export class TabContent {
     })
   }
 
-  protected createDownloadButton(parent: HTMLElement, elementConfig: IElementConifg): void {
+  protected createDownloadButton(parent: HTMLElement, elementConfig: ITabContentConfig): void {
     const config = elementConfig.downloadButtonContainer
     const container = document.createElement('div')
     container.id = config.id
