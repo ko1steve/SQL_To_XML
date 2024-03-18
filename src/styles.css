@@ -1,6 +1,18 @@
+button {
+  padding: 10px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+li{
+  font-family: Consolas;
+}
+
 #input-container {
     padding: 10px;
-    margin: 10px;
     width: 100%;
 }
 
@@ -30,21 +42,6 @@
     margin-bottom: 15px;
 }
 
-input {
-    margin-bottom: 10px;
-    padding: 5px;
-    width: 50%;
-}
-
-button {
-    padding: 10px;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
 .fileInputLabel {
     border-radius: 5px;
     background-color:lightcoral;
@@ -64,7 +61,7 @@ button {
 }
 
 .upload-button-container {
-  margin: 15px;
+  margin-bottom: 15px;
 }
 
 .downloadButton {
@@ -83,10 +80,6 @@ button {
     font-family: Consolas;
 }
 
-li{
-  font-family: Consolas;
-}
-
 .pointerover-command {
   border-radius: 5px;
   background-color: rgb(194, 230, 241);
@@ -101,18 +94,15 @@ li{
 }
 
 .nav-item {
-  font-size: 20px;
+  margin: 20px;
 }
 
 .nav-link {
-  min-width: 400px;
+  font-size: 24px;
+  min-width: 200px;
   border-width: 1px;
   border-color:dimgrey;
   border-style: solid;
-}
-
-#commandTypeTabs {
-  margin-bottom: 10px;
 }
 
 .invisble {
