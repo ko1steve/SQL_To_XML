@@ -1,5 +1,6 @@
-import { CommandType, ErrorType, GroupType, IGroupSetting, MainConfig } from "src/mainConfig";
+import { CommandType, GroupType, IGroupSetting, MainConfig } from "src/mainConfig";
 import { IGroupContainerConfig, ITabContentConfig } from "./tabContentConfig";
+import { CommandData, CommandStatus, ErrorType, ICommandDataDetail } from "src/element/CommandData";
 
 export class TabContentComponent {
 
@@ -99,18 +100,22 @@ export class TabContentComponent {
     return this.mainConfig.ignoredCommands.includes(text.toUpperCase())
   }
 
-  protected isValidCommand(text: string): boolean {
+  protected getCommandDataDetail(text: string): ICommandDataDetail {
     text = text.trim()
     if (text.endsWith(';')) {
       text = text.substring(0, text.length - 1)
     }
-    let result = true
+    const detail: ICommandDataDetail = {
+      errorType: ErrorType.NONE,
+      commands: []
+    }
     this.mainConfig.invalidCommands.forEach(e => {
       if (text.toUpperCase().indexOf(e) > -1) {
-        result = false
+        detail.errorType = ErrorType.INVALID_COMMAND_ERROR
+        detail.commands.push(e)
       }
     })
-    return result
+    return detail
   }
 
   protected getCommandGroupMap(textLinesGroupMap: Map<string, string>): Map<GroupType, CommandData[]> {
@@ -120,7 +125,10 @@ export class TabContentComponent {
       const commamds: CommandData[] = []
       for (let i = 0; i < textLines.length; i++) {
         let isAddToMap = false
-        let isCommandValid = true;
+        let commandDataDetail: ICommandDataDetail = {
+          errorType: ErrorType.NONE,
+          commands: []
+        };
 
         //* 若找不到指令分割的判斷字串，則略過
         if (!textLines[i].trim().startsWith(this.mainConfig.singleCommandIndicator)) {
@@ -131,7 +139,7 @@ export class TabContentComponent {
 
         //* 判斷指令是不是該忽略 
         if (newTextLine.length !== 0 && !this.isIgnoreCommand(newTextLine)) {
-          isCommandValid = this.isValidCommand(newTextLine)
+          commandDataDetail = this.getCommandDataDetail(newTextLine)
           commandText = newTextLine + '\n'
         }
         //* 找到指令分割的判斷字串後，尋找指令的結束點
@@ -141,19 +149,19 @@ export class TabContentComponent {
           if (textLines[j].trim().startsWith(this.mainConfig.singleCommandIndicator)) {
             commandText = this.cleanEmptyLineAtCommandEnd(commandText)
             if (commandText.length > 0) {
-              const commandStatus: CommandStatus = isCommandValid ? CommandStatus.valid : CommandStatus.invalid
-              commamds.push(new CommandData(commandText, commandStatus))
-              commandGroupMap.set(groupName, commamds)
-              if (!isCommandValid) {
+              const commandStatus: CommandStatus = commandDataDetail.errorType === ErrorType.NONE ? CommandStatus.valid : CommandStatus.invalid
+              if (!commandDataDetail) {
                 this.commandValid = false
               }
+              commamds.push(new CommandData(commandText, commandStatus, commandDataDetail))
+              commandGroupMap.set(groupName, commamds)
             }
             isAddToMap = true
             break
           } else if (!this.isIgnoreCommand(textLines[j])) {
             textLines[j] = textLines[j].replace(this.mainConfig.singleCommandIndicator, '')
             if (textLines[j].trim().length > 0) {
-              isCommandValid = this.isValidCommand(textLines[j])
+              commandDataDetail = this.getCommandDataDetail(textLines[j])
               //* 找到結束點之前，不斷累加指令的內容
               commandText += textLines[j] + '\n'
             }
@@ -166,8 +174,11 @@ export class TabContentComponent {
         if (j === textLines.length) {
           commandText = this.cleanEmptyLineAtCommandEnd(commandText)
           if (commandText.length > 0) {
-            const commandStatus: CommandStatus = isCommandValid ? CommandStatus.valid : CommandStatus.invalid
-            commamds.push(new CommandData(commandText, commandStatus))
+            const commandStatus: CommandStatus = commandDataDetail.errorType === ErrorType.NONE ? CommandStatus.valid : CommandStatus.invalid
+            if (!commandDataDetail) {
+              this.commandValid = false
+            }
+            commamds.push(new CommandData(commandText, commandStatus, commandDataDetail))
             commandGroupMap.set(groupName, commamds)
           }
           isAddToMap = true
@@ -183,7 +194,7 @@ export class TabContentComponent {
       const i: number = commandText.lastIndexOf('\n')
       commandText = commandText.substring(0, i).trim()
     }
-    return commandText;
+    return commandText
   }
 
   protected getGroupName(textLine: string): GroupType | null {
@@ -199,7 +210,7 @@ export class TabContentComponent {
 
   protected createPageContent(mainContainer: HTMLDivElement, commandGroupMap: Map<GroupType, CommandData[]>, elementConfig: ITabContentConfig): void {
     const contentContainer: HTMLDivElement = document.createElement('div') as HTMLDivElement
-    contentContainer.id = 'content-container-' + this.commandType
+    contentContainer.id = elementConfig.mainContainer.contentContainer.id
     mainContainer.appendChild(contentContainer)
 
     this.mainConfig.groupShowOrder.forEach(groupType => {
@@ -215,7 +226,7 @@ export class TabContentComponent {
   }
 
   protected createGroupContainer(groupType: GroupType, commands: CommandData[], parent: HTMLElement, elementConfig: ITabContentConfig): void {
-    const config: IGroupContainerConfig = elementConfig.groupContainer;
+    const config: IGroupContainerConfig = elementConfig.groupContainer
 
     const groupContainer: HTMLDivElement = document.createElement('div')
     groupContainer.id = config.id.replace('{groupType}', groupType)
@@ -248,28 +259,38 @@ export class TabContentComponent {
       this.commandValid = false
       let errorMessage: string = this.mainConfig.errorMessageMap.get(ErrorType.CONTENT_NOT_FOUND_ERROR) as string
       errorMessage = errorMessage.replace('{groupType}', groupType)
+      const groupTitle: string = this.mainConfig.groupSettingMap.get(groupType)?.title as string
+      errorMessage = errorMessage.replace('{groupTitle}', groupTitle)
       this.addClassName(title, 'command-invalid')
       const span: HTMLSpanElement = document.createElement('span')
       span.className = config.errorMessageContainer.errorMessage.className
       span.innerText = errorMessage
       errorMessageContainer.appendChild(span)
-      return
     }
-    this.addClassName(errorMessageContainer, 'invisble')
     const orderedList = document.createElement('ol')
     commandContainer.appendChild(orderedList)
 
     commands.forEach((command: CommandData, index: number) => {
       const listItem = document.createElement('li')
       if (command.status === CommandStatus.invalid) {
+        this.commandValid = false
         this.addClassName(listItem, 'command-invalid')
+        command.detail.commands.forEach(e => {
+          let errorMessage: string = this.mainConfig.errorMessageMap.get(command.detail.errorType) as string
+          errorMessage = errorMessage.replace('{groupType}', groupType).replace('{index}', (index + 1).toString())
+          errorMessage = errorMessage.replace('{command}', e)
+          const span: HTMLSpanElement = document.createElement('span')
+          span.className = config.errorMessageContainer.errorMessage.className
+          span.innerText = errorMessage
+          errorMessageContainer.appendChild(span)
+        })
       }
       listItem.addEventListener('pointerover', () => {
         this.addClassName(listItem, 'pointerover-command')
-      });
+      })
       listItem.addEventListener('pointerout', () => {
         this.removeClassName(listItem, 'pointerover-command')
-      });
+      })
       orderedList.appendChild(listItem)
 
       const paragraph = document.createElement('p')
@@ -277,6 +298,10 @@ export class TabContentComponent {
       paragraph.className = config.commandContainer.paragraph.className
       paragraph.innerText = command.content
       listItem.appendChild(paragraph)
+
+      if (this.commandValid) {
+        this.addClassName(errorMessageContainer, 'invisble')
+      }
     })
   }
 
@@ -327,34 +352,4 @@ export class TabContentComponent {
     classNames.forEach(className => element.className = element.className.replace(className, '').trim())
   }
 
-}
-
-export enum CommandStatus {
-  valid = 'valid',
-  invalid = 'invalid',
-  ignored = 'ignored'
-}
-
-export interface ICommandData {
-  content: string
-  status: CommandStatus
-}
-
-export class CommandData implements ICommandData {
-
-  protected _content: string;
-  protected _status: CommandStatus;
-
-  constructor(content: string, status = CommandStatus.valid) {
-    this._content = content;
-    this._status = status;
-  }
-
-  public get content(): string {
-    return this._content
-  }
-
-  public get status(): CommandStatus {
-    return this._status
-  }
 }

@@ -1,4 +1,5 @@
 import { ITabContentConfig, TabContentConfig } from "./component/tabContent/tabContentConfig"
+import { ErrorType } from 'src/element/CommandData'
 
 
 export class MainConfig implements IMainConfig {
@@ -73,7 +74,12 @@ export class MainConfig implements IMainConfig {
 
   public errorMessageMap: Map<ErrorType, string> = new Map<ErrorType, string>([
     [
-      ErrorType.CONTENT_NOT_FOUND_ERROR, 'ContentNotFoundError: Group "{groupType}" is not defind. 請檢查 SQL 檔案是否有包含該類別的指令。'
+      ErrorType.CONTENT_NOT_FOUND_ERROR,
+      '[{groupType}] ContentNotFoundError: "{groupTitle}" is not defind. 請檢查 SQL 檔案是否有包含該類別的指令。'
+    ],
+    [
+      ErrorType.INVALID_COMMAND_ERROR,
+      '[{groupType}, {index}] InvalidCommandError: "{command}" is not allowed. 請移除相關的指令。'
     ]
   ])
 
@@ -105,11 +111,7 @@ export enum GroupType {
 }
 
 export enum CommandType {
-  DDL = 'DDL',
   DML = 'DML',
-  NONE = 'NONE'
-}
-
-export enum ErrorType {
-  CONTENT_NOT_FOUND_ERROR = 'CONTENT_NOT_FOUND_ERROR'
+  NONE = 'NONE',
+  DDL = 'DDL'
 }
