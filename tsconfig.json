@@ -1,24 +1,31 @@
 {
-	"compilerOptions": {
-		"target": "es5",
-		"lib": [
-			"es2015",
-			"es2017",
-			"dom"
-		],
-		"sourceMap": true,
-		"noImplicitThis": true,
-		"module": "commonjs",
-		"allowJs": true,
-		"experimentalDecorators": true,
-		"emitDecoratorMetadata": true,
-		"noUnusedLocals": false,
-		"baseUrl": "./",
-		"plugins": [{ "name": "typescript-plugin-css-modules" }],
-    "strictNullChecks": true
-	},
-	"exclude": [
-		"node_modules",
-		"dist"
-	]
+  "compilerOptions": {
+    "lib": [
+      "es2016",
+      "dom"
+    ],
+    "target": "es5",
+    "module": "commonjs",
+    "sourceMap": true,
+    "strict": true,
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "baseUrl": ".",
+    "plugins": [
+      {
+        "name": "typescript-plugin-css-modules"
+      }
+    ]
+  },
+  "exclude": [
+    "node_modules",
+    "dist",
+    "sample"
+  ]
 }

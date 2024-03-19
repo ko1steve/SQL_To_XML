@@ -1,9 +1,38 @@
-import { ITabContentConfig, TabContentConfig } from "./component/tabContent/tabContentConfig"
+import { ITabContentConfig, TabContentConfig } from './component/tabContent/tabContentConfig'
 import { ErrorType } from 'src/element/CommandData'
 
+export interface IMainConfig {
+  groupShowOrder: GroupType[]
+  checkCommandGroup: Map<CommandType, GroupType[]>
+  groupSettingMap: Map<GroupType, IGroupSetting>
+  singleCommandIndicator: string
+  ignoredCommands: string[]
+  invalidCommands: string[]
+  tabContentConfigMap: Map<CommandType, ITabContentConfig>
+  errorMessageMap: Map<ErrorType, string>
+}
+
+export interface IGroupSetting {
+  title: string
+  indicator: string
+  searchEndPattern: string[]
+}
+
+export enum GroupType {
+  PreSQL = 'PreSQL',
+  CountSQL = 'CountSQL',
+  SelectSQL = 'SelectSQL',
+  MainSQL = 'MainSQL',
+  PostSQL = 'PostSQL'
+}
+
+export enum CommandType {
+  DML = 'DML',
+  NONE = 'NONE',
+  DDL = 'DDL'
+}
 
 export class MainConfig implements IMainConfig {
-
   public groupShowOrder: GroupType[] = [GroupType.PreSQL, GroupType.CountSQL, GroupType.SelectSQL, GroupType.MainSQL, GroupType.PostSQL]
 
   public groupSettingMap: Map<GroupType, IGroupSetting> = new Map<GroupType, IGroupSetting>([
@@ -82,36 +111,4 @@ export class MainConfig implements IMainConfig {
       '[{groupType}, {index}] InvalidCommandError: "{command}" is not allowed. 請移除相關的指令。'
     ]
   ])
-
-}
-
-export interface IMainConfig {
-  groupShowOrder: GroupType[]
-  checkCommandGroup: Map<CommandType, GroupType[]>
-  groupSettingMap: Map<GroupType, IGroupSetting>
-  singleCommandIndicator: string
-  ignoredCommands: string[]
-  invalidCommands: string[]
-  tabContentConfigMap: Map<CommandType, ITabContentConfig>
-  errorMessageMap: Map<ErrorType, string>
-}
-
-export interface IGroupSetting {
-  title: string
-  indicator: string
-  searchEndPattern: string[]
-}
-
-export enum GroupType {
-  PreSQL = 'PreSQL',
-  CountSQL = 'CountSQL',
-  SelectSQL = 'SelectSQL',
-  MainSQL = 'MainSQL',
-  PostSQL = 'PostSQL'
-}
-
-export enum CommandType {
-  DML = 'DML',
-  NONE = 'NONE',
-  DDL = 'DDL'
 }

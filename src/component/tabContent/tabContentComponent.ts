@@ -1,42 +1,36 @@
-import { CommandType, GroupType, IGroupSetting, MainConfig } from "src/mainConfig";
-import { IGroupContainerConfig, ITabContentConfig } from "./tabContentConfig";
-import { CommandData, CommandStatus, ErrorType, ICommandDataDetail } from "src/element/CommandData";
+import { CommandType, GroupType, IGroupSetting, MainConfig } from 'src/mainConfig'
+import { IGroupContainerConfig, ITabContentConfig } from './tabContentConfig'
+import { CommandData, CommandStatus, ErrorType, ICommandDataDetail } from 'src/element/CommandData'
 
 export class TabContentComponent {
-
-  protected mainConfig: MainConfig
+  protected mainConfig: MainConfig = new MainConfig()
   protected commandType: CommandType = CommandType.NONE
   protected textFromFileLoaded: string
 
   protected commandValid: boolean = true
 
-  protected commandGroupMap: Map<GroupType, CommandData[]>
+  protected commandGroupMap: Map<GroupType, CommandData[]> = new Map()
 
-  constructor(commandType: CommandType, textFromFileLoaded: string) {
+  constructor (commandType: CommandType, textFromFileLoaded: string) {
     this.commandType = commandType
     this.textFromFileLoaded = textFromFileLoaded
-    this.initConfig()
+    this.commandValid = true
     this.getCommandGroup()
     this.createContent()
   }
 
-  protected initConfig(): void {
-    this.mainConfig = new MainConfig()
-    this.commandValid = true
-  }
-
-  protected getCommandGroup(): void {
-    const textLinesGroupMap: Map<string, string> = this.getTextGroupMap(this.textFromFileLoaded)
+  protected getCommandGroup (): void {
+    const textLinesGroupMap: Map<GroupType, string> = this.getTextGroupMap(this.textFromFileLoaded)
     this.commandGroupMap = this.getCommandGroupMap(textLinesGroupMap)
   }
 
-  protected createContent(): void {
+  protected createContent (): void {
     const mainContainer: HTMLDivElement = document.getElementById('main-container-' + this.commandType) as HTMLDivElement
     const elementConfig: ITabContentConfig = this.mainConfig.tabContentConfigMap.get(this.commandType) as ITabContentConfig
     this.createPageContent(mainContainer, this.commandGroupMap, elementConfig)
   }
 
-  public resetPageContent(textFromFileLoaded: string): void {
+  public resetPageContent (textFromFileLoaded: string): void {
     const mainContainer: HTMLDivElement = document.getElementById('main-container-' + this.commandType) as HTMLDivElement
     const contentContainer: HTMLDivElement = document.getElementById('content-container-' + this.commandType) as HTMLDivElement
     if (contentContainer == null) {
@@ -48,8 +42,8 @@ export class TabContentComponent {
     this.createContent()
   }
 
-  protected getTextGroupMap(textFromFileLoaded: string): Map<string, string> {
-    const textLinesGroupMap: Map<string, string> = new Map<string, string>()
+  protected getTextGroupMap (textFromFileLoaded: string): Map<GroupType, string> {
+    const textLinesGroupMap: Map<GroupType, string> = new Map<GroupType, string>()
     const textLines: string[] = textFromFileLoaded.split('\n')
     let isGroupToMap = false
     let groupName: GroupType | null
@@ -92,7 +86,7 @@ export class TabContentComponent {
     return textLinesGroupMap
   }
 
-  protected isIgnoreCommand(text: string): boolean {
+  protected isIgnoreCommand (text: string): boolean {
     text = text.trim()
     if (text.endsWith(';')) {
       text = text.substring(0, text.length - 1)
@@ -100,7 +94,7 @@ export class TabContentComponent {
     return this.mainConfig.ignoredCommands.includes(text.toUpperCase())
   }
 
-  protected getCommandDataDetail(text: string): ICommandDataDetail {
+  protected getCommandDataDetail (text: string): ICommandDataDetail {
     text = text.trim()
     if (text.endsWith(';')) {
       text = text.substring(0, text.length - 1)
@@ -118,7 +112,7 @@ export class TabContentComponent {
     return detail
   }
 
-  protected getCommandGroupMap(textLinesGroupMap: Map<string, string>): Map<GroupType, CommandData[]> {
+  protected getCommandGroupMap (textLinesGroupMap: Map<GroupType, string>): Map<GroupType, CommandData[]> {
     const commandGroupMap = new Map<GroupType, CommandData[]>()
     textLinesGroupMap.forEach((text: string, groupName: GroupType) => {
       const textLines = text.split('\n')
@@ -128,7 +122,7 @@ export class TabContentComponent {
         let commandDataDetail: ICommandDataDetail = {
           errorType: ErrorType.NONE,
           commands: []
-        };
+        }
 
         //* 若找不到指令分割的判斷字串，則略過
         if (!textLines[i].trim().startsWith(this.mainConfig.singleCommandIndicator)) {
@@ -137,7 +131,7 @@ export class TabContentComponent {
         let commandText: string = ''
         const newTextLine: string = textLines[i].replace(this.mainConfig.singleCommandIndicator, '').trim()
 
-        //* 判斷指令是不是該忽略 
+        //* 判斷指令是不是該忽略
         if (newTextLine.length !== 0 && !this.isIgnoreCommand(newTextLine)) {
           commandDataDetail = this.getCommandDataDetail(newTextLine)
           commandText = newTextLine + '\n'
@@ -189,7 +183,7 @@ export class TabContentComponent {
     return commandGroupMap
   }
 
-  protected cleanEmptyLineAtCommandEnd(commandText: string): string {
+  protected cleanEmptyLineAtCommandEnd (commandText: string): string {
     while (commandText.endsWith('\n')) {
       const i: number = commandText.lastIndexOf('\n')
       commandText = commandText.substring(0, i).trim()
@@ -197,7 +191,7 @@ export class TabContentComponent {
     return commandText
   }
 
-  protected getGroupName(textLine: string): GroupType | null {
+  protected getGroupName (textLine: string): GroupType | null {
     const groupNames: GroupType[] = Array.from(this.mainConfig.groupSettingMap.keys())
     const groupSetting: IGroupSetting[] = Array.from(this.mainConfig.groupSettingMap.values())
     for (let i = 0; i < groupSetting.length; i++) {
@@ -208,7 +202,7 @@ export class TabContentComponent {
     return null
   }
 
-  protected createPageContent(mainContainer: HTMLDivElement, commandGroupMap: Map<GroupType, CommandData[]>, elementConfig: ITabContentConfig): void {
+  protected createPageContent (mainContainer: HTMLDivElement, commandGroupMap: Map<GroupType, CommandData[]>, elementConfig: ITabContentConfig): void {
     const contentContainer: HTMLDivElement = document.createElement('div') as HTMLDivElement
     contentContainer.id = elementConfig.mainContainer.contentContainer.id
     mainContainer.appendChild(contentContainer)
@@ -225,7 +219,7 @@ export class TabContentComponent {
     }
   }
 
-  protected createGroupContainer(groupType: GroupType, commands: CommandData[], parent: HTMLElement, elementConfig: ITabContentConfig): void {
+  protected createGroupContainer (groupType: GroupType, commands: CommandData[], parent: HTMLElement, elementConfig: ITabContentConfig): void {
     const config: IGroupContainerConfig = elementConfig.groupContainer
 
     const groupContainer: HTMLDivElement = document.createElement('div')
@@ -275,15 +269,17 @@ export class TabContentComponent {
       if (command.status === CommandStatus.invalid) {
         this.commandValid = false
         this.addClassName(listItem, 'command-invalid')
-        command.detail.commands.forEach(e => {
-          let errorMessage: string = this.mainConfig.errorMessageMap.get(command.detail.errorType) as string
-          errorMessage = errorMessage.replace('{groupType}', groupType).replace('{index}', (index + 1).toString())
-          errorMessage = errorMessage.replace('{command}', e)
-          const span: HTMLSpanElement = document.createElement('span')
-          span.className = config.errorMessageContainer.errorMessage.className
-          span.innerText = errorMessage
-          errorMessageContainer.appendChild(span)
-        })
+        if (command.detail !== undefined) {
+          command.detail.commands.forEach(e => {
+            let errorMessage: string = this.mainConfig.errorMessageMap.get((command.detail as ICommandDataDetail).errorType) as string
+            errorMessage = errorMessage.replace('{groupType}', groupType).replace('{index}', (index + 1).toString())
+            errorMessage = errorMessage.replace('{command}', e)
+            const span: HTMLSpanElement = document.createElement('span')
+            span.className = config.errorMessageContainer.errorMessage.className
+            span.innerText = errorMessage
+            errorMessageContainer.appendChild(span)
+          })
+        }
       }
       listItem.addEventListener('pointerover', () => {
         this.addClassName(listItem, 'pointerover-command')
@@ -305,7 +301,7 @@ export class TabContentComponent {
     })
   }
 
-  protected createDownloadButton(parent: HTMLElement, elementConfig: ITabContentConfig): void {
+  protected createDownloadButton (parent: HTMLElement, elementConfig: ITabContentConfig): void {
     const config = elementConfig.downloadButtonContainer
     const container = document.createElement('div')
     container.id = config.id
@@ -344,12 +340,11 @@ export class TabContentComponent {
   //   document.body.removeChild(a)
   // }
 
-  protected addClassName(element: HTMLElement, ...classNames: string[]): void {
-    classNames.forEach(className => element.className += ' ' + className)
+  protected addClassName (element: HTMLElement, ...classNames: string[]): void {
+    classNames.forEach(className => { element.className += ' ' + className })
   }
 
-  protected removeClassName(element: HTMLElement, ...classNames: string[]): void {
-    classNames.forEach(className => element.className = element.className.replace(className, '').trim())
+  protected removeClassName (element: HTMLElement, ...classNames: string[]): void {
+    classNames.forEach(className => { element.className = element.className.replace(className, '').trim() })
   }
-
 }

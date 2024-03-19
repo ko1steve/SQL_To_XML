@@ -1,17 +1,16 @@
-import { CommandType } from "src/mainConfig"
+import { CommandType } from 'src/mainConfig'
 
 export class TabContentConfig implements ITabContentConfig {
-
-  constructor(commandType: CommandType) {
+  constructor (commandType: CommandType) {
     this.commandType = commandType
     this.updateConfigByCommandType(this)
   }
 
-  protected updateConfigByCommandType(obj: object) {
+  protected updateConfigByCommandType (obj: any) {
     Object.getOwnPropertyNames(obj).forEach(k => {
       if (typeof obj[k] === 'object') {
         if (Object.prototype.hasOwnProperty.call(obj[k], 'id')) {
-          obj[k]['id'] = (obj[k]['id'] as string).replace('{commandType}', this.commandType)
+          obj[k].id = (obj[k].id as string).replace('{commandType}', this.commandType)
           this.updateConfigByCommandType(obj[k])
         }
       }
@@ -71,7 +70,6 @@ export class TabContentConfig implements ITabContentConfig {
       textContent: 'Download as XML'
     }
   }
-
 }
 
 export interface IHTMLElementConfig {

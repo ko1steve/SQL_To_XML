@@ -1,6 +1,6 @@
 import * as Path from 'path'
-import * as HtmlWebpackPlugin from 'html-webpack-plugin'
-import * as ESLintPlugin from 'eslint-webpack-plugin'
+import HtmlWebpackPlugin from 'html-webpack-plugin'
+import ESLintPlugin from 'eslint-webpack-plugin'
 
 const appDir = Path.dirname(__dirname)
 
