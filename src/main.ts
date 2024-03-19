@@ -7,16 +7,9 @@ import { TabContentComponent } from './component/tabContent/tabContentComponent'
 const fileInputDdl: HTMLInputElement = document.getElementById('fileInput-DDL') as HTMLInputElement
 const fileInputDml: HTMLInputElement = document.getElementById('fileInput-DML') as HTMLInputElement
 
-if (fileInputDdl != null) {
-  fileInputDdl.onchange = onFileInput.bind(this, fileInputDdl)
-}
-if (fileInputDml != null) {
-  fileInputDml.onchange = onFileInput.bind(this, fileInputDml)
-}
-
 const tabContentMap: Map<CommandType, TabContentComponent> = new Map()
 
-function onFileInput(fileInput: HTMLInputElement): void {
+function onFileInput (fileInput: HTMLInputElement): void {
   if (fileInput?.files?.length === 0) {
     return
   }
@@ -48,4 +41,11 @@ function onFileInput(fileInput: HTMLInputElement): void {
   if (fileInput.files != null) {
     reader.readAsText(fileInput.files[0], 'UTF-8')
   }
+}
+
+if (fileInputDdl != null) {
+  fileInputDdl.onchange = onFileInput.bind(this, fileInputDdl)
+}
+if (fileInputDml != null) {
+  fileInputDml.onchange = onFileInput.bind(this, fileInputDml)
 }

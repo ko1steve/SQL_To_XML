@@ -1,36 +1,3 @@
-
-export class CommandData implements ICommandData {
-
-  protected _content: string;
-  protected _status: CommandStatus;
-  protected _detail: ICommandDataDetail;
-
-  constructor(content: string, status: CommandStatus = CommandStatus.valid, detail?: ICommandDataDetail) {
-    this._content = content
-    this._status = status
-    if (detail) {
-      this._detail = detail
-    }
-  }
-
-  public get content(): string {
-    return this._content
-  }
-
-  public get status(): CommandStatus {
-    return this._status
-  }
-
-  public get detail(): ICommandDataDetail {
-    return this._detail
-  }
-}
-
-export interface ICommandData {
-  content: string
-  status: CommandStatus
-}
-
 export enum CommandStatus {
   valid = 'valid',
   invalid = 'invalid',
@@ -43,7 +10,36 @@ export enum ErrorType {
   NONE = 'NONE'
 }
 
+export interface ICommandData {
+  content: string
+  status: CommandStatus
+}
+
 export interface ICommandDataDetail {
   errorType: ErrorType
   commands: string[]
+}
+
+export class CommandData implements ICommandData {
+  protected _content: string
+  protected _status: CommandStatus
+  protected _detail: ICommandDataDetail | undefined
+
+  constructor (content: string, status: CommandStatus = CommandStatus.valid, detail?: ICommandDataDetail) {
+    this._content = content
+    this._status = status
+    this._detail = detail
+  }
+
+  public get content (): string {
+    return this._content
+  }
+
+  public get status (): CommandStatus {
+    return this._status
+  }
+
+  public get detail (): ICommandDataDetail | undefined {
+    return this._detail
+  }
 }
