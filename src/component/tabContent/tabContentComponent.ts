@@ -1,6 +1,6 @@
 import { CommandType, GroupType, IGroupSetting, MainConfig } from 'src/mainConfig'
 import { IGroupContainerConfig, ITabContentConfig } from './tabContentConfig'
-import { CommandData, CommandStatus, ErrorType, ICommandDataDetail } from 'src/element/CommandData'
+import { CommandData, MessageType, ICommandDataDetail } from 'src/element/CommandData'
 
 export class TabContentComponent {
   protected mainConfig: MainConfig = new MainConfig()
@@ -86,32 +86,39 @@ export class TabContentComponent {
     return textLinesGroupMap
   }
 
-  protected isIgnoreCommand (text: string): boolean {
-    text = text.trim()
-    if (text.endsWith(';')) {
-      text = text.substring(0, text.length - 1)
-    }
-    return this.mainConfig.ignoredCommands.includes(text.toUpperCase())
-  }
-
   protected getCommandDataDetail (text: string): ICommandDataDetail {
     text = text.trim()
     if (text.endsWith(';')) {
       text = text.substring(0, text.length - 1)
     }
     const detail: ICommandDataDetail = {
-      errorType: ErrorType.NONE,
+      messageType: MessageType.NONE,
       commands: []
     }
+    //* 檢查指令是否包含不合規的語法
     this.mainConfig.invalidCommands.forEach(e => {
       if (text.toUpperCase().indexOf(e) > -1) {
-        detail.errorType = ErrorType.INVALID_COMMAND_ERROR
+        detail.messageType = MessageType.INVALID_COMMAND_ERROR
         detail.commands.push(e)
       }
     })
+    //* 若是不存在不合規的語法，則檢查指令是否包含需略過的語法
+    if (detail.commands.length === 0) {
+      this.mainConfig.ignoredCommands.forEach(e => {
+        if (text.toUpperCase().indexOf(e) > -1) {
+          detail.messageType = MessageType.IGNORED_COMMAND
+          detail.commands.push(e)
+        }
+      })
+    }
     return detail
   }
 
+  /**
+   * Split the raw text to five command groups (PreSQL , CountSQL , SelectSQL , MainSQL , PostSQL)
+   * @param textLinesGroupMap
+   * @returns Map<GroupType, CommandData[]>
+   */
   protected getCommandGroupMap (textLinesGroupMap: Map<GroupType, string>): Map<GroupType, CommandData[]> {
     const commandGroupMap = new Map<GroupType, CommandData[]>()
     textLinesGroupMap.forEach((text: string, groupName: GroupType) => {
@@ -120,7 +127,7 @@ export class TabContentComponent {
       for (let i = 0; i < textLines.length; i++) {
         let isAddToMap = false
         let commandDataDetail: ICommandDataDetail = {
-          errorType: ErrorType.NONE,
+          messageType: MessageType.NONE,
           commands: []
         }
 
@@ -131,8 +138,8 @@ export class TabContentComponent {
         let commandText: string = ''
         const newTextLine: string = textLines[i].replace(this.mainConfig.singleCommandIndicator, '').trim()
 
-        //* 判斷指令是不是該忽略
-        if (newTextLine.length !== 0 && !this.isIgnoreCommand(newTextLine)) {
+        //* 取得指令資料
+        if (newTextLine.length !== 0) {
           commandDataDetail = this.getCommandDataDetail(newTextLine)
           commandText = newTextLine + '\n'
         }
@@ -143,16 +150,12 @@ export class TabContentComponent {
           if (textLines[j].trim().startsWith(this.mainConfig.singleCommandIndicator)) {
             commandText = this.cleanEmptyLineAtCommandEnd(commandText)
             if (commandText.length > 0) {
-              const commandStatus: CommandStatus = commandDataDetail.errorType === ErrorType.NONE ? CommandStatus.valid : CommandStatus.invalid
-              if (!commandDataDetail) {
-                this.commandValid = false
-              }
-              commamds.push(new CommandData(commandText, commandStatus, commandDataDetail))
+              commamds.push(new CommandData(commandText, commandDataDetail))
               commandGroupMap.set(groupName, commamds)
             }
             isAddToMap = true
             break
-          } else if (!this.isIgnoreCommand(textLines[j])) {
+          } else {
             textLines[j] = textLines[j].replace(this.mainConfig.singleCommandIndicator, '')
             if (textLines[j].trim().length > 0) {
               commandDataDetail = this.getCommandDataDetail(textLines[j])
@@ -168,11 +171,7 @@ export class TabContentComponent {
         if (j === textLines.length) {
           commandText = this.cleanEmptyLineAtCommandEnd(commandText)
           if (commandText.length > 0) {
-            const commandStatus: CommandStatus = commandDataDetail.errorType === ErrorType.NONE ? CommandStatus.valid : CommandStatus.invalid
-            if (!commandDataDetail) {
-              this.commandValid = false
-            }
-            commamds.push(new CommandData(commandText, commandStatus, commandDataDetail))
+            commamds.push(new CommandData(commandText, commandDataDetail))
             commandGroupMap.set(groupName, commamds)
           }
           isAddToMap = true
@@ -228,10 +227,9 @@ export class TabContentComponent {
     parent.appendChild(groupContainer)
 
     const warningMessageContainer = document.createElement('div')
-    warningMessageContainer.id = config.warningMessageContainer.id
+    warningMessageContainer.id = config.warningMessageContainer.id.replace('{groupType}', groupType)
     warningMessageContainer.className = config.warningMessageContainer.className
     groupContainer.appendChild(warningMessageContainer)
-    this.addClassName(warningMessageContainer, 'invisble')
 
     const commandContainer = document.createElement('div')
     commandContainer.id = config.commandContainer.id.replace('{groupType}', groupType)
@@ -239,7 +237,7 @@ export class TabContentComponent {
     groupContainer.appendChild(commandContainer)
 
     const errorMessageContainer: HTMLDivElement = document.createElement('div')
-    errorMessageContainer.id = config.errorMessageContainer.id
+    errorMessageContainer.id = config.errorMessageContainer.id.replace('{groupType}', groupType)
     errorMessageContainer.className = config.errorMessageContainer.className
     groupContainer.appendChild(errorMessageContainer)
 
@@ -251,11 +249,11 @@ export class TabContentComponent {
 
     if (commands.length === 0) {
       this.commandValid = false
-      let errorMessage: string = this.mainConfig.errorMessageMap.get(ErrorType.CONTENT_NOT_FOUND_ERROR) as string
+      let errorMessage: string = this.mainConfig.messageMap.get(MessageType.CONTENT_NOT_FOUND_ERROR) as string
       errorMessage = errorMessage.replace('{groupType}', groupType)
       const groupTitle: string = this.mainConfig.groupSettingMap.get(groupType)?.title as string
       errorMessage = errorMessage.replace('{groupTitle}', groupTitle)
-      this.addClassName(title, 'command-invalid')
+      this.addClassName(title, 'command-error')
       const span: HTMLSpanElement = document.createElement('span')
       span.className = config.errorMessageContainer.errorMessage.className
       span.innerText = errorMessage
@@ -266,20 +264,19 @@ export class TabContentComponent {
 
     commands.forEach((command: CommandData, index: number) => {
       const listItem = document.createElement('li')
-      if (command.status === CommandStatus.invalid) {
-        this.commandValid = false
-        this.addClassName(listItem, 'command-invalid')
-        if (command.detail !== undefined) {
-          command.detail.commands.forEach(e => {
-            let errorMessage: string = this.mainConfig.errorMessageMap.get((command.detail as ICommandDataDetail).errorType) as string
-            errorMessage = errorMessage.replace('{groupType}', groupType).replace('{index}', (index + 1).toString())
-            errorMessage = errorMessage.replace('{command}', e)
-            const span: HTMLSpanElement = document.createElement('span')
-            span.className = config.errorMessageContainer.errorMessage.className
-            span.innerText = errorMessage
-            errorMessageContainer.appendChild(span)
-          })
-        }
+      listItem.className = 'command'
+      switch (command.detail.messageType) {
+        case MessageType.IGNORED_COMMAND:
+          this.addClassName(listItem, 'command-ignored')
+          break
+        case MessageType.CONTENT_NOT_FOUND_ERROR:
+        case MessageType.INVALID_COMMAND_ERROR:
+          this.commandValid = false
+          this.addClassName(listItem, 'command-error')
+          break
+      }
+      if (command.detail.messageType !== MessageType.NONE) {
+        this.appendMessage(command, groupType, index, config)
       }
       listItem.addEventListener('pointerover', () => {
         this.addClassName(listItem, 'pointerover-command')
@@ -291,14 +288,43 @@ export class TabContentComponent {
 
       const paragraph = document.createElement('p')
       paragraph.id = config.commandContainer.paragraph.id.replace('{groupType}', groupType).replace('{index}', index.toString())
-      paragraph.className = config.commandContainer.paragraph.className
       paragraph.innerText = command.content
       listItem.appendChild(paragraph)
-
-      if (this.commandValid) {
-        this.addClassName(errorMessageContainer, 'invisble')
-      }
     })
+    if (warningMessageContainer.children.length === 0) {
+      this.addClassName(warningMessageContainer, 'invisible')
+    }
+    if (errorMessageContainer.children.length === 0) {
+      this.addClassName(errorMessageContainer, 'invisible')
+    }
+  }
+
+  protected appendMessage (command: CommandData, groupType: GroupType, index: number, config: IGroupContainerConfig): void {
+    if (command.detail !== undefined) {
+      let container: HTMLDivElement
+      const paragraph: HTMLSpanElement = document.createElement('p')
+      command.detail.commands.forEach(e => {
+        let message: string = this.mainConfig.messageMap.get((command.detail as ICommandDataDetail).messageType) as string
+        message = message.replace('{groupType}', groupType)
+        message = message.replace('{index}', (index + 1).toString())
+        message = message.replace('{command}', e)
+        paragraph.innerText = message
+        switch (command.detail.messageType) {
+          case MessageType.IGNORED_COMMAND:
+            paragraph.className = config.warningMessageContainer.warningMessage.className
+            this.addClassName(paragraph, 'warning-message')
+            container = document.getElementById(config.warningMessageContainer.id.replace('{groupType}', groupType)) as HTMLDivElement
+            break
+          case MessageType.INVALID_COMMAND_ERROR:
+          case MessageType.CONTENT_NOT_FOUND_ERROR:
+            paragraph.className = config.errorMessageContainer.errorMessage.className
+            this.addClassName(paragraph, 'error-meesage')
+            container = document.getElementById(config.errorMessageContainer.id.replace('{groupType}', groupType)) as HTMLDivElement
+            break
+        }
+        container.appendChild(paragraph)
+      })
+    }
   }
 
   protected createDownloadButton (parent: HTMLElement, elementConfig: ITabContentConfig): void {

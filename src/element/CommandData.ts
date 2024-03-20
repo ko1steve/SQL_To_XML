@@ -1,10 +1,5 @@
-export enum CommandStatus {
-  valid = 'valid',
-  invalid = 'invalid',
-  ignored = 'ignored'
-}
-
-export enum ErrorType {
+export enum MessageType {
+  IGNORED_COMMAND = 'IGNORED_COMMAND',
   CONTENT_NOT_FOUND_ERROR = 'CONTENT_NOT_FOUND_ERROR',
   INVALID_COMMAND_ERROR = 'INVALID_COMMAND_ERROR',
   NONE = 'NONE'
@@ -12,22 +7,20 @@ export enum ErrorType {
 
 export interface ICommandData {
   content: string
-  status: CommandStatus
+  detail: ICommandDataDetail
 }
 
 export interface ICommandDataDetail {
-  errorType: ErrorType
+  messageType: MessageType
   commands: string[]
 }
 
 export class CommandData implements ICommandData {
   protected _content: string
-  protected _status: CommandStatus
-  protected _detail: ICommandDataDetail | undefined
+  protected _detail: ICommandDataDetail
 
-  constructor (content: string, status: CommandStatus = CommandStatus.valid, detail?: ICommandDataDetail) {
+  constructor (content: string, detail: ICommandDataDetail) {
     this._content = content
-    this._status = status
     this._detail = detail
   }
 
@@ -35,11 +28,7 @@ export class CommandData implements ICommandData {
     return this._content
   }
 
-  public get status (): CommandStatus {
-    return this._status
-  }
-
-  public get detail (): ICommandDataDetail | undefined {
+  public get detail (): ICommandDataDetail {
     return this._detail
   }
 }

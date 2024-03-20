@@ -32,7 +32,7 @@ export class TabContentConfig implements ITabContentConfig {
     id: 'groupContainer-{groupType}-{commandType}',
     className: 'groupContainer row',
     warningMessageContainer: {
-      id: 'warningMessageContainer-{commandType}',
+      id: 'warningMessageContainer-{groupType}-{commandType}',
       className: 'col-2 col-md-3 warningContainer',
       warningMessage: {
         id: 'warning-message-{index}-{commandType}',
@@ -52,7 +52,7 @@ export class TabContentConfig implements ITabContentConfig {
       }
     },
     errorMessageContainer: {
-      id: 'errorMessageContainer-{commandType}',
+      id: 'errorMessageContainer-{groupType}-{commandType}',
       className: 'col-2 col-md-3 errorMessageContainer',
       errorMessage: {
         id: 'error-message-{index}-{commandType}',

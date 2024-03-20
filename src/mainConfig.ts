@@ -1,5 +1,5 @@
 import { ITabContentConfig, TabContentConfig } from './component/tabContent/tabContentConfig'
-import { ErrorType } from 'src/element/CommandData'
+import { MessageType } from 'src/element/CommandData'
 
 export interface IMainConfig {
   groupShowOrder: GroupType[]
@@ -9,7 +9,7 @@ export interface IMainConfig {
   ignoredCommands: string[]
   invalidCommands: string[]
   tabContentConfigMap: Map<CommandType, ITabContentConfig>
-  errorMessageMap: Map<ErrorType, string>
+  messageMap: Map<MessageType, string>
 }
 
 export interface IGroupSetting {
@@ -101,13 +101,17 @@ export class MainConfig implements IMainConfig {
     ]
   ])
 
-  public errorMessageMap: Map<ErrorType, string> = new Map<ErrorType, string>([
+  public messageMap: Map<MessageType, string> = new Map<MessageType, string>([
     [
-      ErrorType.CONTENT_NOT_FOUND_ERROR,
+      MessageType.IGNORED_COMMAND,
+      '[{groupType}, {index}] IgnoredCommand: Command "{command}" has been commented out.'
+    ],
+    [
+      MessageType.CONTENT_NOT_FOUND_ERROR,
       '[{groupType}] ContentNotFoundError: "{groupTitle}" is not defind. 請檢查 SQL 檔案是否有包含該類別的指令。'
     ],
     [
-      ErrorType.INVALID_COMMAND_ERROR,
+      MessageType.INVALID_COMMAND_ERROR,
       '[{groupType}, {index}] InvalidCommandError: "{command}" is not allowed. 請移除相關的指令。'
     ]
   ])
