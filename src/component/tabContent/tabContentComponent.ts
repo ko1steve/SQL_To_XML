@@ -265,16 +265,6 @@ export class TabContentComponent {
     commands.forEach((command: CommandData, index: number) => {
       const listItem = document.createElement('li')
       listItem.className = 'command'
-      switch (command.detail.messageType) {
-        case MessageType.IGNORED_COMMAND:
-          this.addClassName(listItem, 'command-ignored')
-          break
-        case MessageType.CONTENT_NOT_FOUND_ERROR:
-        case MessageType.INVALID_COMMAND_ERROR:
-          this.commandValid = false
-          this.addClassName(listItem, 'command-error')
-          break
-      }
       if (command.detail.messageType !== MessageType.NONE) {
         this.appendMessage(command, groupType, index, config)
       }
@@ -290,6 +280,19 @@ export class TabContentComponent {
       paragraph.id = config.commandContainer.paragraph.id.replace('{groupType}', groupType).replace('{index}', index.toString())
       paragraph.innerText = command.content
       listItem.appendChild(paragraph)
+
+      switch (command.detail.messageType) {
+        case MessageType.IGNORED_COMMAND:
+          this.addClassName(listItem, 'command-ignored')
+          command.content = '-- ' + command.content
+          console.error(command.content)
+          break
+        case MessageType.CONTENT_NOT_FOUND_ERROR:
+        case MessageType.INVALID_COMMAND_ERROR:
+          this.commandValid = false
+          this.addClassName(listItem, 'command-error')
+          break
+      }
     })
     if (warningMessageContainer.children.length === 0) {
       this.addClassName(warningMessageContainer, 'invisible')

@@ -28,6 +28,10 @@ export class CommandData implements ICommandData {
     return this._content
   }
 
+  public set content (content: string) {
+    this._content = content
+  }
+
   public get detail (): ICommandDataDetail {
     return this._detail
   }
