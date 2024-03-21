@@ -7,57 +7,59 @@ button {
   cursor: pointer;
 }
 
-li{
+li {
   font-family: Consolas;
 }
 
 #input-container {
-    padding: 10px;
-    width: 100%;
+  padding: 10px;
+  width: 100%;
 }
 
 .warningContainer {
-    border: solid 2px orange;
-    border-radius: 5px;
-    padding: 10px;
-    position: relative;
-    margin-bottom: 15px;
+  border: none 2px orange;
+  border-radius: 5px;
+  padding: 10px;
+  font-weight: bold;
+  text-align: left;
+  position: relative;
+  margin-bottom: 15px;
 }
 
 .commandContainer {
-    border: solid 2px #4c84af;
-    border-radius: 5px;
-    padding: 10px;
-    position: relative;
-    margin-bottom: 15px;
+  border: solid 2px #4c84af;
+  border-radius: 5px;
+  padding: 10px;
+  position: relative;
+  margin-bottom: 15px;
 }
 
 .errorMessageContainer {
-    border: none 2px crimson;
-    border-radius: 5px;
-    padding: 10px;
-    font-weight: bold;
-    text-align: left;
-    position: relative;
-    margin-bottom: 15px;
+  border: none 2px crimson;
+  border-radius: 5px;
+  padding: 10px;
+  font-weight: bold;
+  text-align: left;
+  position: relative;
+  margin-bottom: 15px;
 }
 
 .fileInputLabel {
-    border-radius: 5px;
-    background-color:lightcoral;
-    color: aliceblue;
-    font-weight: bolder;
-    font-size: 20px;
-    padding: 10px;
-    cursor: pointer;
+  border-radius: 5px;
+  background-color: lightcoral;
+  color: aliceblue;
+  font-weight: bolder;
+  font-size: 20px;
+  padding: 10px;
+  cursor: pointer;
 }
 
 .fileInput {
-    visibility: hidden;
-    width: 0px;
-    height: 0px;
-    margin-bottom: 0px;
-    padding: 0px;
+  visibility: hidden;
+  width: 0px;
+  height: 0px;
+  margin-bottom: 0px;
+  padding: 0px;
 }
 
 .upload-button-container {
@@ -65,19 +67,28 @@ li{
 }
 
 .downloadButton {
-    margin: 10px;
-    border-radius: 5px;
-    color: aliceblue;
-    font-weight: bolder;
-    font-size: 20px;
-    padding: 10px;
-    cursor: pointer;
+  margin: 10px;
+  border-radius: 5px;
+  color: aliceblue;
+  font-weight: bolder;
+  font-size: 20px;
+  padding: 10px;
+  cursor: pointer;
 }
 
 .command {
-    text-align: left;
-    margin: 5px;
-    font-family: Consolas;
+  color: black;
+  text-align: left;
+  margin: 5px;
+  font-family: Consolas;
+}
+
+.command-ignored {
+  text-decoration: line-through;
+}
+
+.command-error {
+  color: crimson;
 }
 
 .pointerover-command {
@@ -85,8 +96,8 @@ li{
   background-color: rgb(194, 230, 241);
 }
 
-.command-invalid {
-  color: crimson;
+.warning-message {
+  color: orange;
 }
 
 .error-message {
@@ -101,10 +112,10 @@ li{
   font-size: 24px;
   min-width: 200px;
   border-width: 1px;
-  border-color:dimgrey;
+  border-color: dimgrey;
   border-style: solid;
 }
 
-.invisble {
+.invisible {
   visibility: hidden;
 }
