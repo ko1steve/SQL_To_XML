@@ -6,8 +6,8 @@ export interface IMainConfig {
   checkCommandGroup: Map<CommandType, GroupType[]>
   groupSettingMap: Map<GroupType, IGroupSetting>
   singleCommandIndicator: string
-  ignoredCommands: string[]
-  invalidCommands: string[]
+  ignoredCommandMap: Map<CommandType, string[]>
+  invalidCommandMap: Map<CommandType, string[]>
   tabContentConfigMap: Map<CommandType, ITabContentConfig>
   messageMap: Map<MessageType, string>
 }
@@ -75,9 +75,29 @@ export class MainConfig implements IMainConfig {
 
   public singleCommandIndicator: string = '/*--!*/'
 
-  public ignoredCommands: string[] = ['GO']
+  public ignoredCommandMap: Map<CommandType, string[]> = new Map([
+    [
+      CommandType.DDL, ['GO']
+    ],
+    [
+      CommandType.DML, ['GO']
+    ],
+    [
+      CommandType.NONE, []
+    ]
+  ])
 
-  public invalidCommands: string[] = ['COMMIT']
+  public invalidCommandMap: Map<CommandType, string[]> = new Map([
+    [
+      CommandType.DDL, ['COMMIT', 'UPDATE', 'DELETE', 'INSERT', 'SELECT']
+    ],
+    [
+      CommandType.DML, ['COMMIT', 'CREATE', 'ALTER', 'DROP', 'TRUNCATE']
+    ],
+    [
+      CommandType.NONE, []
+    ]
+  ])
 
   public tabContentConfigMap: Map<CommandType, ITabContentConfig> = new Map<CommandType, ITabContentConfig>([
     [

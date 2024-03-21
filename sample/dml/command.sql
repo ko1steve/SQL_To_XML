@@ -1,95 +1,90 @@
---#PreSQL--
+--#PreSQL
 
 /*--!*/
-CREATE TABLE YourTableName (
-    Column1 INT PRIMARY KEY,
-    Column2 VARCHAR(50),
-    Column3 DATE
-);
+SELECT * FROM YourTableName;
 
 /*--!*/
-ALTER TABLE YourTableName
-ADD Column4 VARCHAR(100);
+INSERT INTO YourTableName (Column1, Column2, Column3)
+VALUES ('Value1', 'Value2', 'Value3');
 
 /*--!*/
-DROP TABLE YourTableName;
+UPDATE YourTableName
+SET Column1 = 'NewValue1', Column2 = 'NewValue2'
+WHERE SomeCondition;
 
 /*--!*/
-TRUNCATE TABLE YourTableName;
+DELETE FROM YourTableName
+WHERE SomeCondition;
 
 --#CountSQL
 
 /*--!*/
-CREATE TABLE YourTableName (
-    Column1 INT PRIMARY KEY,
-    Column2 VARCHAR(50),
-    Column3 DATE
-);
+SELECT * FROM YourTableName;
 
 /*--!*/
-ALTER TABLE YourTableName
-ADD Column4 VARCHAR(100);
+INSERT INTO YourTableName (Column1, Column2, Column3)
+VALUES ('Value1', 'Value2', 'Value3');
 
 /*--!*/
-DROP TABLE YourTableName;
+UPDATE YourTableName
+SET Column1 = 'NewValue1', Column2 = 'NewValue2'
+WHERE SomeCondition;
 
 /*--!*/
-TRUNCATE TABLE YourTableName;
+DELETE FROM YourTableName
+WHERE SomeCondition;
 
 --#SelectSQL
 
 /*--!*/
-CREATE TABLE YourTableName (
-    Column1 INT PRIMARY KEY,
-    Column2 VARCHAR(50),
-    Column3 DATE
-);
+SELECT * FROM YourTableName;
 
 /*--!*/
-ALTER TABLE YourTableName
-ADD Column4 VARCHAR(100);
+INSERT INTO YourTableName (Column1, Column2, Column3)
+VALUES ('Value1', 'Value2', 'Value3');
 
 /*--!*/
-DROP TABLE YourTableName;
+UPDATE YourTableName
+SET Column1 = 'NewValue1', Column2 = 'NewValue2'
+WHERE SomeCondition;
 
 /*--!*/
-TRUNCATE TABLE YourTableName;
+DELETE FROM YourTableName
+WHERE SomeCondition;
 
 --#MainSQL
 
 /*--!*/
-CREATE TABLE YourTableName (
-    Column1 INT PRIMARY KEY,
-    Column2 VARCHAR(50),
-    Column3 DATE
-);
+SELECT * FROM YourTableName;
 
 /*--!*/
-ALTER TABLE YourTableName
-ADD Column4 VARCHAR(100);
+INSERT INTO YourTableName (Column1, Column2, Column3)
+VALUES ('Value1', 'Value2', 'Value3');
 
 /*--!*/
-DROP TABLE YourTableName;
+UPDATE YourTableName
+SET Column1 = 'NewValue1', Column2 = 'NewValue2'
+WHERE SomeCondition;
 
 /*--!*/
-TRUNCATE TABLE YourTableName;
+DELETE FROM YourTableName
+WHERE SomeCondition;
 
 --#PostSQL
 
 /*--!*/
-CREATE TABLE YourTableName (
-    Column1 INT PRIMARY KEY,
-    Column2 VARCHAR(50),
-    Column3 DATE
-);
+SELECT * FROM YourTableName;
 
 /*--!*/
-ALTER TABLE YourTableName
-ADD Column4 VARCHAR(100);
+INSERT INTO YourTableName (Column1, Column2, Column3)
+VALUES ('Value1', 'Value2', 'Value3');
 
 /*--!*/
-DROP TABLE YourTableName;
+UPDATE YourTableName
+SET Column1 = 'NewValue1', Column2 = 'NewValue2'
+WHERE SomeCondition;
 
 /*--!*/
-TRUNCATE TABLE YourTableName;
+DELETE FROM YourTableName
+WHERE SomeCondition;
 

@@ -99,15 +99,17 @@ export class TabContentComponent {
       commands: []
     }
     //* 檢查指令是否包含不合規的語法
-    this.mainConfig.invalidCommands.forEach(e => {
-      if (text.toUpperCase().indexOf(e) > -1) {
-        detail.messageType = MessageType.INVALID_COMMAND_ERROR
-        detail.commands.push(e)
-      }
-    })
+    if (this.mainConfig.invalidCommandMap.has(this.commandType)) {
+      (this.mainConfig.invalidCommandMap.get(this.commandType) as string[]).forEach(e => {
+        if (text.toUpperCase().indexOf(e) > -1) {
+          detail.messageType = MessageType.INVALID_COMMAND_ERROR
+          detail.commands.push(e)
+        }
+      })
+    }
     //* 若是不存在不合規的語法，則檢查指令是否包含需略過的語法
-    if (detail.commands.length === 0) {
-      this.mainConfig.ignoredCommands.forEach(e => {
+    if (detail.commands.length === 0 && this.mainConfig.invalidCommandMap.has(this.commandType)) {
+      (this.mainConfig.ignoredCommandMap.get(this.commandType) as string[]).forEach(e => {
         if (text.toUpperCase().indexOf(e) > -1) {
           detail.messageType = MessageType.IGNORED_COMMAND
           detail.commands.push(e)
@@ -161,7 +163,14 @@ export class TabContentComponent {
           } else {
             textLines[j] = textLines[j].replace(this.mainConfig.singleCommandIndicator, '')
             if (textLines[j].trim().length > 0) {
-              commandDataDetail = this.getCommandDataDetail(textLines[j])
+              const newCommandDataDetail = this.getCommandDataDetail(textLines[j])
+              commandDataDetail = {
+                messageType: commandDataDetail.messageType === MessageType.NONE ? newCommandDataDetail.messageType : commandDataDetail.messageType,
+                commands: [
+                  ...commandDataDetail.commands.concat(newCommandDataDetail.commands)
+                ]
+
+              }
               //* 找到結束點之前，不斷累加指令的內容
               commandText += textLines[j] + '\n'
             }
@@ -277,6 +286,7 @@ export class TabContentComponent {
       const listItem = document.createElement('li')
       listItem.className = 'command'
       if (command.detail.messageType !== MessageType.NONE) {
+        console.error(command.content)
         this.appendMessage(command, groupType, index, config)
       }
       listItem.addEventListener('pointerover', () => {
