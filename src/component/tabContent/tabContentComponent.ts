@@ -73,6 +73,9 @@ export class TabContentComponent {
         if (isGroupToMap) {
           break
         }
+        if (this.commandType === CommandType.DML) {
+          textLines[j] = this.cleanSemicolon(textLines[j])
+        }
         //* 找到結束點之前，不斷累加該行的指令文字
         text += textLines[j] + '\n'
       }
@@ -182,6 +185,14 @@ export class TabContentComponent {
     return commandGroupMap
   }
 
+  protected cleanSemicolon (commandText: string): string {
+    const newText = commandText.trimEnd()
+    if (newText.endsWith(';')) {
+      return newText.substring(0, newText.length - 1)
+    }
+    return commandText
+  }
+
   protected cleanEmptyLineAtCommandEnd (commandText: string): string {
     while (commandText.endsWith('\n')) {
       const i: number = commandText.lastIndexOf('\n')
@@ -285,7 +296,6 @@ export class TabContentComponent {
         case MessageType.IGNORED_COMMAND:
           this.addClassName(listItem, 'command-ignored')
           command.content = '-- ' + command.content
-          console.error(command.content)
           break
         case MessageType.CONTENT_NOT_FOUND_ERROR:
         case MessageType.INVALID_COMMAND_ERROR:
