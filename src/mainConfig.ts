@@ -97,19 +97,19 @@ export class MainConfig implements IMainConfig {
     [
       CommandType.DDL, new Map<string, RegExp>([
         [
-          'COMMIT', /^COMMIT\s+|\s+COMMIT\s+|\s+COMMIT$/
+          'COMMIT', /^COMMIT$|^COMMIT\s+|\s+COMMIT\s+|\s+COMMIT$/
         ],
         [
-          'UPDATE', /^UPDATE\s+|\s+UPDATE\s+|\s+UPDATE$/
+          'UPDATE', /^UPDATE$|^UPDATE\s+|\s+UPDATE\s+|\s+UPDATE$/
         ],
         [
-          'DELETE', /^DELETE\s+|\s+DELETE\s+|\s+DELETE$/
+          'DELETE', /^DELETE$|^DELETE\s+|\s+DELETE\s+|\s+DELETE$/
         ],
         [
-          'INSERT', /^INSERT\s+|\s+INSERT\s+|\s+INSERT$/
+          'INSERT', /^INSERT$|^INSERT\s+|\s+INSERT\s+|\s+INSERT$/
         ],
         [
-          'SELECT', /^SELECT\s+|\s+SELECT\s+|\s+SELECT$/
+          'SELECT', /^SELECT$|^SELECT\s+|\s+SELECT\s+|\s+SELECT$/
         ]
       ])
     ],
