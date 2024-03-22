@@ -6,8 +6,8 @@ export interface IMainConfig {
   checkCommandGroup: Map<CommandType, GroupType[]>
   groupSettingMap: Map<GroupType, IGroupSetting>
   singleCommandIndicator: string
-  ignoredCommandMap: Map<CommandType, string[]>
-  invalidCommandMap: Map<CommandType, string[]>
+  ignoredCommandMap: Map<CommandType, Map<string, RegExp>>
+  invalidCommandMap: Map<CommandType, Map<string, RegExp>>
   tabContentConfigMap: Map<CommandType, ITabContentConfig>
   messageMap: Map<MessageType, string>
 }
@@ -75,27 +75,62 @@ export class MainConfig implements IMainConfig {
 
   public singleCommandIndicator: string = '/*--!*/'
 
-  public ignoredCommandMap: Map<CommandType, string[]> = new Map([
+  public ignoredCommandMap: Map<CommandType, Map<string, RegExp>> = new Map<CommandType, Map<string, RegExp>>([
+    //* [唯一|開頭|結尾|句中]
     [
-      CommandType.DDL, ['GO']
+      CommandType.DDL, new Map<string, RegExp>([
+        [
+          'GO', /^GO$|^GO[^\w]|[^\w]GO;*$|[^\w]+GO[^\w]+/
+        ]
+      ])
     ],
     [
-      CommandType.DML, ['GO']
-    ],
-    [
-      CommandType.NONE, []
+      CommandType.DML, new Map<string, RegExp>([
+        [
+          'GO', /^GO$|^GO[^\w]|[^\w]GO;*$|[^\w]+GO[^\w]+/
+        ]
+      ])
     ]
   ])
 
-  public invalidCommandMap: Map<CommandType, string[]> = new Map([
+  public invalidCommandMap: Map<CommandType, Map<string, RegExp>> = new Map<CommandType, Map<string, RegExp>>([
     [
-      CommandType.DDL, ['COMMIT', 'UPDATE', 'DELETE', 'INSERT', 'SELECT']
+      CommandType.DDL, new Map<string, RegExp>([
+        [
+          'COMMIT', /^COMMIT\s+|\s+COMMIT\s+|\s+COMMIT$/
+        ],
+        [
+          'UPDATE', /^UPDATE\s+|\s+UPDATE\s+|\s+UPDATE$/
+        ],
+        [
+          'DELETE', /^DELETE\s+|\s+DELETE\s+|\s+DELETE$/
+        ],
+        [
+          'INSERT', /^INSERT\s+|\s+INSERT\s+|\s+INSERT$/
+        ],
+        [
+          'SELECT', /^SELECT\s+|\s+SELECT\s+|\s+SELECT$/
+        ]
+      ])
     ],
     [
-      CommandType.DML, ['COMMIT', 'CREATE', 'ALTER', 'DROP', 'TRUNCATE']
-    ],
-    [
-      CommandType.NONE, []
+      CommandType.DML, new Map<string, RegExp>([
+        [
+          'COMMIT', /^COMMIT\s+|\s+COMMIT\s+|\s+COMMIT$/
+        ],
+        [
+          'CREATE', /^CREATE\s+|\s+CREATE\s+|\s+CREATE$/
+        ],
+        [
+          'ALTER', /^ALTER\s+|\s+ALTER\s+|\s+ALTER$/
+        ],
+        [
+          'DROP', /^DROP\s+|\s+DROP\s+|\s+DROP$/
+        ],
+        [
+          'TRUNCATE', /^TRUNCATE\s+|\s+TRUNCATE\s+|\s+TRUNCATE$/
+        ]
+      ])
     ]
   ])
 

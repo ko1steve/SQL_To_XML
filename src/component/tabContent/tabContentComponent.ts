@@ -37,6 +37,7 @@ export class TabContentComponent {
       return
     }
     mainContainer.removeChild(contentContainer)
+    this.commandValid = true
     this.textFromFileLoaded = textFromFileLoaded
     this.getCommandGroup()
     this.createContent()
@@ -100,19 +101,21 @@ export class TabContentComponent {
     }
     //* 檢查指令是否包含不合規的語法
     if (this.mainConfig.invalidCommandMap.has(this.commandType)) {
-      (this.mainConfig.invalidCommandMap.get(this.commandType) as string[]).forEach(e => {
-        if (text.toUpperCase().indexOf(e) > -1) {
+      const invalidCommandMap: Map<string, RegExp> = this.mainConfig.invalidCommandMap.get(this.commandType) as Map<string, RegExp>
+      invalidCommandMap.forEach((regExp, command) => {
+        if (text.toUpperCase().search(regExp) > -1) {
           detail.messageType = MessageType.INVALID_COMMAND_ERROR
-          detail.commands.push(e)
+          detail.commands.push(command)
         }
       })
     }
     //* 若是不存在不合規的語法，則檢查指令是否包含需略過的語法
-    if (detail.commands.length === 0 && this.mainConfig.invalidCommandMap.has(this.commandType)) {
-      (this.mainConfig.ignoredCommandMap.get(this.commandType) as string[]).forEach(e => {
-        if (text.toUpperCase().indexOf(e) > -1) {
+    if (detail.commands.length === 0 && this.mainConfig.ignoredCommandMap.has(this.commandType)) {
+      const ignoredCommandMap: Map<string, RegExp> = this.mainConfig.ignoredCommandMap.get(this.commandType) as Map<string, RegExp>
+      ignoredCommandMap.forEach((regExp, command) => {
+        if (text.toUpperCase().search(regExp) > -1) {
           detail.messageType = MessageType.IGNORED_COMMAND
-          detail.commands.push(e)
+          detail.commands.push(command)
         }
       })
     }
@@ -169,7 +172,6 @@ export class TabContentComponent {
                 commands: [
                   ...commandDataDetail.commands.concat(newCommandDataDetail.commands)
                 ]
-
               }
               //* 找到結束點之前，不斷累加指令的內容
               commandText += textLines[j] + '\n'
@@ -286,7 +288,6 @@ export class TabContentComponent {
       const listItem = document.createElement('li')
       listItem.className = 'command'
       if (command.detail.messageType !== MessageType.NONE) {
-        console.error(command.content)
         this.appendMessage(command, groupType, index, config)
       }
       listItem.addEventListener('pointerover', () => {
