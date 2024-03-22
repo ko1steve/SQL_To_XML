@@ -37,6 +37,7 @@ export class TabContentComponent {
       return
     }
     mainContainer.removeChild(contentContainer)
+    this.commandValid = true
     this.textFromFileLoaded = textFromFileLoaded
     this.getCommandGroup()
     this.createContent()
@@ -99,18 +100,22 @@ export class TabContentComponent {
       commands: []
     }
     //* 檢查指令是否包含不合規的語法
-    this.mainConfig.invalidCommands.forEach(e => {
-      if (text.toUpperCase().indexOf(e) > -1) {
-        detail.messageType = MessageType.INVALID_COMMAND_ERROR
-        detail.commands.push(e)
-      }
-    })
+    if (this.mainConfig.invalidCommandMap.has(this.commandType)) {
+      const invalidCommandMap: Map<string, RegExp> = this.mainConfig.invalidCommandMap.get(this.commandType) as Map<string, RegExp>
+      invalidCommandMap.forEach((regExp, command) => {
+        if (text.toUpperCase().search(regExp) > -1) {
+          detail.messageType = MessageType.INVALID_COMMAND_ERROR
+          detail.commands.push(command)
+        }
+      })
+    }
     //* 若是不存在不合規的語法，則檢查指令是否包含需略過的語法
-    if (detail.commands.length === 0) {
-      this.mainConfig.ignoredCommands.forEach(e => {
-        if (text.toUpperCase().indexOf(e) > -1) {
+    if (detail.commands.length === 0 && this.mainConfig.ignoredCommandMap.has(this.commandType)) {
+      const ignoredCommandMap: Map<string, RegExp> = this.mainConfig.ignoredCommandMap.get(this.commandType) as Map<string, RegExp>
+      ignoredCommandMap.forEach((regExp, command) => {
+        if (text.toUpperCase().search(regExp) > -1) {
           detail.messageType = MessageType.IGNORED_COMMAND
-          detail.commands.push(e)
+          detail.commands.push(command)
         }
       })
     }
@@ -161,7 +166,13 @@ export class TabContentComponent {
           } else {
             textLines[j] = textLines[j].replace(this.mainConfig.singleCommandIndicator, '')
             if (textLines[j].trim().length > 0) {
-              commandDataDetail = this.getCommandDataDetail(textLines[j])
+              const newCommandDataDetail = this.getCommandDataDetail(textLines[j])
+              commandDataDetail = {
+                messageType: commandDataDetail.messageType === MessageType.NONE ? newCommandDataDetail.messageType : commandDataDetail.messageType,
+                commands: [
+                  ...commandDataDetail.commands.concat(newCommandDataDetail.commands)
+                ]
+              }
               //* 找到結束點之前，不斷累加指令的內容
               commandText += textLines[j] + '\n'
             }

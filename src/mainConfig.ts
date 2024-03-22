@@ -6,8 +6,8 @@ export interface IMainConfig {
   checkCommandGroup: Map<CommandType, GroupType[]>
   groupSettingMap: Map<GroupType, IGroupSetting>
   singleCommandIndicator: string
-  ignoredCommands: string[]
-  invalidCommands: string[]
+  ignoredCommandMap: Map<CommandType, Map<string, RegExp>>
+  invalidCommandMap: Map<CommandType, Map<string, RegExp>>
   tabContentConfigMap: Map<CommandType, ITabContentConfig>
   messageMap: Map<MessageType, string>
 }
@@ -75,9 +75,64 @@ export class MainConfig implements IMainConfig {
 
   public singleCommandIndicator: string = '/*--!*/'
 
-  public ignoredCommands: string[] = ['GO']
+  public ignoredCommandMap: Map<CommandType, Map<string, RegExp>> = new Map<CommandType, Map<string, RegExp>>([
+    //* [唯一|開頭|結尾|句中]
+    [
+      CommandType.DDL, new Map<string, RegExp>([
+        [
+          'GO', /^GO$|^GO[^\w]|[^\w]GO;*$|[^\w]+GO[^\w]+/
+        ]
+      ])
+    ],
+    [
+      CommandType.DML, new Map<string, RegExp>([
+        [
+          'GO', /^GO$|^GO[^\w]|[^\w]GO;*$|[^\w]+GO[^\w]+/
+        ]
+      ])
+    ]
+  ])
 
-  public invalidCommands: string[] = ['COMMIT']
+  public invalidCommandMap: Map<CommandType, Map<string, RegExp>> = new Map<CommandType, Map<string, RegExp>>([
+    [
+      CommandType.DDL, new Map<string, RegExp>([
+        [
+          'COMMIT', /^COMMIT\s+|\s+COMMIT\s+|\s+COMMIT$/
+        ],
+        [
+          'UPDATE', /^UPDATE\s+|\s+UPDATE\s+|\s+UPDATE$/
+        ],
+        [
+          'DELETE', /^DELETE\s+|\s+DELETE\s+|\s+DELETE$/
+        ],
+        [
+          'INSERT', /^INSERT\s+|\s+INSERT\s+|\s+INSERT$/
+        ],
+        [
+          'SELECT', /^SELECT\s+|\s+SELECT\s+|\s+SELECT$/
+        ]
+      ])
+    ],
+    [
+      CommandType.DML, new Map<string, RegExp>([
+        [
+          'COMMIT', /^COMMIT\s+|\s+COMMIT\s+|\s+COMMIT$/
+        ],
+        [
+          'CREATE', /^CREATE\s+|\s+CREATE\s+|\s+CREATE$/
+        ],
+        [
+          'ALTER', /^ALTER\s+|\s+ALTER\s+|\s+ALTER$/
+        ],
+        [
+          'DROP', /^DROP\s+|\s+DROP\s+|\s+DROP$/
+        ],
+        [
+          'TRUNCATE', /^TRUNCATE\s+|\s+TRUNCATE\s+|\s+TRUNCATE$/
+        ]
+      ])
+    ]
+  ])
 
   public tabContentConfigMap: Map<CommandType, ITabContentConfig> = new Map<CommandType, ITabContentConfig>([
     [
