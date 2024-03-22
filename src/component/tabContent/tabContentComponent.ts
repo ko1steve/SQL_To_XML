@@ -1,6 +1,7 @@
 import { CommandType, GroupType, IGroupSetting, MainConfig } from 'src/mainConfig'
 import { IGroupContainerConfig, ITabContentConfig } from './tabContentConfig'
 import { CommandData, MessageType, ICommandDataDetail } from 'src/element/CommandData'
+import { TSMap } from 'typescript-map'
 
 export class TabContentComponent {
   protected mainConfig: MainConfig = new MainConfig()
@@ -9,7 +10,7 @@ export class TabContentComponent {
 
   protected commandValid: boolean = true
 
-  protected commandGroupMap: Map<GroupType, CommandData[]> = new Map()
+  protected commandGroupMap: TSMap<GroupType, CommandData[]> = new TSMap()
 
   constructor (commandType: CommandType, textFromFileLoaded: string) {
     this.commandType = commandType
@@ -20,7 +21,7 @@ export class TabContentComponent {
   }
 
   protected getCommandGroup (): void {
-    const textLinesGroupMap: Map<GroupType, string> = this.getTextGroupMap(this.textFromFileLoaded)
+    const textLinesGroupMap: TSMap<GroupType, string> = this.getTextGroupMap(this.textFromFileLoaded)
     this.commandGroupMap = this.getCommandGroupMap(textLinesGroupMap)
   }
 
@@ -43,8 +44,8 @@ export class TabContentComponent {
     this.createContent()
   }
 
-  protected getTextGroupMap (textFromFileLoaded: string): Map<GroupType, string> {
-    const textLinesGroupMap: Map<GroupType, string> = new Map<GroupType, string>()
+  protected getTextGroupMap (textFromFileLoaded: string): TSMap<GroupType, string> {
+    const textLinesGroupMap: TSMap<GroupType, string> = new TSMap<GroupType, string>()
     const textLines: string[] = textFromFileLoaded.split('\n')
     let isGroupToMap = false
     let groupName: GroupType | null
@@ -56,7 +57,7 @@ export class TabContentComponent {
       if (groupName === null) {
         continue
       }
-      const searchEndArr: string[] = this.mainConfig.groupSettingMap.get(groupName)?.searchEndPattern as string[]
+      const searchEndArr: string[] = this.mainConfig.groupSettingMap.get(groupName).searchEndPattern
       let text = ''
 
       //* 找到區塊分割的判斷字串後，尋找區塊的結束點
@@ -65,7 +66,7 @@ export class TabContentComponent {
         i = j - 1
         for (let k = 0; k < searchEndArr.length; k++) {
           if (textLines[j].trim().startsWith(searchEndArr[k])) {
-            //* 找到結束點後，將整個區塊指令儲存至 Map
+            //* 找到結束點後，將整個區塊指令儲存至 TSMap
             textLinesGroupMap.set(groupName, text)
             isGroupToMap = true
             break
@@ -101,21 +102,21 @@ export class TabContentComponent {
     }
     //* 檢查指令是否包含不合規的語法
     if (this.mainConfig.invalidCommandMap.has(this.commandType)) {
-      const invalidCommandMap: Map<string, RegExp> = this.mainConfig.invalidCommandMap.get(this.commandType) as Map<string, RegExp>
+      const invalidCommandMap: TSMap<string, RegExp> = this.mainConfig.invalidCommandMap.get(this.commandType)
       invalidCommandMap.forEach((regExp, command) => {
         if (text.toUpperCase().search(regExp) > -1) {
           detail.messageType = MessageType.INVALID_COMMAND_ERROR
-          detail.commands.push(command)
+          detail.commands.push(command!)
         }
       })
     }
     //* 若是不存在不合規的語法，則檢查指令是否包含需略過的語法
     if (detail.commands.length === 0 && this.mainConfig.ignoredCommandMap.has(this.commandType)) {
-      const ignoredCommandMap: Map<string, RegExp> = this.mainConfig.ignoredCommandMap.get(this.commandType) as Map<string, RegExp>
+      const ignoredCommandMap: TSMap<string, RegExp> = this.mainConfig.ignoredCommandMap.get(this.commandType)
       ignoredCommandMap.forEach((regExp, command) => {
         if (text.toUpperCase().search(regExp) > -1) {
           detail.messageType = MessageType.IGNORED_COMMAND
-          detail.commands.push(command)
+          detail.commands.push(command!)
         }
       })
     }
@@ -125,11 +126,11 @@ export class TabContentComponent {
   /**
    * Split the raw text to five command groups (PreSQL , CountSQL , SelectSQL , MainSQL , PostSQL)
    * @param textLinesGroupMap
-   * @returns Map<GroupType, CommandData[]>
+   * @returns TSMap<GroupType, CommandData[]>
    */
-  protected getCommandGroupMap (textLinesGroupMap: Map<GroupType, string>): Map<GroupType, CommandData[]> {
-    const commandGroupMap = new Map<GroupType, CommandData[]>()
-    textLinesGroupMap.forEach((text: string, groupName: GroupType) => {
+  protected getCommandGroupMap (textLinesGroupMap: TSMap<GroupType, string>): TSMap<GroupType, CommandData[]> {
+    const commandGroupMap = new TSMap<GroupType, CommandData[]>()
+    textLinesGroupMap.forEach((text, groupName) => {
       const textLines = text.split('\n')
       const commamds: CommandData[] = []
       for (let i = 0; i < textLines.length; i++) {
@@ -138,7 +139,6 @@ export class TabContentComponent {
           messageType: MessageType.NONE,
           commands: []
         }
-
         //* 若找不到指令分割的判斷字串，則略過
         if (!textLines[i].trim().startsWith(this.mainConfig.singleCommandIndicator)) {
           continue
@@ -159,7 +159,7 @@ export class TabContentComponent {
             commandText = this.cleanEmptyLineAtCommandEnd(commandText)
             if (commandText.length > 0) {
               commamds.push(new CommandData(commandText, commandDataDetail))
-              commandGroupMap.set(groupName, commamds)
+              commandGroupMap.set(groupName!, commamds)
             }
             isAddToMap = true
             break
@@ -186,7 +186,7 @@ export class TabContentComponent {
           commandText = this.cleanEmptyLineAtCommandEnd(commandText)
           if (commandText.length > 0) {
             commamds.push(new CommandData(commandText, commandDataDetail))
-            commandGroupMap.set(groupName, commamds)
+            commandGroupMap.set(groupName!, commamds)
           }
           isAddToMap = true
           break
@@ -223,17 +223,17 @@ export class TabContentComponent {
     return null
   }
 
-  protected createPageContent (mainContainer: HTMLDivElement, commandGroupMap: Map<GroupType, CommandData[]>, elementConfig: ITabContentConfig): void {
+  protected createPageContent (mainContainer: HTMLDivElement, commandGroupMap: TSMap<GroupType, CommandData[]>, elementConfig: ITabContentConfig): void {
     const contentContainer: HTMLDivElement = document.createElement('div') as HTMLDivElement
     contentContainer.id = elementConfig.mainContainer.contentContainer.id
     mainContainer.appendChild(contentContainer)
 
-    this.mainConfig.groupShowOrder.forEach(groupType => {
+    this.mainConfig.groupSettingMap.keys().forEach(groupType => {
       let commands: CommandData[] = []
-      if (commandGroupMap.has(groupType)) {
-        commands = commandGroupMap.get(groupType) as CommandData[]
+      if (commandGroupMap.has(groupType!)) {
+        commands = commandGroupMap.get(groupType!)
       }
-      this.createGroupContainer(groupType, commands, contentContainer, elementConfig)
+      this.createGroupContainer(groupType!, commands, contentContainer, elementConfig)
     })
     if (this.commandValid) {
       this.createDownloadButton(contentContainer, elementConfig)
@@ -266,14 +266,14 @@ export class TabContentComponent {
     const title = document.createElement('p')
     title.id = config.commandContainer.title.id.replace('{groupType}', groupType)
     title.className = config.commandContainer.title.className
-    title.innerText = this.mainConfig.groupSettingMap.get(groupType)?.title as string
+    title.innerText = this.mainConfig.groupSettingMap.get(groupType).title
     commandContainer.appendChild(title)
 
     if (commands.length === 0) {
       this.commandValid = false
-      let errorMessage: string = this.mainConfig.messageMap.get(MessageType.CONTENT_NOT_FOUND_ERROR) as string
+      let errorMessage: string = this.mainConfig.messageMap.get(MessageType.CONTENT_NOT_FOUND_ERROR)
       errorMessage = errorMessage.replace('{groupType}', groupType)
-      const groupTitle: string = this.mainConfig.groupSettingMap.get(groupType)?.title as string
+      const groupTitle: string = this.mainConfig.groupSettingMap.get(groupType).title
       errorMessage = errorMessage.replace('{groupTitle}', groupTitle)
       this.addClassName(title, 'command-error')
       const span: HTMLSpanElement = document.createElement('span')
@@ -328,7 +328,7 @@ export class TabContentComponent {
       let container: HTMLDivElement
       const paragraph: HTMLSpanElement = document.createElement('p')
       command.detail.commands.forEach(e => {
-        let message: string = this.mainConfig.messageMap.get((command.detail as ICommandDataDetail).messageType) as string
+        let message: string = this.mainConfig.messageMap.get(command.detail.messageType)
         message = message.replace('{groupType}', groupType)
         message = message.replace('{index}', (index + 1).toString())
         message = message.replace('{command}', e)
