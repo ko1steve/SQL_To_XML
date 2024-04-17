@@ -362,33 +362,36 @@ export class TabContentComponent {
       button.textContent = config.downloadButton.textContent
     }
     button.onclick = () => {
-      // downloadXML()
+      this.downloadXML()
     }
     container.appendChild(button)
     parent.appendChild(container)
   }
 
-  // function downloadXML (): void {
-  //   let xmlContent = '<?xml version="1.0" encoding="UTF-8"?>\n'
-  //   xmlContent += '<data>\n'
-  //   fieldCountArr.forEach((count, groupIndex) => {
-  //     xmlContent += '  <group index="' + groupIndex + '">\n'
-  //     for (let i = 0; i < count; i++) {
-  //       // var valueId = 'field' + (groupIndex + 1) + '-' + (i+1)
-  //       // xmlContent += '    <item index="' + i + '">' + document.getElementById(valueId).value + '</item>\n'
-  //     }
-  //     xmlContent += '  </group>\n'
-  //   })
-  //   xmlContent += '</data>\n'
+  protected downloadXML (): void {
+    let xmlContent = '<?xml version="1.0" encoding="UTF-8"?>\n'
+    xmlContent += '<SQLBodys>\n'
+    Object.values(GroupType).forEach(groupType => {
+      if (this.commandGroupMap.has(groupType)) {
+        xmlContent += '  <' + groupType + '>\n'
+        this.commandGroupMap.get(groupType).forEach(command => {
+          let sqlCommandStr = '    <SQL>'
+          sqlCommandStr += command.content + '</SQL>'
+          xmlContent += sqlCommandStr + '\n'
+        })
+        xmlContent += '  </' + groupType + '>\n'
+      }
+    })
+    xmlContent += '</SQLBodys>'
 
-  //   const blob = new Blob([xmlContent], { type: 'text/xml' })
-  //   const a = document.createElement('a')
-  //   a.href = URL.createObjectURL(blob)
-  //   a.download = 'data.xml'
-  //   document.body.appendChild(a)
-  //   a.click()
-  //   document.body.removeChild(a)
-  // }
+    const blob = new Blob([xmlContent], { type: 'text/xml' })
+    const a = document.createElement('a')
+    a.href = URL.createObjectURL(blob)
+    a.download = 'data.xml'
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+  }
 
   protected addClassName (element: HTMLElement, ...classNames: string[]): void {
     classNames.forEach(className => { element.className += ' ' + className })
