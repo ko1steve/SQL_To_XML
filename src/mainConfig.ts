@@ -95,38 +95,38 @@ export class MainConfig implements IMainConfig {
     [
       CommandType.DDL, new TSMap<string, RegExp>([
         [
-          'COMMIT', /^COMMIT$|^COMMIT\s+|\s+COMMIT\s+|\s+COMMIT$/
+          'COMMIT', /^\s*COMMIT\s+/
         ],
         [
-          'UPDATE', /^UPDATE$|^UPDATE\s+|\s+UPDATE\s+|\s+UPDATE$/
+          'UPDATE', /^\s*UPDATE\s+/
         ],
         [
-          'DELETE', /^DELETE$|^DELETE\s+|\s+DELETE\s+|\s+DELETE$/
+          'DELETE', /^\s*DELETE\s+/
         ],
         [
-          'INSERT', /^INSERT$|^INSERT\s+|\s+INSERT\s+|\s+INSERT$/
+          'INSERT', /^\s*INSERT\s+/
         ],
         [
-          'SELECT', /^SELECT$|^SELECT\s+|\s+SELECT\s+|\s+SELECT$/
+          'SELECT', /^\s*SELECT\s+/
         ]
       ])
     ],
     [
       CommandType.DML, new TSMap<string, RegExp>([
         [
-          'COMMIT', /^COMMIT\s+|\s+COMMIT\s+|\s+COMMIT$/
+          'COMMIT', /^\s*COMMIT\s+/
         ],
         [
-          'CREATE', /^CREATE\s+|\s+CREATE\s+|\s+CREATE$/
+          'CREATE', /^\s*CREATE\s+/
         ],
         [
-          'ALTER', /^ALTER\s+|\s+ALTER\s+|\s+ALTER$/
+          'ALTER', /^\s*ALTER\s+/
         ],
         [
-          'DROP', /^DROP\s+|\s+DROP\s+|\s+DROP$/
+          'DROP', /^\s*DROP\s+/
         ],
         [
-          'TRUNCATE', /^TRUNCATE\s+|\s+TRUNCATE\s+|\s+TRUNCATE$/
+          'TRUNCATE', /^\s*TRUNCATE\s+/
         ]
       ])
     ]
