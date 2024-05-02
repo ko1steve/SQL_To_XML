@@ -248,11 +248,6 @@ export class TabContentComponent {
     groupContainer.className = config.className
     parent.appendChild(groupContainer)
 
-    const warningMessageContainer = document.createElement('div')
-    warningMessageContainer.id = config.warningMessageContainer.id.replace('{groupType}', groupType)
-    warningMessageContainer.className = config.warningMessageContainer.className
-    groupContainer.appendChild(warningMessageContainer)
-
     const commandContainer = document.createElement('div')
     commandContainer.id = config.commandContainer.id.replace('{groupType}', groupType)
     commandContainer.className = config.commandContainer.className
@@ -315,9 +310,6 @@ export class TabContentComponent {
           break
       }
     })
-    if (warningMessageContainer.children.length === 0) {
-      this.addClassName(warningMessageContainer, 'invisible')
-    }
     if (errorMessageContainer.children.length === 0) {
       this.addClassName(errorMessageContainer, 'invisible')
     }
@@ -335,14 +327,12 @@ export class TabContentComponent {
         paragraph.innerText = message
         switch (command.detail.messageType) {
           case MessageType.IGNORED_COMMAND:
-            paragraph.className = config.warningMessageContainer.warningMessage.className
-            this.addClassName(paragraph, 'warning-message')
-            container = document.getElementById(config.warningMessageContainer.id.replace('{groupType}', groupType)) as HTMLDivElement
+            paragraph.className = config.errorMessageContainer.warningMessage.className
+            container = document.getElementById(config.errorMessageContainer.id.replace('{groupType}', groupType)) as HTMLDivElement
             break
           case MessageType.INVALID_COMMAND_ERROR:
           case MessageType.CONTENT_NOT_FOUND_ERROR:
             paragraph.className = config.errorMessageContainer.errorMessage.className
-            this.addClassName(paragraph, 'error-meesage')
             container = document.getElementById(config.errorMessageContainer.id.replace('{groupType}', groupType)) as HTMLDivElement
             break
         }

@@ -16,14 +16,9 @@ li {
   width: 100%;
 }
 
-.warningContainer {
-  border: none 2px orange;
-  border-radius: 5px;
-  padding: 10px;
-  font-weight: bold;
-  text-align: left;
-  position: relative;
-  margin-bottom: 15px;
+#descriptContainer {
+  border: solid 2px black;
+  padding-top: 30px;
 }
 
 .commandContainer {
@@ -118,4 +113,12 @@ li {
 
 .invisible {
   visibility: hidden;
+}
+
+.mt-100{
+  margin-top: 100px;
+}
+
+.nav-link{
+  background-color: aliceblue;
 }

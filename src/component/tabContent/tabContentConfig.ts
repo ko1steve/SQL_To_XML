@@ -31,17 +31,9 @@ export class TabContentConfig implements ITabContentConfig {
   public groupContainer: IGroupContainerConfig = {
     id: 'groupContainer-{groupType}-{commandType}',
     className: 'groupContainer row',
-    warningMessageContainer: {
-      id: 'warningMessageContainer-{groupType}-{commandType}',
-      className: 'col-2 col-md-3 warningContainer',
-      warningMessage: {
-        id: 'warning-message-{index}-{commandType}',
-        className: 'warning-message'
-      }
-    },
     commandContainer: {
       id: 'commandContainer-{groupType}-{commandType}',
-      className: 'col-8 col-md-6 commandContainer',
+      className: 'col-8 col-md-8 commandContainer',
       title: {
         id: '{groupType}-title-{commandType}',
         className: 'fw-bold fs-3'
@@ -53,7 +45,11 @@ export class TabContentConfig implements ITabContentConfig {
     },
     errorMessageContainer: {
       id: 'errorMessageContainer-{groupType}-{commandType}',
-      className: 'col-2 col-md-3 errorMessageContainer',
+      className: 'col-4 col-md-4 errorMessageContainer',
+      warningMessage: {
+        id: 'warning-message-{index}-{commandType}',
+        className: 'warning-message'
+      },
       errorMessage: {
         id: 'error-message-{index}-{commandType}',
         className: 'error-message'
@@ -91,7 +87,6 @@ export interface IMainContainerConfig extends IHTMLElementConfig {
 }
 
 export interface IGroupContainerConfig extends IHTMLElementConfig {
-  warningMessageContainer: IWarningMessageContainer
   commandContainer: ICommandContainer
   errorMessageContainer: IErrorMessageContainer
 }
@@ -105,10 +100,7 @@ export interface ICommandContainer extends IHTMLElementConfig {
   paragraph: IHTMLElementConfig
 }
 
-export interface IWarningMessageContainer extends IHTMLElementConfig {
-  warningMessage: IHTMLElementConfig
-}
-
 export interface IErrorMessageContainer extends IHTMLElementConfig {
+  warningMessage: IHTMLElementConfig
   errorMessage: IHTMLElementConfig
 }

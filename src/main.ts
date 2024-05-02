@@ -49,3 +49,24 @@ if (fileInputDdl != null) {
 if (fileInputDml != null) {
   fileInputDml.onchange = onFileInput.bind(this, fileInputDml)
 }
+
+const dmlTab = document.getElementById('dml-tab')
+if (dmlTab != null) {
+  dmlTab.onclick = onNavClick.bind(this, CommandType.DML)
+}
+const ddlTab = document.getElementById('ddl-tab')
+if (ddlTab != null) {
+  ddlTab.onclick = onNavClick.bind(this, CommandType.DDL)
+}
+
+function onNavClick (commamdType: CommandType) {
+  const uplloadButtonContainer = document.getElementsByClassName('upload-button-container')[0]
+
+  const label: HTMLLabelElement = uplloadButtonContainer.getElementsByTagName('label')[0]
+  label.id = label.id.replace(CommandType.DDL, commamdType).replace(CommandType.DML, commamdType)
+  label.htmlFor = label.htmlFor.replace(CommandType.DDL, commamdType).replace(CommandType.DML, commamdType)
+
+  const input: HTMLInputElement = uplloadButtonContainer.getElementsByTagName('input')[0]
+  input.id = input.id.replace(CommandType.DDL, commamdType).replace(CommandType.DML, commamdType)
+  input.dataset.sqlType = commamdType
+}
