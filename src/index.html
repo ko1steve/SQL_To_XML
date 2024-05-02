@@ -8,37 +8,48 @@
 </head>
 
 <body>
-  <div class='d-flex justify-content-center'>
-    <div class="upload-button-container  mt-100">
-      <label for="fileInput-DML" class="fileInputLabel" id='fileInputLabel-DML'>Upload SQL File</label>
-      <input type="file" accept=".sql" id="fileInput-DML" class="fileInput" data-sql-type="DML">
+  <div class="navbar navbar-dark bg-dark shadow-sm fixed-top">
+    <div class='container d-flex align-items-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none'>
+      <span id='header-title'>SQL 產生器</span>
     </div>
   </div>
-  <div class='row container'>
+  <div class='row container-full px-5 mt-100'>
     <div class='col-4 container' id='descriptContainer'>
       <div>
-        <p class=' h1 d-flex justify-content-center'>格式說明</p>
+        <p class='h1 d-flex justify-content-center'>格式說明</p>
       </div>
       <div class='d-flex justify-content-center '>
         <ul>
           <li>Descript 1</li>
           <li>Descript 2</li>
           <li>Descript 3</li>
+          <li>Descript 4</li>
+          <li>Descript 5</li>
+          <li>Descript 6</li>
         </ul>
       </div>
     </div>
-    <div class='col-8 container'>
-      <ul class="nav nav-pills justify-content-center fixed-top bg-secondary" id="commandTypeTabs" role="tablist">
+    <div class='col-8 container position-relative'>
+      <div class='d-flex justify-content-right position-absolute end-0'>
+        <div class="upload-button-container">
+          <label for="fileInput-DML" class="fileInputLabel" id='fileInputLabel-DML'>Import SQL File</label>
+          <input type="file" accept=".sql" id="fileInput-DML" class="fileInput" data-sql-type="DML">
+        </div>
+        <div class="download-button-container">
+          <button id='download-button'>Export as XML</button>
+        </div>
+      </div>
+      <ul class="nav nav-tabs" id="commandTypeTabs" role="tablist">
         <li class="nav-item" role="presentation">
           <button class="nav-link active" id="dml-tab" data-bs-toggle="tab" data-bs-target="#dml" type="button"
             role="tab" aria-controls="dml" aria-selected="true">DML</button>
         </li>
-        <li class="nav-item bg-secondary" role="presentation">
+        <li class="nav-item" role="presentation">
           <button class="nav-link" id="ddl-tab" data-bs-toggle="tab" data-bs-target="#ddl" type="button" role="tab"
             aria-controls="ddl" aria-selected="false">DDL</button>
         </li>
       </ul>
-      <div class="tab-content" id="commandTypeTabsContent">
+      <div class="tab-content mt-3" id="commandTypeTabsContent">
         <!-- DML -->
         <div class="tab-pane fade show active" id="dml" role="tabpanel" aria-labelledby="dml-tab">
           <div class="text-center container" id="main-container-DML">

@@ -3,7 +3,7 @@ import { IGroupContainerConfig, ITabContentConfig } from './tabContentConfig'
 import { CommandData, MessageType, ICommandDataDetail } from 'src/element/CommandData'
 import { TSMap } from 'typescript-map'
 
-export class TabContentComponent {
+export class TabContentController {
   protected mainConfig: MainConfig = new MainConfig()
   protected commandType: CommandType = CommandType.NONE
   protected textFromFileLoaded: string
@@ -18,6 +18,7 @@ export class TabContentComponent {
     this.commandValid = true
     this.getCommandGroup()
     this.createContent()
+    this.updateDownloadButtonStatus()
   }
 
   protected getCommandGroup (): void {
@@ -42,6 +43,7 @@ export class TabContentComponent {
     this.textFromFileLoaded = textFromFileLoaded
     this.getCommandGroup()
     this.createContent()
+    this.updateDownloadButtonStatus()
   }
 
   protected getTextGroupMap (textFromFileLoaded: string): TSMap<GroupType, string> {
@@ -235,9 +237,6 @@ export class TabContentComponent {
       }
       this.createGroupContainer(groupType!, commands, contentContainer, elementConfig)
     })
-    if (this.commandValid) {
-      this.createDownloadButton(contentContainer, elementConfig)
-    }
   }
 
   protected createGroupContainer (groupType: GroupType, commands: CommandData[], parent: HTMLElement, elementConfig: ITabContentConfig): void {
@@ -341,24 +340,23 @@ export class TabContentComponent {
     }
   }
 
-  protected createDownloadButton (parent: HTMLElement, elementConfig: ITabContentConfig): void {
-    const config = elementConfig.downloadButtonContainer
-    const container = document.createElement('div')
-    container.id = config.id
-    container.className = config.className
-    const button = document.createElement('button')
-    button.className = config.downloadButton.className
-    if (config.downloadButton.textContent) {
-      button.textContent = config.downloadButton.textContent
+  protected updateDownloadButtonStatus (): void {
+    const downloadButton = document.getElementById('download-button')
+    if (downloadButton != null) {
+      if (this.commandValid) {
+        this.removeClassName(downloadButton, 'inactive')
+        this.addClassName(downloadButton, 'active')
+      } else {
+        this.removeClassName(downloadButton, 'active')
+        this.addClassName(downloadButton, 'inactive')
+      }
     }
-    button.onclick = () => {
-      this.downloadXML()
-    }
-    container.appendChild(button)
-    parent.appendChild(container)
   }
 
-  protected downloadXML (): void {
+  public downloadXML (): void {
+    if (!this.commandValid) {
+      return
+    }
     let xmlContent = '<?xml version="1.0" encoding="UTF-8"?>\n'
     xmlContent += '<SQLBodys>\n'
     Object.values(GroupType).forEach(groupType => {

@@ -1,14 +1,20 @@
-button {
+/* button {
   padding: 10px;
   background-color: #4CAF50;
   color: white;
   border: none;
   border-radius: 5px;
   cursor: pointer;
-}
+} */
 
 li {
   font-family: Consolas;
+}
+
+#header-title {
+  font-family:'Microsoft JhengHei';
+  font-size: 24px;
+  color: white;
 }
 
 #input-container {
@@ -19,6 +25,7 @@ li {
 #descriptContainer {
   border: solid 2px black;
   padding-top: 30px;
+  height:fit-content;
 }
 
 .commandContainer {
@@ -44,9 +51,10 @@ li {
   background-color: lightcoral;
   color: aliceblue;
   font-weight: bolder;
-  font-size: 20px;
+  font-size: 15px;
   padding: 10px;
   cursor: pointer;
+  border: none;
 }
 
 .fileInput {
@@ -61,14 +69,22 @@ li {
   margin-bottom: 15px;
 }
 
-.downloadButton {
-  margin: 10px;
+#download-button {
   border-radius: 5px;
   color: aliceblue;
   font-weight: bolder;
-  font-size: 20px;
+  font-size: 15px;
   padding: 10px;
-  cursor: pointer;
+  border: none;
+  background-color:#dbdbdb;
+}
+
+#download-button.active {
+  background-color: #4CAF50;
+}
+
+#download-button.inactive {
+  background-color:#dbdbdb;
 }
 
 .command {
@@ -99,16 +115,12 @@ li {
   color: crimson;
 }
 
-.nav-item {
-  margin: 20px;
-}
-
 .nav-link {
-  font-size: 24px;
+  /* font-size: 24px;
   min-width: 200px;
   border-width: 1px;
   border-color: dimgrey;
-  border-style: solid;
+  border-style: solid; */
 }
 
 .invisible {
@@ -119,6 +131,19 @@ li {
   margin-top: 100px;
 }
 
-.nav-link{
-  background-color: aliceblue;
+.nav-item .nav-link {
+  color: darkslateblue;
+}
+
+.nav-item .nav-link.active {
+  background-color:darkslateblue;
+  color: white;
+}
+
+.nav-tabs {
+  --bs-nav-tabs-border-color:black
+}
+
+.list-text {
+  margin-top: 10px;
 }
