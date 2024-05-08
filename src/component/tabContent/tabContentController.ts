@@ -362,8 +362,8 @@ export class TabContentController {
     Object.values(GroupType).forEach(groupType => {
       if (this.commandGroupMap.has(groupType)) {
         xmlContent += '  <' + groupType + '>\n'
-        this.commandGroupMap.get(groupType).forEach(command => {
-          let sqlCommandStr = '    <SQL>'
+        this.commandGroupMap.get(groupType).forEach((command, index) => {
+          let sqlCommandStr = '    <SQL sql_idx="' + (index + 1) + '">'
           sqlCommandStr += command.content + '</SQL>'
           xmlContent += sqlCommandStr + '\n'
         })
