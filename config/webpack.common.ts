@@ -21,7 +21,21 @@ module.exports = {
       },
       {
         test: /\.(png|jpe?g|gif|svg|woff|woff2|ttf|eot|ico)$/,
-        loader: 'null-loader'
+        use: [
+          {
+            loader: 'url-loader',
+            options: {
+              limit: 8192,
+              name: 'image/[name].[ext]'
+            }
+          },
+          {
+            loader: 'image-webpack-loader',
+            options: {
+              disable: process.env.NODE_ENV !== 'production'
+            }
+          }
+        ]
       },
       {
         test: /\.json$/,
