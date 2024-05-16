@@ -1,6 +1,7 @@
 import * as Path from 'path'
 import HtmlWebpackPlugin from 'html-webpack-plugin'
 import ESLintPlugin from 'eslint-webpack-plugin'
+import TerserWebpackPlugin from 'terser-webpack-plugin'
 
 const appDir = Path.dirname(__dirname)
 
@@ -67,5 +68,9 @@ module.exports = {
       file: Path.join(appDir, 'dist', 'index.html'),
       template: './index.html'
     })
-  ]
+  ],
+  optimization: {
+    minimize: true,
+    minimizer: [new TerserWebpackPlugin()]
+  }
 }
