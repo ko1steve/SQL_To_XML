@@ -5,7 +5,7 @@ import ESLintPlugin from 'eslint-webpack-plugin'
 const appDir = Path.dirname(__dirname)
 
 module.exports = {
-  context: Path.join(__dirname, '../src'),
+  context: Path.join(appDir, 'src'),
   entry: ['./main.ts'],
   mode: 'none',
   module: {
@@ -13,11 +13,11 @@ module.exports = {
       {
         test: /\.tsx?$/,
         use: 'ts-loader',
-        exclude: /node_modules/,
+        exclude: /node_modules/
       },
       {
         test: /\.css$/i,
-        use: ['style-loader', 'css-loader'],
+        use: ['style-loader', 'css-loader']
       },
       {
         test: /\.(png|jpe?g|gif|svg|woff|woff2|ttf|eot|ico)$/,
@@ -27,7 +27,7 @@ module.exports = {
         test: /\.json$/,
         loader: 'json5-loader',
         options: {
-          esModule: false,
+          esModule: false
         },
         type: 'javascript/auto'
       }
@@ -40,14 +40,14 @@ module.exports = {
       Path.resolve(appDir, 'node_modules')
     ],
     alias: {
-      'src': Path.resolve(appDir, 'src/')
+      src: Path.resolve(appDir, 'src/')
     }
   },
   target: 'web',
 
   plugins: [
     new ESLintPlugin({
-      extensions: ['ts', 'tsx'],
+      extensions: ['ts', 'tsx']
     }),
     new HtmlWebpackPlugin({
       file: Path.join(appDir, 'dist', 'index.html'),

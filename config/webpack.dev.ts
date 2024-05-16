@@ -6,13 +6,14 @@ const appDir = Path.dirname(__dirname)
 
 module.exports = WebpackMerge.merge(Common, {
   output: {
-    path: Path.join(__dirname, './../dist')
+    filename: 'bundle.js',
+    path: Path.join(appDir, 'dist')
   },
   devtool: 'inline-source-map',
   mode: 'development',
 
   devServer: {
-    static: Path.join(appDir, '../src'),
+    static: Path.join(appDir, 'src'),
 
     port: 8018,
 

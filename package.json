@@ -5,7 +5,7 @@
   "main": "src/main.ts",
   "scripts": {
     "start": "webpack-dev-server --open --config ./config/webpack.dev.ts",
-    "release-dev": "ts-node node_modules/webpack/bin/webpack.js --config ./config/webpack.dev.ts --progress --profile --colors",
+    "release-dev": "ts-node node_modules/webpack/bin/webpack.js --config config/webpack.dev.ts --progress",
     "lint": "eslint ."
   },
   "author": "",
