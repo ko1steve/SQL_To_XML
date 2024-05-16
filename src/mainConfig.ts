@@ -1,15 +1,15 @@
 import { ITabContentConfig, TabContentConfig } from './component/tabContent/tabContentConfig'
 import { MessageType } from 'src/element/CommandData'
+import { TSMap } from 'typescript-map'
 
 export interface IMainConfig {
-  groupShowOrder: GroupType[]
-  checkCommandGroup: Map<CommandType, GroupType[]>
-  groupSettingMap: Map<GroupType, IGroupSetting>
+  checkCommandGroup: TSMap<CommandType, GroupType[]>
+  groupSettingMap: TSMap<GroupType, IGroupSetting>
   singleCommandIndicator: string
-  ignoredCommandMap: Map<CommandType, Map<string, RegExp>>
-  invalidCommandMap: Map<CommandType, Map<string, RegExp>>
-  tabContentConfigMap: Map<CommandType, ITabContentConfig>
-  messageMap: Map<MessageType, string>
+  ignoredCommandMap: TSMap<CommandType, TSMap<string, RegExp>>
+  invalidCommandMap: TSMap<CommandType, TSMap<string, RegExp>>
+  tabContentConfigMap: TSMap<CommandType, ITabContentConfig>
+  messageMap: TSMap<MessageType, string>
 }
 
 export interface IGroupSetting {
@@ -33,59 +33,57 @@ export enum CommandType {
 }
 
 export class MainConfig implements IMainConfig {
-  public groupShowOrder: GroupType[] = [GroupType.PreSQL, GroupType.CountSQL, GroupType.SelectSQL, GroupType.MainSQL, GroupType.PostSQL]
-
-  public groupSettingMap: Map<GroupType, IGroupSetting> = new Map<GroupType, IGroupSetting>([
+  public groupSettingMap: TSMap<GroupType, IGroupSetting> = new TSMap<GroupType, IGroupSetting>([
     [
       GroupType.PreSQL, {
         title: '前置宣告',
         indicator: '--#PreSQL',
         searchEndPattern: ['--#CountSQL', '--#SelectSQL', '--#MainSQL', '--#PostSQL']
-      } as IGroupSetting
+      }
     ],
     [
       GroupType.CountSQL, {
         title: 'Count語法',
         indicator: '--#CountSQL',
         searchEndPattern: ['--#PreSQL', '--#SelectSQL', '--#MainSQL', '--#PostSQL']
-      } as IGroupSetting
+      }
     ],
     [
       GroupType.SelectSQL, {
         title: '異動前/後語法',
         indicator: '--#SelectSQL',
         searchEndPattern: ['--#PreSQL', '--#CountSQL', '--#MainSQL', '--#PostSQL']
-      } as IGroupSetting
+      }
     ],
     [
       GroupType.MainSQL, {
         title: '異動語法',
         indicator: '--#MainSQL',
         searchEndPattern: ['--#PreSQL', '--#CountSQL', '--#SelectSQL', '--#PostSQL']
-      } as IGroupSetting
+      }
     ],
     [
       GroupType.PostSQL, {
         title: '後置語法',
         indicator: '--#PostSQL',
         searchEndPattern: ['--#PreSQL', '--#CountSQL', '--#SelectSQL', '--#MainSQL']
-      } as IGroupSetting
+      }
     ]
   ])
 
   public singleCommandIndicator: string = '/*--!*/'
 
-  public ignoredCommandMap: Map<CommandType, Map<string, RegExp>> = new Map<CommandType, Map<string, RegExp>>([
+  public ignoredCommandMap: TSMap<CommandType, TSMap<string, RegExp>> = new TSMap<CommandType, TSMap<string, RegExp>>([
     //* [唯一|開頭|結尾|句中]
     [
-      CommandType.DDL, new Map<string, RegExp>([
+      CommandType.DDL, new TSMap<string, RegExp>([
         [
           'GO', /^GO$|^GO[^\w]|[^\w]GO;*$|[^\w]+GO[^\w]+/
         ]
       ])
     ],
     [
-      CommandType.DML, new Map<string, RegExp>([
+      CommandType.DML, new TSMap<string, RegExp>([
         [
           'GO', /^GO$|^GO[^\w]|[^\w]GO;*$|[^\w]+GO[^\w]+/
         ]
@@ -93,9 +91,9 @@ export class MainConfig implements IMainConfig {
     ]
   ])
 
-  public invalidCommandMap: Map<CommandType, Map<string, RegExp>> = new Map<CommandType, Map<string, RegExp>>([
+  public invalidCommandMap: TSMap<CommandType, TSMap<string, RegExp>> = new TSMap<CommandType, TSMap<string, RegExp>>([
     [
-      CommandType.DDL, new Map<string, RegExp>([
+      CommandType.DDL, new TSMap<string, RegExp>([
         [
           'COMMIT', /^COMMIT$|^COMMIT\s+|\s+COMMIT\s+|\s+COMMIT$/
         ],
@@ -114,7 +112,7 @@ export class MainConfig implements IMainConfig {
       ])
     ],
     [
-      CommandType.DML, new Map<string, RegExp>([
+      CommandType.DML, new TSMap<string, RegExp>([
         [
           'COMMIT', /^COMMIT\s+|\s+COMMIT\s+|\s+COMMIT$/
         ],
@@ -134,7 +132,7 @@ export class MainConfig implements IMainConfig {
     ]
   ])
 
-  public tabContentConfigMap: Map<CommandType, ITabContentConfig> = new Map<CommandType, ITabContentConfig>([
+  public tabContentConfigMap: TSMap<CommandType, ITabContentConfig> = new TSMap<CommandType, ITabContentConfig>([
     [
       CommandType.DML, new TabContentConfig(CommandType.DML)
     ],
@@ -143,7 +141,7 @@ export class MainConfig implements IMainConfig {
     ]
   ])
 
-  public checkCommandGroup: Map<CommandType, GroupType[]> = new Map<CommandType, GroupType[]>([
+  public checkCommandGroup: TSMap<CommandType, GroupType[]> = new TSMap<CommandType, GroupType[]>([
     [
       CommandType.DML, [
         GroupType.CountSQL, GroupType.SelectSQL, GroupType.MainSQL
@@ -156,7 +154,7 @@ export class MainConfig implements IMainConfig {
     ]
   ])
 
-  public messageMap: Map<MessageType, string> = new Map<MessageType, string>([
+  public messageMap: TSMap<MessageType, string> = new TSMap<MessageType, string>([
     [
       MessageType.IGNORED_COMMAND,
       '[{groupType}, {index}] IgnoredCommand: Command "{command}" has been commented out.'
