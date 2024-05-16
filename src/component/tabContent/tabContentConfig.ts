@@ -1,3 +1,4 @@
+import { IHtmlElementConfig } from 'src/element/HtmlConfig'
 import { CommandType } from 'src/mainConfig'
 
 export class TabContentConfig implements ITabContentConfig {
@@ -31,17 +32,9 @@ export class TabContentConfig implements ITabContentConfig {
   public groupContainer: IGroupContainerConfig = {
     id: 'groupContainer-{groupType}-{commandType}',
     className: 'groupContainer row',
-    warningMessageContainer: {
-      id: 'warningMessageContainer-{groupType}-{commandType}',
-      className: 'col-2 col-md-3 warningContainer',
-      warningMessage: {
-        id: 'warning-message-{index}-{commandType}',
-        className: 'warning-message'
-      }
-    },
     commandContainer: {
       id: 'commandContainer-{groupType}-{commandType}',
-      className: 'col-8 col-md-6 commandContainer',
+      className: 'col-8 col-md-8 commandContainer',
       title: {
         id: '{groupType}-title-{commandType}',
         className: 'fw-bold fs-3'
@@ -53,62 +46,40 @@ export class TabContentConfig implements ITabContentConfig {
     },
     errorMessageContainer: {
       id: 'errorMessageContainer-{groupType}-{commandType}',
-      className: 'col-2 col-md-3 errorMessageContainer',
+      className: 'col-4 col-md-4 errorMessageContainer',
+      warningMessage: {
+        id: 'warning-message-{index}-{commandType}',
+        className: 'warning-message'
+      },
       errorMessage: {
         id: 'error-message-{index}-{commandType}',
         className: 'error-message'
       }
     }
   }
-
-  public downloadButtonContainer: IDownloadButtonContainer = {
-    id: 'downloadButtonContainer-{commandType}',
-    className: 'container',
-    downloadButton: {
-      id: 'downloadButton-{commandType}',
-      className: 'downloadButton',
-      textContent: 'Download as XML'
-    }
-  }
-}
-
-export interface IHTMLElementConfig {
-  id: string
-  className: string
-  innerText?: string
-  textContent?: string
 }
 
 export interface ITabContentConfig {
   commandType: CommandType;
   mainContainer: IMainContainerConfig
   groupContainer: IGroupContainerConfig
-  downloadButtonContainer: IDownloadButtonContainer
 }
 
-export interface IMainContainerConfig extends IHTMLElementConfig {
-  contentContainer: IHTMLElementConfig
+export interface IMainContainerConfig extends IHtmlElementConfig {
+  contentContainer: IHtmlElementConfig
 }
 
-export interface IGroupContainerConfig extends IHTMLElementConfig {
-  warningMessageContainer: IWarningMessageContainer
+export interface IGroupContainerConfig extends IHtmlElementConfig {
   commandContainer: ICommandContainer
   errorMessageContainer: IErrorMessageContainer
 }
 
-export interface IDownloadButtonContainer extends IHTMLElementConfig {
-  downloadButton: IHTMLElementConfig
+export interface ICommandContainer extends IHtmlElementConfig {
+  title: IHtmlElementConfig
+  paragraph: IHtmlElementConfig
 }
 
-export interface ICommandContainer extends IHTMLElementConfig {
-  title: IHTMLElementConfig
-  paragraph: IHTMLElementConfig
-}
-
-export interface IWarningMessageContainer extends IHTMLElementConfig {
-  warningMessage: IHTMLElementConfig
-}
-
-export interface IErrorMessageContainer extends IHTMLElementConfig {
-  errorMessage: IHTMLElementConfig
+export interface IErrorMessageContainer extends IHtmlElementConfig {
+  warningMessage: IHtmlElementConfig
+  errorMessage: IHtmlElementConfig
 }

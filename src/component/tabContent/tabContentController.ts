@@ -3,7 +3,7 @@ import { IGroupContainerConfig, ITabContentConfig } from './tabContentConfig'
 import { CommandData, MessageType, ICommandDataDetail } from 'src/element/CommandData'
 import { TSMap } from 'typescript-map'
 
-export class TabContentComponent {
+export class TabContentController {
   protected mainConfig: MainConfig = new MainConfig()
   protected commandType: CommandType = CommandType.NONE
   protected textFromFileLoaded: string
@@ -18,6 +18,7 @@ export class TabContentComponent {
     this.commandValid = true
     this.getCommandGroup()
     this.createContent()
+    this.updateDownloadButtonStatus()
   }
 
   protected getCommandGroup (): void {
@@ -42,6 +43,7 @@ export class TabContentComponent {
     this.textFromFileLoaded = textFromFileLoaded
     this.getCommandGroup()
     this.createContent()
+    this.updateDownloadButtonStatus()
   }
 
   protected getTextGroupMap (textFromFileLoaded: string): TSMap<GroupType, string> {
@@ -235,9 +237,6 @@ export class TabContentComponent {
       }
       this.createGroupContainer(groupType!, commands, contentContainer, elementConfig)
     })
-    if (this.commandValid) {
-      this.createDownloadButton(contentContainer, elementConfig)
-    }
   }
 
   protected createGroupContainer (groupType: GroupType, commands: CommandData[], parent: HTMLElement, elementConfig: ITabContentConfig): void {
@@ -247,11 +246,6 @@ export class TabContentComponent {
     groupContainer.id = config.id.replace('{groupType}', groupType)
     groupContainer.className = config.className
     parent.appendChild(groupContainer)
-
-    const warningMessageContainer = document.createElement('div')
-    warningMessageContainer.id = config.warningMessageContainer.id.replace('{groupType}', groupType)
-    warningMessageContainer.className = config.warningMessageContainer.className
-    groupContainer.appendChild(warningMessageContainer)
 
     const commandContainer = document.createElement('div')
     commandContainer.id = config.commandContainer.id.replace('{groupType}', groupType)
@@ -315,9 +309,6 @@ export class TabContentComponent {
           break
       }
     })
-    if (warningMessageContainer.children.length === 0) {
-      this.addClassName(warningMessageContainer, 'invisible')
-    }
     if (errorMessageContainer.children.length === 0) {
       this.addClassName(errorMessageContainer, 'invisible')
     }
@@ -335,14 +326,12 @@ export class TabContentComponent {
         paragraph.innerText = message
         switch (command.detail.messageType) {
           case MessageType.IGNORED_COMMAND:
-            paragraph.className = config.warningMessageContainer.warningMessage.className
-            this.addClassName(paragraph, 'warning-message')
-            container = document.getElementById(config.warningMessageContainer.id.replace('{groupType}', groupType)) as HTMLDivElement
+            paragraph.className = config.errorMessageContainer.warningMessage.className
+            container = document.getElementById(config.errorMessageContainer.id.replace('{groupType}', groupType)) as HTMLDivElement
             break
           case MessageType.INVALID_COMMAND_ERROR:
           case MessageType.CONTENT_NOT_FOUND_ERROR:
             paragraph.className = config.errorMessageContainer.errorMessage.className
-            this.addClassName(paragraph, 'error-meesage')
             container = document.getElementById(config.errorMessageContainer.id.replace('{groupType}', groupType)) as HTMLDivElement
             break
         }
@@ -351,44 +340,46 @@ export class TabContentComponent {
     }
   }
 
-  protected createDownloadButton (parent: HTMLElement, elementConfig: ITabContentConfig): void {
-    const config = elementConfig.downloadButtonContainer
-    const container = document.createElement('div')
-    container.id = config.id
-    container.className = config.className
-    const button = document.createElement('button')
-    button.className = config.downloadButton.className
-    if (config.downloadButton.textContent) {
-      button.textContent = config.downloadButton.textContent
+  protected updateDownloadButtonStatus (): void {
+    const downloadButton = document.getElementById('download-button')
+    if (downloadButton != null) {
+      if (this.commandValid) {
+        this.removeClassName(downloadButton, 'inactive')
+        this.addClassName(downloadButton, 'active')
+      } else {
+        this.removeClassName(downloadButton, 'active')
+        this.addClassName(downloadButton, 'inactive')
+      }
     }
-    button.onclick = () => {
-      // downloadXML()
-    }
-    container.appendChild(button)
-    parent.appendChild(container)
   }
 
-  // function downloadXML (): void {
-  //   let xmlContent = '<?xml version="1.0" encoding="UTF-8"?>\n'
-  //   xmlContent += '<data>\n'
-  //   fieldCountArr.forEach((count, groupIndex) => {
-  //     xmlContent += '  <group index="' + groupIndex + '">\n'
-  //     for (let i = 0; i < count; i++) {
-  //       // var valueId = 'field' + (groupIndex + 1) + '-' + (i+1)
-  //       // xmlContent += '    <item index="' + i + '">' + document.getElementById(valueId).value + '</item>\n'
-  //     }
-  //     xmlContent += '  </group>\n'
-  //   })
-  //   xmlContent += '</data>\n'
+  public downloadXML (): void {
+    if (!this.commandValid) {
+      return
+    }
+    let xmlContent = '<?xml version="1.0" encoding="UTF-8"?>\n'
+    xmlContent += '<SQLBodys>\n'
+    Object.values(GroupType).forEach(groupType => {
+      if (this.commandGroupMap.has(groupType)) {
+        xmlContent += '  <' + groupType + '>\n'
+        this.commandGroupMap.get(groupType).forEach((command, index) => {
+          let sqlCommandStr = '    <SQL sql_idx="' + (index + 1) + '">'
+          sqlCommandStr += command.content + '</SQL>'
+          xmlContent += sqlCommandStr + '\n'
+        })
+        xmlContent += '  </' + groupType + '>\n'
+      }
+    })
+    xmlContent += '</SQLBodys>'
 
-  //   const blob = new Blob([xmlContent], { type: 'text/xml' })
-  //   const a = document.createElement('a')
-  //   a.href = URL.createObjectURL(blob)
-  //   a.download = 'data.xml'
-  //   document.body.appendChild(a)
-  //   a.click()
-  //   document.body.removeChild(a)
-  // }
+    const blob = new Blob([xmlContent], { type: 'text/xml' })
+    const a = document.createElement('a')
+    a.href = URL.createObjectURL(blob)
+    a.download = 'data.xml'
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+  }
 
   protected addClassName (element: HTMLElement, ...classNames: string[]): void {
     classNames.forEach(className => { element.className += ' ' + className })
