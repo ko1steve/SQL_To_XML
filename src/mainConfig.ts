@@ -12,6 +12,7 @@ export interface IMainConfig {
   generalInvalidCommands: TSMap<string, RegExp>
   tabContentConfigMap: TSMap<CommandType, ITabContentConfig>
   messageMap: TSMap<MessageType, string>
+  enableTrimCommand: boolean
 }
 
 export interface IGroupSetting {
@@ -436,4 +437,6 @@ export class MainConfig implements IMainConfig {
       '[{groupType}, {index}] InvalidCommandError: "{command}" is not allowed. 請移除相關的指令。'
     ]
   ])
+
+  public enableTrimCommand: boolean = false
 }

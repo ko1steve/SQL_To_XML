@@ -180,26 +180,30 @@ export class TabContentController {
         for (j = i + 1; j < textLines.length; j++) {
           i = j - 1
           if (textLines[j].trim().startsWith(this.mainConfig.singleCommandIndicator)) {
-            // commandText = this.cleanEmptyLineAtCommandEnd(commandText)
-            // if (commandText.length > 0) {
-            commamds.push(new CommandData(commandText, commandDataDetail))
-            commandGroupMap.set(groupName!, commamds)
-            // }
+            if (this.mainConfig.enableTrimCommand) {
+              commandText = this.cleanEmptyLineAtCommandEnd(commandText)
+            }
+            if (!this.mainConfig.enableTrimCommand || commandText.length > 0) {
+              commamds.push(new CommandData(commandText, commandDataDetail))
+              commandGroupMap.set(groupName!, commamds)
+            }
             isAddToMap = true
             break
           } else {
             textLines[j] = textLines[j].replace(this.mainConfig.singleCommandIndicator, '')
-            // if (textLines[j].trim().length > 0) {
-            const newCommandDataDetail = this.getCommandDataDetail(textLines[j], groupName!)
-            commandDataDetail = {
-              messageType: commandDataDetail.messageType === MessageType.NONE ? newCommandDataDetail.messageType : commandDataDetail.messageType,
-              commands: [
-                ...commandDataDetail.commands.concat(newCommandDataDetail.commands)
-              ]
+            if (textLines[j].trim().length > 0) {
+              const newCommandDataDetail = this.getCommandDataDetail(textLines[j], groupName!)
+              commandDataDetail = {
+                messageType: commandDataDetail.messageType === MessageType.NONE ? newCommandDataDetail.messageType : commandDataDetail.messageType,
+                commands: [
+                  ...commandDataDetail.commands.concat(newCommandDataDetail.commands)
+                ]
+              }
             }
-            //* 找到結束點之前，不斷累加指令的內容
-            commandText += textLines[j] + '\n'
-            // }
+            if (!this.mainConfig.enableTrimCommand || textLines[j].trim().length > 0) {
+              //* 找到結束點之前，不斷累加指令的內容
+              commandText += textLines[j] + '\n'
+            }
           }
           if (isAddToMap) {
             break
@@ -207,11 +211,15 @@ export class TabContentController {
         }
         //* 如果直到最後都沒有出現結束點文字，則判斷結束點為最後一行文字
         if (j === textLines.length) {
-          // commandText = this.cleanEmptyLineAtCommandEnd(commandText)
-          // if (commandText.length > 0) {
-          commamds.push(new CommandData(commandText, commandDataDetail))
-          //   commandGroupMap.set(groupName!, commamds)
-          // }
+          if (this.mainConfig.enableTrimCommand) {
+            commandText = this.cleanEmptyLineAtCommandEnd(commandText)
+            if (commandText.length > 0) {
+              commamds.push(new CommandData(commandText, commandDataDetail))
+              commandGroupMap.set(groupName!, commamds)
+            }
+          } else {
+            commamds.push(new CommandData(commandText, commandDataDetail))
+          }
           isAddToMap = true
           break
         }
