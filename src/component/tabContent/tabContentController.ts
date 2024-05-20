@@ -149,35 +149,35 @@ export class TabContentController {
         const newTextLine: string = textLines[i].replace(this.mainConfig.singleCommandIndicator, '').trim()
 
         //* 取得指令資料
-        if (newTextLine.length !== 0) {
-          commandDataDetail = this.getCommandDataDetail(newTextLine)
-          commandText = newTextLine + '\n'
-        }
+        // if (newTextLine.length !== 0) {
+        commandDataDetail = this.getCommandDataDetail(newTextLine)
+        commandText = newTextLine + '\n'
+        // }
         //* 找到指令分割的判斷字串後，尋找指令的結束點
         let j: number
         for (j = i + 1; j < textLines.length; j++) {
           i = j - 1
           if (textLines[j].trim().startsWith(this.mainConfig.singleCommandIndicator)) {
-            commandText = this.cleanEmptyLineAtCommandEnd(commandText)
-            if (commandText.length > 0) {
-              commamds.push(new CommandData(commandText, commandDataDetail))
-              commandGroupMap.set(groupName!, commamds)
-            }
+            // commandText = this.cleanEmptyLineAtCommandEnd(commandText)
+            // if (commandText.length > 0) {
+            commamds.push(new CommandData(commandText, commandDataDetail))
+            commandGroupMap.set(groupName!, commamds)
+            // }
             isAddToMap = true
             break
           } else {
             textLines[j] = textLines[j].replace(this.mainConfig.singleCommandIndicator, '')
-            if (textLines[j].trim().length > 0) {
-              const newCommandDataDetail = this.getCommandDataDetail(textLines[j])
-              commandDataDetail = {
-                messageType: commandDataDetail.messageType === MessageType.NONE ? newCommandDataDetail.messageType : commandDataDetail.messageType,
-                commands: [
-                  ...commandDataDetail.commands.concat(newCommandDataDetail.commands)
-                ]
-              }
-              //* 找到結束點之前，不斷累加指令的內容
-              commandText += textLines[j] + '\n'
+            // if (textLines[j].trim().length > 0) {
+            const newCommandDataDetail = this.getCommandDataDetail(textLines[j])
+            commandDataDetail = {
+              messageType: commandDataDetail.messageType === MessageType.NONE ? newCommandDataDetail.messageType : commandDataDetail.messageType,
+              commands: [
+                ...commandDataDetail.commands.concat(newCommandDataDetail.commands)
+              ]
             }
+            //* 找到結束點之前，不斷累加指令的內容
+            commandText += textLines[j] + '\n'
+            // }
           }
           if (isAddToMap) {
             break
@@ -185,11 +185,11 @@ export class TabContentController {
         }
         //* 如果直到最後都沒有出現結束點文字，則判斷結束點為最後一行文字
         if (j === textLines.length) {
-          commandText = this.cleanEmptyLineAtCommandEnd(commandText)
-          if (commandText.length > 0) {
-            commamds.push(new CommandData(commandText, commandDataDetail))
-            commandGroupMap.set(groupName!, commamds)
-          }
+          // commandText = this.cleanEmptyLineAtCommandEnd(commandText)
+          // if (commandText.length > 0) {
+          commamds.push(new CommandData(commandText, commandDataDetail))
+          //   commandGroupMap.set(groupName!, commamds)
+          // }
           isAddToMap = true
           break
         }
