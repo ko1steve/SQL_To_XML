@@ -68,7 +68,7 @@ export class TabContentController {
         i = j - 1
         for (let k = 0; k < searchEndArr.length; k++) {
           if (textLines[j].trim().startsWith(searchEndArr[k])) {
-            //* 找到結束點後，將整個區塊指令儲存至 TSMap
+            //* 找到結束點後，將整個區塊指令儲存至 Map
             textLinesGroupMap.set(groupName, text)
             isGroupToMap = true
             break
@@ -93,7 +93,7 @@ export class TabContentController {
     return textLinesGroupMap
   }
 
-  protected getCommandDataDetail (text: string): ICommandDataDetail {
+  protected getCommandDataDetail (text: string, groupName: GroupType): ICommandDataDetail {
     text = text.trim()
     if (text.endsWith(';')) {
       text = text.substring(0, text.length - 1)
@@ -104,8 +104,18 @@ export class TabContentController {
     }
     //* 檢查指令是否包含不合規的語法
     if (this.mainConfig.invalidCommandMap.has(this.commandType)) {
-      const invalidCommandMap: TSMap<string, RegExp> = this.mainConfig.invalidCommandMap.get(this.commandType)
-      invalidCommandMap.forEach((regExp, command) => {
+      const groupInvalidCommandMap: TSMap<GroupType, TSMap<string, RegExp>> = this.mainConfig.invalidCommandMap.get(this.commandType)
+      if (groupInvalidCommandMap.has(groupName)) {
+        const invalidCommandMap: TSMap<string, RegExp> = groupInvalidCommandMap.get(groupName)
+        invalidCommandMap.forEach((regExp, command) => {
+          if (text.toUpperCase().search(regExp) > -1) {
+            detail.messageType = MessageType.INVALID_COMMAND_ERROR
+            detail.commands.push(command!)
+          }
+        })
+      }
+    } else {
+      this.mainConfig.generalInvalidCommands.forEach((regExp, command) => {
         if (text.toUpperCase().search(regExp) > -1) {
           detail.messageType = MessageType.INVALID_COMMAND_ERROR
           detail.commands.push(command!)
@@ -113,14 +123,26 @@ export class TabContentController {
       })
     }
     //* 若是不存在不合規的語法，則檢查指令是否包含需略過的語法
-    if (detail.commands.length === 0 && this.mainConfig.ignoredCommandMap.has(this.commandType)) {
-      const ignoredCommandMap: TSMap<string, RegExp> = this.mainConfig.ignoredCommandMap.get(this.commandType)
-      ignoredCommandMap.forEach((regExp, command) => {
-        if (text.toUpperCase().search(regExp) > -1) {
-          detail.messageType = MessageType.IGNORED_COMMAND
-          detail.commands.push(command!)
+    if (detail.commands.length === 0) {
+      if (this.mainConfig.ignoredCommandMap.has(this.commandType)) {
+        const groupIgnoredCommandMap: TSMap<GroupType, TSMap<string, RegExp>> = this.mainConfig.ignoredCommandMap.get(this.commandType)
+        if (groupIgnoredCommandMap.has(groupName)) {
+          const ignoredCommandMap: TSMap<string, RegExp> = groupIgnoredCommandMap.get(groupName)
+          ignoredCommandMap.forEach((regExp, command) => {
+            if (text.toUpperCase().search(regExp) > -1) {
+              detail.messageType = MessageType.IGNORED_COMMAND
+              detail.commands.push(command!)
+            }
+          })
         }
-      })
+      } else {
+        this.mainConfig.generalIgnoredCommands.forEach((regExp, command) => {
+          if (text.toUpperCase().search(regExp) > -1) {
+            detail.messageType = MessageType.IGNORED_COMMAND
+            detail.commands.push(command!)
+          }
+        })
+      }
     }
     return detail
   }
@@ -149,10 +171,10 @@ export class TabContentController {
         const newTextLine: string = textLines[i].replace(this.mainConfig.singleCommandIndicator, '').trim()
 
         //* 取得指令資料
-        // if (newTextLine.length !== 0) {
-        commandDataDetail = this.getCommandDataDetail(newTextLine)
-        commandText = newTextLine + '\n'
-        // }
+        if (newTextLine.length !== 0) {
+          commandDataDetail = this.getCommandDataDetail(newTextLine, groupName!)
+          commandText = newTextLine + '\n'
+        }
         //* 找到指令分割的判斷字串後，尋找指令的結束點
         let j: number
         for (j = i + 1; j < textLines.length; j++) {
@@ -168,7 +190,7 @@ export class TabContentController {
           } else {
             textLines[j] = textLines[j].replace(this.mainConfig.singleCommandIndicator, '')
             // if (textLines[j].trim().length > 0) {
-            const newCommandDataDetail = this.getCommandDataDetail(textLines[j])
+            const newCommandDataDetail = this.getCommandDataDetail(textLines[j], groupName!)
             commandDataDetail = {
               messageType: commandDataDetail.messageType === MessageType.NONE ? newCommandDataDetail.messageType : commandDataDetail.messageType,
               commands: [
