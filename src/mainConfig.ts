@@ -6,10 +6,13 @@ export interface IMainConfig {
   checkCommandGroup: TSMap<CommandType, GroupType[]>
   groupSettingMap: TSMap<GroupType, IGroupSetting>
   singleCommandIndicator: string
-  ignoredCommandMap: TSMap<CommandType, TSMap<string, RegExp>>
-  invalidCommandMap: TSMap<CommandType, TSMap<string, RegExp>>
+  ignoredCommandMap: TSMap<CommandType, TSMap<GroupType, TSMap<string, RegExp>>>
+  invalidCommandMap: TSMap<CommandType, TSMap<GroupType, TSMap<string, RegExp>>>
+  generalIgnoredCommands: TSMap<string, RegExp>
+  generalInvalidCommands: TSMap<string, RegExp>
   tabContentConfigMap: TSMap<CommandType, ITabContentConfig>
   messageMap: TSMap<MessageType, string>
+  enableTrimCommand: boolean
 }
 
 export interface IGroupSetting {
@@ -73,30 +76,23 @@ export class MainConfig implements IMainConfig {
 
   public singleCommandIndicator: string = '/*--!*/'
 
-  public ignoredCommandMap: TSMap<CommandType, TSMap<string, RegExp>> = new TSMap<CommandType, TSMap<string, RegExp>>([
-    //* [唯一|開頭|結尾|句中]
+  public generalIgnoredCommands: TSMap<string, RegExp> = new TSMap<string, RegExp>([
     [
-      CommandType.DDL, new TSMap<string, RegExp>([
-        [
-          'GO', /^GO$|^GO[^\w]|[^\w]GO;*$|[^\w]+GO[^\w]+/
-        ]
-      ])
-    ],
-    [
-      CommandType.DML, new TSMap<string, RegExp>([
-        [
-          'GO', /^GO$|^GO[^\w]|[^\w]GO;*$|[^\w]+GO[^\w]+/
-        ]
-      ])
+      'GO', /^GO$|^GO[^\w]|[^\w]GO;*$|[^\w]+GO[^\w]+/
     ]
   ])
 
-  public invalidCommandMap: TSMap<CommandType, TSMap<string, RegExp>> = new TSMap<CommandType, TSMap<string, RegExp>>([
+  public generalInvalidCommands: TSMap<string, RegExp> = new TSMap<string, RegExp>([
     [
-      CommandType.DDL, new TSMap<string, RegExp>([
-        [
-          'COMMIT', /^\s*COMMIT\s+/
-        ],
+      'COMMIT', /^\s*COMMIT\s+/
+    ]
+  ])
+
+  public ignoredCommandMap: TSMap<CommandType, TSMap<GroupType, TSMap<string, RegExp>>> = new TSMap<CommandType, TSMap<GroupType, TSMap<string, RegExp>>>([])
+
+  protected invalidComandMapDdl: TSMap<GroupType, TSMap<string, RegExp>> = new TSMap<GroupType, TSMap<string, RegExp>>([
+    [
+      GroupType.PreSQL, new TSMap<string, RegExp>([
         [
           'UPDATE', /^\s*UPDATE\s+/
         ],
@@ -108,14 +104,246 @@ export class MainConfig implements IMainConfig {
         ],
         [
           'SELECT', /^\s*SELECT\s+/
+        ],
+        // [
+        //   'CREATE', /^\s*CREATE\s+/
+        // ],
+        [
+          'ALTER', /^\s*ALTER\s+/
+        ],
+        [
+          'DROP', /^\s*DROP\s+/
+        ],
+        [
+          'TRUNCATE', /^\s*TRUNCATE\s+/
         ]
       ])
     ],
     [
-      CommandType.DML, new TSMap<string, RegExp>([
+      GroupType.CountSQL, new TSMap<string, RegExp>([
+        [
+          'UPDATE', /^\s*UPDATE\s+/
+        ],
+        [
+          'DELETE', /^\s*DELETE\s+/
+        ],
+        [
+          'INSERT', /^\s*INSERT\s+/
+        ],
+        // [
+        //   'SELECT', /^\s*UPDATE\s+/
+        // ],
+        [
+          'CREATE', /^\s*CREATE\s+/
+        ],
+        [
+          'ALTER', /^\s*ALTER\s+/
+        ],
+        [
+          'DROP', /^\s*DROP\s+/
+        ],
+        [
+          'TRUNCATE', /^\s*TRUNCATE\s+/
+        ],
         [
           'COMMIT', /^\s*COMMIT\s+/
+        ]
+      ])
+    ],
+    [
+      GroupType.SelectSQL, new TSMap<string, RegExp>([
+        [
+          'UPDATE', /^\s*UPDATE\s+/
         ],
+        [
+          'DELETE', /^\s*DELETE\s+/
+        ],
+        [
+          'INSERT', /^\s*INSERT\s+/
+        ],
+        // [
+        //   'SELECT', /^\s*UPDATE\s+/
+        // ],
+        [
+          'CREATE', /^\s*CREATE\s+/
+        ],
+        [
+          'ALTER', /^\s*ALTER\s+/
+        ],
+        [
+          'DROP', /^\s*DROP\s+/
+        ],
+        [
+          'TRUNCATE', /^\s*TRUNCATE\s+/
+        ],
+        [
+          'COMMIT', /^\s*COMMIT\s+/
+        ]
+      ])
+    ],
+    [
+      GroupType.MainSQL, new TSMap<string, RegExp>([
+        [
+          'UPDATE', /^\s*UPDATE\s+/
+        ],
+        [
+          'DELETE', /^\s*DELETE\s+/
+        ],
+        [
+          'INSERT', /^\s*INSERT\s+/
+        ],
+        [
+          'SELECT', /^\s*UPDATE\s+/
+        ],
+        [
+          'CREATE', /^\s*CREATE\s+/
+        ]
+        // [
+        //   'ALTER', /^\s*ALTER\s+/
+        // ],
+        // [
+        //   'DROP', /^\s*DROP\s+/
+        // ],
+        // [
+        //   'TRUNCATE', /^\s*TRUNCATE\s+/
+        // ]
+      ])
+    ],
+    [
+      GroupType.PostSQL, new TSMap<string, RegExp>([
+        [
+          'UPDATE', /^\s*UPDATE\s+/
+        ],
+        [
+          'DELETE', /^\s*DELETE\s+/
+        ],
+        [
+          'INSERT', /^\s*INSERT\s+/
+        ],
+        [
+          'SELECT', /^\s*UPDATE\s+/
+        ],
+        [
+          'CREATE', /^\s*CREATE\s+/
+        ],
+        [
+          'ALTER', /^\s*ALTER\s+/
+        ],
+        // [
+        //   'DROP', /^\s*DROP\s+/
+        // ],
+        [
+          'TRUNCATE', /^\s*TRUNCATE\s+/
+        ]
+      ])
+    ]
+  ])
+
+  protected invalidComandMapDml: TSMap<GroupType, TSMap<string, RegExp>> = new TSMap<GroupType, TSMap<string, RegExp>>([
+    [
+      GroupType.PreSQL, new TSMap<string, RegExp>([
+        [
+          'UPDATE', /^\s*UPDATE\s+/
+        ],
+        [
+          'DELETE', /^\s*DELETE\s+/
+        ],
+        [
+          'INSERT', /^\s*INSERT\s+/
+        ],
+        [
+          'SELECT', /^\s*SELECT\s+/
+        ],
+        // [
+        //   'CREATE', /^\s*CREATE\s+/
+        // ],
+        [
+          'ALTER', /^\s*ALTER\s+/
+        ],
+        [
+          'DROP', /^\s*DROP\s+/
+        ],
+        [
+          'TRUNCATE', /^\s*TRUNCATE\s+/
+        ]
+      ])
+    ],
+    [
+      GroupType.CountSQL, new TSMap<string, RegExp>([
+        [
+          'UPDATE', /^\s*UPDATE\s+/
+        ],
+        [
+          'DELETE', /^\s*DELETE\s+/
+        ],
+        [
+          'INSERT', /^\s*INSERT\s+/
+        ],
+        // [
+        //   'SELECT', /^\s*UPDATE\s+/
+        // ],
+        [
+          'CREATE', /^\s*CREATE\s+/
+        ],
+        [
+          'ALTER', /^\s*ALTER\s+/
+        ],
+        [
+          'DROP', /^\s*DROP\s+/
+        ],
+        [
+          'TRUNCATE', /^\s*TRUNCATE\s+/
+        ],
+        [
+          'COMMIT', /^\s*COMMIT\s+/
+        ]
+      ])
+    ],
+    [
+      GroupType.SelectSQL, new TSMap<string, RegExp>([
+        [
+          'UPDATE', /^\s*UPDATE\s+/
+        ],
+        [
+          'DELETE', /^\s*DELETE\s+/
+        ],
+        [
+          'INSERT', /^\s*INSERT\s+/
+        ],
+        // [
+        //   'SELECT', /^\s*UPDATE\s+/
+        // ],
+        [
+          'CREATE', /^\s*CREATE\s+/
+        ],
+        [
+          'ALTER', /^\s*ALTER\s+/
+        ],
+        [
+          'DROP', /^\s*DROP\s+/
+        ],
+        [
+          'TRUNCATE', /^\s*TRUNCATE\s+/
+        ],
+        [
+          'COMMIT', /^\s*COMMIT\s+/
+        ]
+      ])
+    ],
+    [
+      GroupType.MainSQL, new TSMap<string, RegExp>([
+        // [
+        //   'UPDATE', /^\s*UPDATE\s+/
+        // ],
+        // [
+        //   'DELETE', /^\s*DELETE\s+/
+        // ],
+        // [
+        //   'INSERT', /^\s*INSERT\s+/
+        // ],
+        // [
+        //   'SELECT', /^\s*UPDATE\s+/
+        // ]
         [
           'CREATE', /^\s*CREATE\s+/
         ],
@@ -128,6 +356,47 @@ export class MainConfig implements IMainConfig {
         [
           'TRUNCATE', /^\s*TRUNCATE\s+/
         ]
+      ])
+    ],
+    [
+      GroupType.PostSQL, new TSMap<string, RegExp>([
+        [
+          'UPDATE', /^\s*UPDATE\s+/
+        ],
+        [
+          'DELETE', /^\s*DELETE\s+/
+        ],
+        [
+          'INSERT', /^\s*INSERT\s+/
+        ],
+        [
+          'SELECT', /^\s*UPDATE\s+/
+        ],
+        [
+          'CREATE', /^\s*CREATE\s+/
+        ],
+        [
+          'ALTER', /^\s*ALTER\s+/
+        ],
+        // [
+        //   'DROP', /^\s*DROP\s+/
+        // ],
+        [
+          'TRUNCATE', /^\s*TRUNCATE\s+/
+        ]
+      ])
+    ]
+  ])
+
+  public invalidCommandMap: TSMap<CommandType, TSMap<GroupType, TSMap<string, RegExp>>> = new TSMap<CommandType, TSMap<GroupType, TSMap<string, RegExp>>>([
+    [
+      CommandType.DDL, new TSMap<GroupType, TSMap<string, RegExp>>([
+        ...this.invalidComandMapDdl.entries()
+      ])
+    ],
+    [
+      CommandType.DML, new TSMap<GroupType, TSMap<string, RegExp>>([
+        ...this.invalidComandMapDml.entries()
       ])
     ]
   ])
@@ -168,4 +437,6 @@ export class MainConfig implements IMainConfig {
       '[{groupType}, {index}] InvalidCommandError: "{command}" is not allowed. 請移除相關的指令。'
     ]
   ])
+
+  public enableTrimCommand: boolean = false
 }

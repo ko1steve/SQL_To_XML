@@ -83,6 +83,7 @@ li {
   text-align: left;
   margin: 5px;
   font-family: Consolas;
+  white-space: pre-wrap;
 }
 
 .command-ignored {
