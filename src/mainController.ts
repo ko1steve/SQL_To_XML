@@ -113,4 +113,34 @@ export class MainController {
     const tabContentController = this.tabContentControllerMap.get(this.currentCommandType)
     tabContentController?.downloadXML()
   }
+
+  protected onDownloadExampleClick (): void {
+    const xmlContent = '--#PreSQL\r\n' +
+      '/*--!*/\r\n' +
+      '--請放置前置語法\r\n' +
+      '\r\n' +
+      '--#CountSQL\r\n' +
+      '/*--!*/\r\n' +
+      '--請放置Count語法\r\n' +
+      '\r\n' +
+      '--#SelectSQL\r\n' +
+      '/*--!*/\r\n' +
+      '--請放置異動前/後語法\r\n' +
+      '\r\n' +
+      '--#MainSQL\r\n' +
+      '/*--!*/\r\n' +
+      '--請放置異動語法\r\n' +
+      '\r\n' +
+      '--#PostSQL\r\n' +
+      '/*--!*/\r\n' +
+      '--請放置後置語法'
+
+    const blob = new Blob([xmlContent], { type: 'text/xml' })
+    const a = document.createElement('a')
+    a.href = URL.createObjectURL(blob)
+    a.download = 'example.sql'
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+  }
 }
