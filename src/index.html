@@ -28,19 +28,20 @@
       </div>
       <div class='d-flex justify-content-center '>
         <ul>
-          <li class='list-text'>在五大區塊語法第一行放置下列對應的特殊字串,讓程式做辨識擷取SQL指令。<br>
+          <li class='list-text'>在五大區塊語法第一行放置下列對應的特殊字串,讓程式做辨識擷取SQL語法。<br>
             (1) 前置語法:--#PreSQL<br>
             (2) Count語法:--#CountSQL<br>
             (3) 異動前/後語法:--#SelectSQL<br>
             (4) 異動語法:--#MainSQL<br>
             (5) 後置語法:--#PostSQL
           </li>
-          <li class='list-text'>統一在 SQL 檔每一段 SQL 指令的前一行放置特殊字串「/*--!*/」,讓程式做辨識截取SQL指令。</li>
+          <li class='list-text'>統一在 SQL 檔每一段 SQL 指令的前一行放置特殊字串「/*--!*/」,讓程式做辨識截取SQL語法。</li>
           <li class='list-text'>SQL檔案內容需至少有以下的內容才視為完整的SQL檔案<br>
             (1) DML須至少有Count語法、異動前/後語法、異動語法<br>
             (2) DDL須至少有異動語法
           </li>
-          <li class='list-text'>包含GO語法的指令將會被自動刪除</li>
+          <li class='list-text'>包含GO的語法將會被自動刪除</li>
+          <li class='list-text'>DML語法結尾的分號(;)將會被自動刪除</li>
           <li class='list-text'>不得使用commit語法</li>
         </ul>
       </div>
