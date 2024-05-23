@@ -426,15 +426,15 @@ export class MainConfig implements IMainConfig {
   public messageMap: TSMap<MessageType, string> = new TSMap<MessageType, string>([
     [
       MessageType.IGNORED_COMMAND,
-      '[{groupType}, {index}] IgnoredCommand: Command "{command}" has been commented out.'
+      '{groupTitle}, index = {index}\n IgnoredCommand: Command "{command}" has been commented out.'
     ],
     [
       MessageType.CONTENT_NOT_FOUND_ERROR,
-      '[{groupType}] ContentNotFoundError: "{groupTitle}" is not defind. 請檢查 SQL 檔案是否有包含該類別的指令。'
+      '{groupTitle}\n ContentNotFoundError: "{groupTitle}" is not defind. 請檢查 SQL 檔案是否有包含該類別的指令。'
     ],
     [
       MessageType.INVALID_COMMAND_ERROR,
-      '[{groupType}, {index}] InvalidCommandError: "{command}" is not allowed. 請移除相關的指令。'
+      '{groupTitle}, index = {index}\n InvalidCommandError: "{command}" is not allowed. 請移除相關的指令。'
     ]
   ])
 

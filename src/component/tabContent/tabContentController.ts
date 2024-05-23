@@ -350,7 +350,8 @@ export class TabContentController {
       const paragraph: HTMLSpanElement = document.createElement('p')
       command.detail.commands.forEach(e => {
         let message: string = this.mainConfig.messageMap.get(command.detail.messageType)
-        message = message.replace('{groupType}', groupType)
+        const groupTitle = this.mainConfig.groupSettingMap.get(groupType).title
+        message = message.replace('{groupTitle}', groupTitle)
         message = message.replace('{index}', (index + 1).toString())
         message = message.replace('{command}', e)
         paragraph.innerText = message
