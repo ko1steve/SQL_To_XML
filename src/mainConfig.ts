@@ -39,7 +39,7 @@ export class MainConfig implements IMainConfig {
   public groupSettingMap: TSMap<GroupType, IGroupSetting> = new TSMap<GroupType, IGroupSetting>([
     [
       GroupType.PreSQL, {
-        title: '前置宣告',
+        title: '前置語法',
         indicator: '--#PreSQL',
         searchEndPattern: ['--#CountSQL', '--#SelectSQL', '--#MainSQL', '--#PostSQL']
       }
