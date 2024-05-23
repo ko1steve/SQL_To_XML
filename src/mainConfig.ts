@@ -438,5 +438,5 @@ export class MainConfig implements IMainConfig {
     ]
   ])
 
-  public enableTrimCommand: boolean = false
+  public enableTrimCommand: boolean = true
 }

@@ -53,6 +53,10 @@ export class MainController {
     if (downloadButton != null) {
       downloadButton.onclick = this.onDownloadClick.bind(this)
     }
+    const exampleButton = document.getElementById('download-example-button')
+    if (exampleButton != null) {
+      exampleButton.onclick = this.onDownloadExampleClick.bind(this)
+    }
   }
 
   protected onFileInput (fileInput: HTMLInputElement): void {
