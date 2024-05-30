@@ -93,17 +93,22 @@ export class MainController {
     }
   }
 
-  protected onNavClick (commamdType: CommandType) {
-    this.currentCommandType = commamdType
+  protected onNavClick (commandType: CommandType) {
+    this.currentCommandType = commandType
     const uplloadButtonContainer = document.getElementsByClassName('upload-button-container')[0]
 
     const label: HTMLLabelElement = uplloadButtonContainer.getElementsByTagName('label')[0]
-    label.id = label.id.replace(CommandType.DDL, commamdType).replace(CommandType.DML, commamdType)
-    label.htmlFor = label.htmlFor.replace(CommandType.DDL, commamdType).replace(CommandType.DML, commamdType)
+    label.id = label.id.replace(CommandType.DDL, commandType).replace(CommandType.DML, commandType)
+    label.htmlFor = label.htmlFor.replace(CommandType.DDL, commandType).replace(CommandType.DML, commandType)
 
     const input: HTMLInputElement = uplloadButtonContainer.getElementsByTagName('input')[0]
-    input.id = input.id.replace(CommandType.DDL, commamdType).replace(CommandType.DML, commamdType)
-    input.dataset.sqlType = commamdType
+    input.id = input.id.replace(CommandType.DDL, commandType).replace(CommandType.DML, commandType)
+    input.dataset.sqlType = commandType
+
+    if (this.tabContentControllerMap.has(commandType)) {
+      const tabContentController = this.tabContentControllerMap.get(commandType) as TabContentController
+      tabContentController.updateDownloadButtonStatus()
+    }
   }
 
   protected onDownloadClick (): void {

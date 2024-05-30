@@ -393,7 +393,7 @@ export class TabContentController {
     }
   }
 
-  protected updateDownloadButtonStatus (): void {
+  public updateDownloadButtonStatus (): void {
     const downloadButton = document.getElementById('download-button')
     if (downloadButton != null) {
       if (this.commandValid) {
