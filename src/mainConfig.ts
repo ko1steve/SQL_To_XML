@@ -10,6 +10,8 @@ export interface IMainConfig {
   invalidCommandMap: TSMap<CommandType, TSMap<GroupType, TSMap<string, RegExp>>>
   generalIgnoredCommands: TSMap<string, RegExp>
   generalInvalidCommands: TSMap<string, RegExp>
+  complexCommands: TSMap<string, RegExp>
+  complexInvalidCommandCondition: TSMap<string, TSMap<string, boolean>>
   tabContentConfigMap: TSMap<CommandType, ITabContentConfig>
   messageMap: TSMap<MessageType, string>
   enableTrimCommand: boolean
@@ -435,6 +437,50 @@ export class MainConfig implements IMainConfig {
     [
       MessageType.INVALID_COMMAND_ERROR,
       '{groupTitle}, index = {index}\n InvalidCommandError: "{command}" is not allowed. 請移除相關的指令。'
+    ]
+  ])
+
+  public complexCommands: TSMap<string, RegExp> = new TSMap<string, RegExp>([
+    [
+      'CREATE PROCEDURE', /^\s*CREATE PROCEDURE\s+/
+    ]
+  ])
+
+  public complexInvalidCommandCondition: TSMap<string, TSMap<string, boolean>> = new TSMap<string, TSMap<string, boolean>>([
+    ['COMMIT',
+      new TSMap<string, boolean>([
+        [
+          'CREATE PROCEDURE', true
+        ]
+      ])
+    ],
+    ['INSERT',
+      new TSMap<string, boolean>([
+        [
+          'CREATE PROCEDURE', true
+        ]
+      ])
+    ],
+    ['SELECT',
+      new TSMap<string, boolean>([
+        [
+          'CREATE PROCEDURE', true
+        ]
+      ])
+    ],
+    ['UPDATE',
+      new TSMap<string, boolean>([
+        [
+          'CREATE PROCEDURE', true
+        ]
+      ])
+    ],
+    ['DELETE',
+      new TSMap<string, boolean>([
+        [
+          'CREATE PROCEDURE', true
+        ]
+      ])
     ]
   ])
 
