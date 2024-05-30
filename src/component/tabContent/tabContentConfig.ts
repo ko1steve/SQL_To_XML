@@ -34,7 +34,7 @@ export class TabContentConfig implements ITabContentConfig {
     className: 'groupContainer row',
     commandContainer: {
       id: 'commandContainer-{groupType}-{commandType}',
-      className: 'col-8 col-md-8 commandContainer',
+      className: 'col-8 col-md-8 commandContainer mx-auto',
       title: {
         id: '{groupType}-title-{commandType}',
         className: 'fw-bold fs-3'
