@@ -293,11 +293,17 @@ export class TabContentController {
     title.innerText = this.mainConfig.groupSettingMap.get(groupType).title
     commandContainer.appendChild(title)
 
-    if (commands.length === 0) {
+    let isCheckGroup: boolean = false
+    if (this.mainConfig.checkCommandGroup.has(this.commandType)) {
+      const checkGroupTypes: GroupType[] = this.mainConfig.checkCommandGroup.get(this.commandType)
+      isCheckGroup = checkGroupTypes.includes(groupType)
+    }
+
+    if (commands.length === 0 && isCheckGroup) {
       this.commandValid = false
       let errorMessage: string = this.mainConfig.messageMap.get(MessageType.CONTENT_NOT_FOUND_ERROR)
-      errorMessage = errorMessage.replace('{groupType}', groupType)
       const groupTitle: string = this.mainConfig.groupSettingMap.get(groupType).title
+      errorMessage = errorMessage.replace('{groupTitle}', groupTitle)
       errorMessage = errorMessage.replace('{groupTitle}', groupTitle)
       this.addClassName(title, 'command-error')
       const span: HTMLSpanElement = document.createElement('span')
@@ -305,40 +311,44 @@ export class TabContentController {
       span.innerText = errorMessage
       errorMessageContainer.appendChild(span)
     }
-    const orderedList = document.createElement('ol')
-    commandContainer.appendChild(orderedList)
 
-    commands.forEach((command: CommandData, index: number) => {
-      const listItem = document.createElement('li')
-      listItem.className = 'command'
-      if (command.detail.messageType !== MessageType.NONE) {
-        this.appendMessage(command, groupType, index, config)
-      }
-      listItem.addEventListener('pointerover', () => {
-        this.addClassName(listItem, 'pointerover-command')
+    if (commands.length > 0) {
+      const orderedList = document.createElement('ol')
+      orderedList.className = 'command-list'
+      commandContainer.appendChild(orderedList)
+
+      commands.forEach((command: CommandData, index: number) => {
+        const listItem = document.createElement('li')
+        listItem.className = 'command  mx-auto'
+        if (command.detail.messageType !== MessageType.NONE) {
+          this.appendMessage(command, groupType, index, config)
+        }
+        listItem.addEventListener('pointerover', () => {
+          this.addClassName(listItem, 'pointerover-command')
+        })
+        listItem.addEventListener('pointerout', () => {
+          this.removeClassName(listItem, 'pointerover-command')
+        })
+        orderedList.appendChild(listItem)
+
+        const paragraph = document.createElement('p')
+        paragraph.id = config.commandContainer.paragraph.id.replace('{groupType}', groupType).replace('{index}', index.toString())
+        paragraph.innerText = command.content
+        listItem.appendChild(paragraph)
+
+        switch (command.detail.messageType) {
+          case MessageType.IGNORED_COMMAND:
+            this.addClassName(listItem, 'command-ignored')
+            command.content = '-- ' + command.content
+            break
+          case MessageType.CONTENT_NOT_FOUND_ERROR:
+          case MessageType.INVALID_COMMAND_ERROR:
+            this.commandValid = false
+            this.addClassName(listItem, 'command-error')
+            break
+        }
       })
-      listItem.addEventListener('pointerout', () => {
-        this.removeClassName(listItem, 'pointerover-command')
-      })
-      orderedList.appendChild(listItem)
-
-      const paragraph = document.createElement('p')
-      paragraph.id = config.commandContainer.paragraph.id.replace('{groupType}', groupType).replace('{index}', index.toString())
-      paragraph.innerText = command.content
-      listItem.appendChild(paragraph)
-
-      switch (command.detail.messageType) {
-        case MessageType.IGNORED_COMMAND:
-          this.addClassName(listItem, 'command-ignored')
-          command.content = '-- ' + command.content
-          break
-        case MessageType.CONTENT_NOT_FOUND_ERROR:
-        case MessageType.INVALID_COMMAND_ERROR:
-          this.commandValid = false
-          this.addClassName(listItem, 'command-error')
-          break
-      }
-    })
+    }
     if (errorMessageContainer.children.length === 0) {
       this.addClassName(errorMessageContainer, 'invisible')
     }
@@ -350,7 +360,8 @@ export class TabContentController {
       const paragraph: HTMLSpanElement = document.createElement('p')
       command.detail.commands.forEach(e => {
         let message: string = this.mainConfig.messageMap.get(command.detail.messageType)
-        message = message.replace('{groupType}', groupType)
+        const groupTitle = this.mainConfig.groupSettingMap.get(groupType).title
+        message = message.replace('{groupTitle}', groupTitle)
         message = message.replace('{index}', (index + 1).toString())
         message = message.replace('{command}', e)
         paragraph.innerText = message

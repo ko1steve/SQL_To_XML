@@ -11,6 +11,14 @@
   <div class="navbar navbar-dark bg-dark shadow-sm fixed-top">
     <div class='container d-flex align-items-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none'>
       <span id='header-title'>SQL 產生器</span>
+      <div class='offcanvas-body p-4 pt-0 p-lg-0'>
+        <ul class='navbar-nav flex-row flex-wrap bd-navbar-nav px-5 justify-content-end'>
+          <li class='nav-item col-6 col-lg-auto'>
+            <button class="nav-link py-2 px-0 px-lg-2 header-bar" id='download-example-button'>Example</button>
+          </li>
+          <li class='nav-item col-6 col-lg-auto'></li>
+        </ul>
+      </div>
     </div>
   </div>
   <div class='row container-fluid px-5 mt-100'>
@@ -20,19 +28,20 @@
       </div>
       <div class='d-flex justify-content-center '>
         <ul>
-          <li class='list-text'>在五大區塊語法第一行放置下列對應的特殊字串,讓程式做辨識擷取SQL指令。<br>
+          <li class='list-text'>在五大區塊語法第一行放置下列對應的特殊字串,讓程式做辨識擷取SQL語法。<br>
             (1) 前置語法:--#PreSQL<br>
             (2) Count語法:--#CountSQL<br>
             (3) 異動前/後語法:--#SelectSQL<br>
             (4) 異動語法:--#MainSQL<br>
             (5) 後置語法:--#PostSQL
           </li>
-          <li class='list-text'>統一在 SQL 檔每一段 SQL 指令的前一行放置特殊字串「/*--!*/」,讓程式做辨識截取SQL指令。</li>
+          <li class='list-text'>統一在 SQL 檔每一段 SQL 指令的前一行放置特殊字串「/*--!*/」,讓程式做辨識截取SQL語法。</li>
           <li class='list-text'>SQL檔案內容需至少有以下的內容才視為完整的SQL檔案<br>
             (1) DML須至少有Count語法、異動前/後語法、異動語法<br>
             (2) DDL須至少有異動語法
           </li>
-          <li class='list-text'>包含GO語法的指令將會被自動刪除</li>
+          <li class='list-text'>包含GO的語法將會被自動刪除</li>
+          <li class='list-text'>DML語法結尾的分號(;)將會被自動刪除</li>
           <li class='list-text'>不得使用commit語法</li>
         </ul>
       </div>
