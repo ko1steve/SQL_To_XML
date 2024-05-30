@@ -296,8 +296,8 @@ export class TabContentController {
     if (commands.length === 0) {
       this.commandValid = false
       let errorMessage: string = this.mainConfig.messageMap.get(MessageType.CONTENT_NOT_FOUND_ERROR)
-      errorMessage = errorMessage.replace('{groupType}', groupType)
       const groupTitle: string = this.mainConfig.groupSettingMap.get(groupType).title
+      errorMessage = errorMessage.replace('{groupTitle}', groupTitle)
       errorMessage = errorMessage.replace('{groupTitle}', groupTitle)
       this.addClassName(title, 'command-error')
       const span: HTMLSpanElement = document.createElement('span')

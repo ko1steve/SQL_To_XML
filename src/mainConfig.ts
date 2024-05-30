@@ -194,10 +194,10 @@ export class MainConfig implements IMainConfig {
         ],
         [
           'SELECT', /^\s*UPDATE\s+/
-        ],
-        [
-          'CREATE', /^\s*CREATE\s+/
         ]
+        // [
+        //   'CREATE', /^\s*CREATE\s+/
+        // ],
         // [
         //   'ALTER', /^\s*ALTER\s+/
         // ],
