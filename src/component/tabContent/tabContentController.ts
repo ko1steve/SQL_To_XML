@@ -93,11 +93,9 @@ export class TabContentController {
     return textLinesGroupMap
   }
 
-  protected getCommandDataDetail (text: string, groupName: GroupType): ICommandDataDetail {
+  protected getCommandDataDetail (text: string, groupName: GroupType, prevCommandString: string): ICommandDataDetail {
+    prevCommandString += '\n' + text
     text = text.trim()
-    if (text.endsWith(';')) {
-      text = text.substring(0, text.length - 1)
-    }
     const detail: ICommandDataDetail = {
       messageType: MessageType.NONE,
       commands: []
@@ -109,8 +107,22 @@ export class TabContentController {
         const invalidCommandMap: TSMap<string, RegExp> = groupInvalidCommandMap.get(groupName)
         invalidCommandMap.forEach((regExp, command) => {
           if (text.toUpperCase().search(regExp) > -1) {
-            detail.messageType = MessageType.INVALID_COMMAND_ERROR
-            detail.commands.push(command!)
+            let isComplexCommandVaild = false
+            if (this.mainConfig.complexInvalidCommandCondition.has(command!)) {
+              const conditionMap = this.mainConfig.complexInvalidCommandCondition.get(command!)
+              conditionMap.forEach((isValid, conditionCommand) => {
+                if (isValid && this.mainConfig.complexCommands.has(conditionCommand!)) {
+                  const contextRegExp = this.mainConfig.complexCommands.get(conditionCommand!)
+                  if (prevCommandString.toUpperCase().search(contextRegExp) > -1) {
+                    isComplexCommandVaild = true
+                  }
+                }
+              })
+            }
+            if (!isComplexCommandVaild) {
+              detail.messageType = MessageType.INVALID_COMMAND_ERROR
+              detail.commands.push(command!)
+            }
           }
         })
       }
@@ -172,7 +184,7 @@ export class TabContentController {
 
         //* 取得指令資料
         if (newTextLine.length !== 0) {
-          commandDataDetail = this.getCommandDataDetail(newTextLine, groupName!)
+          commandDataDetail = this.getCommandDataDetail(newTextLine, groupName!, commandText)
           commandText = newTextLine + '\n'
         }
         //* 找到指令分割的判斷字串後，尋找指令的結束點
@@ -192,7 +204,7 @@ export class TabContentController {
           } else {
             textLines[j] = textLines[j].replace(this.mainConfig.singleCommandIndicator, '')
             if (textLines[j].trim().length > 0) {
-              const newCommandDataDetail = this.getCommandDataDetail(textLines[j], groupName!)
+              const newCommandDataDetail = this.getCommandDataDetail(textLines[j], groupName!, commandText)
               commandDataDetail = {
                 messageType: commandDataDetail.messageType === MessageType.NONE ? newCommandDataDetail.messageType : commandDataDetail.messageType,
                 commands: [
@@ -381,7 +393,7 @@ export class TabContentController {
     }
   }
 
-  protected updateDownloadButtonStatus (): void {
+  public updateDownloadButtonStatus (): void {
     const downloadButton = document.getElementById('download-button')
     if (downloadButton != null) {
       if (this.commandValid) {
