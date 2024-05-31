@@ -410,17 +410,17 @@ export class TabContentController {
     if (!this.commandValid) {
       return
     }
-    let xmlContent = '<?xml version="1.0" encoding="UTF-8"?>\n'
-    xmlContent += '<SQLBodys>\n'
+    let xmlContent = '<?xml version="1.0" encoding="UTF-8"?>\r\n'
+    xmlContent += '<SQLBodys>\r\n'
     Object.values(GroupType).forEach(groupType => {
       if (this.commandGroupMap.has(groupType)) {
-        xmlContent += '  <' + groupType + '>\n'
+        xmlContent += '  <' + groupType + '>\r\n'
         this.commandGroupMap.get(groupType).forEach((command, index) => {
           let sqlCommandStr = '    <SQL sql_idx="' + (index + 1) + '">'
           sqlCommandStr += command.content + '</SQL>'
-          xmlContent += sqlCommandStr + '\n'
+          xmlContent += sqlCommandStr + '\r\n'
         })
-        xmlContent += '  </' + groupType + '>\n'
+        xmlContent += '  </' + groupType + '>\r\n'
       }
     })
     xmlContent += '</SQLBodys>'
