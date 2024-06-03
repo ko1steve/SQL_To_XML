@@ -396,7 +396,7 @@ export class TabContentController {
   public updateDownloadButtonStatus (): void {
     const downloadButton = document.getElementById('download-button')
     if (downloadButton != null) {
-      if (this.commandValid) {
+      if (this.commandValid && this.textFromFileLoaded !== undefined) {
         this.removeClassName(downloadButton, 'inactive')
         this.addClassName(downloadButton, 'active')
       } else {
