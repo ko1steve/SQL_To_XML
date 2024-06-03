@@ -325,27 +325,35 @@ export class TabContentController {
     }
 
     if (commands.length > 0) {
-      const orderedList = document.createElement('ol')
-      orderedList.className = 'command-list'
-      commandContainer.appendChild(orderedList)
+      const itemList = document.createElement('ul')
+      itemList.className = 'command-list'
+      commandContainer.appendChild(itemList)
 
       commands.forEach((command: CommandData, index: number) => {
         const listItem = document.createElement('li')
-        listItem.className = 'command  mx-auto'
+        listItem.className = 'command'
         if (command.detail.messageType !== MessageType.NONE) {
           this.appendMessage(command, groupType, index, config)
         }
-        listItem.addEventListener('pointerover', () => {
-          this.addClassName(listItem, 'pointerover-command')
-        })
-        listItem.addEventListener('pointerout', () => {
-          this.removeClassName(listItem, 'pointerover-command')
-        })
-        orderedList.appendChild(listItem)
+        itemList.appendChild(listItem)
+
+        const numOfItem = document.createElement('p')
+        numOfItem.className = 'num-of-item '
+        numOfItem.innerText = (index + 1).toString()
+        listItem.appendChild(numOfItem)
 
         const paragraph = document.createElement('p')
         paragraph.id = config.commandContainer.paragraph.id.replace('{groupType}', groupType).replace('{index}', index.toString())
+        paragraph.className = 'command-text pointerout-command'
         paragraph.innerText = command.content
+        paragraph.addEventListener('pointerover', () => {
+          this.addClassName(paragraph, 'pointerover-command')
+          this.removeClassName(paragraph, 'pointerout-command')
+        })
+        paragraph.addEventListener('pointerout', () => {
+          this.addClassName(paragraph, 'pointerout-command')
+          this.removeClassName(paragraph, 'pointerover-command')
+        })
         listItem.appendChild(paragraph)
 
         switch (command.detail.messageType) {
