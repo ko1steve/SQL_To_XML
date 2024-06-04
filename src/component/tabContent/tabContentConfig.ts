@@ -44,7 +44,7 @@ export class TabContentConfig implements ITabContentConfig {
         className: 'command'
       }
     },
-    errorMessageContainer: {
+    messageContainer: {
       id: 'error-message-container-{groupType}-{commandType}',
       className: 'col-4 col-md-4 error-message-container',
       warningMessage: {
@@ -71,7 +71,7 @@ export interface IMainContainerConfig extends IHtmlElementConfig {
 
 export interface IGroupContainerConfig extends IHtmlElementConfig {
   commandContainer: ICommandContainer
-  errorMessageContainer: IErrorMessageContainer
+  messageContainer: IMessageContainer
 }
 
 export interface ICommandContainer extends IHtmlElementConfig {
@@ -79,7 +79,7 @@ export interface ICommandContainer extends IHtmlElementConfig {
   paragraph: IHtmlElementConfig
 }
 
-export interface IErrorMessageContainer extends IHtmlElementConfig {
+export interface IMessageContainer extends IHtmlElementConfig {
   warningMessage: IHtmlElementConfig
   errorMessage: IHtmlElementConfig
 }

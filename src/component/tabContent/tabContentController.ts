@@ -294,10 +294,10 @@ export class TabContentController {
     commandContainer.className = config.commandContainer.className
     groupContainer.appendChild(commandContainer)
 
-    const errorMessageContainer: HTMLDivElement = document.createElement('div')
-    errorMessageContainer.id = config.errorMessageContainer.id.replace('{groupType}', groupType)
-    errorMessageContainer.className = config.errorMessageContainer.className
-    groupContainer.appendChild(errorMessageContainer)
+    const messageContainer: HTMLDivElement = document.createElement('div')
+    messageContainer.id = config.messageContainer.id.replace('{groupType}', groupType)
+    messageContainer.className = config.messageContainer.className
+    groupContainer.appendChild(messageContainer)
 
     const title = document.createElement('p')
     title.id = config.commandContainer.title.id.replace('{groupType}', groupType)
@@ -319,9 +319,9 @@ export class TabContentController {
       errorMessage = errorMessage.replace('{groupTitle}', groupTitle)
       this.addClassName(title, 'command-error')
       const span: HTMLSpanElement = document.createElement('span')
-      span.className = config.errorMessageContainer.errorMessage.className
+      span.className = config.messageContainer.errorMessage.className
       span.innerText = errorMessage
-      errorMessageContainer.appendChild(span)
+      messageContainer.appendChild(span)
     }
 
     if (commands.length > 0) {
@@ -369,8 +369,8 @@ export class TabContentController {
         }
       })
     }
-    if (errorMessageContainer.children.length === 0) {
-      this.addClassName(errorMessageContainer, 'invisible')
+    if (messageContainer.children.length === 0) {
+      this.addClassName(messageContainer, 'invisible')
     }
   }
 
@@ -387,13 +387,13 @@ export class TabContentController {
         paragraph.innerText = message
         switch (command.detail.messageType) {
           case MessageType.IGNORED_COMMAND:
-            paragraph.className = config.errorMessageContainer.warningMessage.className
-            container = document.getElementById(config.errorMessageContainer.id.replace('{groupType}', groupType)) as HTMLDivElement
+            paragraph.className = config.messageContainer.warningMessage.className
+            container = document.getElementById(config.messageContainer.id.replace('{groupType}', groupType)) as HTMLDivElement
             break
           case MessageType.INVALID_COMMAND_ERROR:
           case MessageType.CONTENT_NOT_FOUND_ERROR:
-            paragraph.className = config.errorMessageContainer.errorMessage.className
-            container = document.getElementById(config.errorMessageContainer.id.replace('{groupType}', groupType)) as HTMLDivElement
+            paragraph.className = config.messageContainer.errorMessage.className
+            container = document.getElementById(config.messageContainer.id.replace('{groupType}', groupType)) as HTMLDivElement
             break
         }
         container.appendChild(paragraph)
