@@ -4,6 +4,7 @@ import 'src/styles.css'
 import { CommandType } from './mainConfig'
 import { TabContentController } from './component/tabContent/tabContentController'
 import TopButtonImage from './image/top-button.png'
+import jschardet from 'jschardet'
 
 export class MainController {
   protected tabContentControllerMap: Map<CommandType, TabContentController> = new Map()
@@ -60,9 +61,10 @@ export class MainController {
   }
 
   protected onFileInput (fileInput: HTMLInputElement): void {
-    if (fileInput?.files?.length === 0) {
+    if (!fileInput || !fileInput.files || fileInput?.files?.length === 0) {
       return
     }
+    const file: File = fileInput.files[0]
     let commandType: CommandType = CommandType.NONE
     Object.values(CommandType).forEach(e => {
       if (e.toString() === fileInput.dataset.sqlType) {
@@ -72,24 +74,44 @@ export class MainController {
     if (commandType === CommandType.NONE) {
       return
     }
-    const reader: FileReader = new FileReader()
-    reader.onload = (event) => {
+    const arrayBufferReader: FileReader = new FileReader()
+    arrayBufferReader.onload = (event) => {
       if (event.target == null) {
         return
       }
-      const textFromFileLoaded: string = event.target.result as string
-      if (this.tabContentControllerMap.has(commandType)) {
-        const tabContentController = this.tabContentControllerMap.get(commandType) as TabContentController
-        tabContentController.resetPageContent(textFromFileLoaded)
-      } else {
-        const tabContentController = new TabContentController(commandType, textFromFileLoaded)
-        this.tabContentControllerMap.set(commandType, tabContentController)
+      const arrayBuffer: ArrayBuffer = event.target.result as ArrayBuffer
+
+      //* 將 ArrayBuffer 轉成 String Type
+      const uint8Array: Uint8Array = new Uint8Array(arrayBuffer)
+      const binaryString: string = Array.from(uint8Array, byte => String.fromCharCode(byte)).join('')
+
+      //* 偵測文字編碼
+      const detectedInfo: jschardet.IDetectedMap = jschardet.detect(binaryString)
+
+      const textReader = new FileReader()
+      textReader.onload = (event) => {
+        if (event.target == null) {
+          return
+        }
+        const text = event.target.result as string
+        if (this.tabContentControllerMap.has(commandType)) {
+          const tabContentController = this.tabContentControllerMap.get(commandType) as TabContentController
+          tabContentController.resetPageContent(text)
+        } else {
+          const tabContentController = new TabContentController(commandType, text)
+          this.tabContentControllerMap.set(commandType, tabContentController)
+        }
+      }
+      //* 以偵測到的編碼讀取文字檔
+      if (fileInput.files != null) {
+        textReader.readAsText(file, detectedInfo.encoding)
       }
       fileInput.files = null
       fileInput.value = ''
     }
+    //* 將文字檔讀取為 ArrayBuffer Type
     if (fileInput.files != null) {
-      reader.readAsText(fileInput.files[0], 'UTF-8')
+      arrayBufferReader.readAsArrayBuffer(file)
     }
   }
 
