@@ -2,6 +2,7 @@ import { CommandType, GroupType, IGroupSetting, MainConfig } from 'src/mainConfi
 import { IGroupContainerConfig, ITabContentConfig } from './tabContentConfig'
 import { CommandData, MessageType, ICommandDataDetail } from 'src/element/CommandData'
 import { TSMap } from 'typescript-map'
+import * as He from 'he'
 
 export class TabContentController {
   protected mainConfig: MainConfig = new MainConfig()
@@ -425,7 +426,8 @@ export class TabContentController {
       if (this.commandGroupMap.has(groupType)) {
         this.commandGroupMap.get(groupType).forEach((command, index) => {
           let sqlCommandStr = '    <SQL sql_idx="' + (index + 1) + '">'
-          sqlCommandStr += command.content + '</SQL>'
+          //* 需透過編碼轉換 "<"、">"、"=" 等特殊字元
+          sqlCommandStr += He.encode(command.content) + '</SQL>'
           xmlContent += sqlCommandStr + '\r\n'
         })
       }

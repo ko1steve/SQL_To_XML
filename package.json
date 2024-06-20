@@ -12,6 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "bootstrap": "^5.3.3",
+    "he": "^1.2.0",
     "jschardet": "^3.1.2",
     "typescript-ioc": "^3.2.2",
     "typescript-map": "0.0.7"
@@ -20,6 +21,7 @@
     "@babel/core": "^7.24.0",
     "@babel/preset-env": "^7.24.0",
     "@babel/preset-typescript": "^7.23.3",
+    "@types/he": "^1.2.3",
     "@types/html-webpack-plugin": "^3.2.9",
     "@types/node": "^20.11.29",
     "@types/node-polyglot": "^2.5.0",
