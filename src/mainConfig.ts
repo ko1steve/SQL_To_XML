@@ -195,7 +195,7 @@ export class MainConfig implements IMainConfig {
           'INSERT', /^\s*INSERT\s+/
         ],
         [
-          'SELECT', /^\s*UPDATE\s+/
+          'SELECT', /^\s*SELECT\s+/
         ]
         // [
         //   'CREATE', /^\s*CREATE\s+/
