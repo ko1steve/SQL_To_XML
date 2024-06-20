@@ -4,15 +4,16 @@ import { CommandType } from 'src/mainConfig'
 export class TabContentConfig implements ITabContentConfig {
   constructor (commandType: CommandType) {
     this.commandType = commandType
-    this.updateConfigByCommandType(this)
+    this.replaceCommandType(this)
   }
 
-  protected updateConfigByCommandType (obj: any) {
+  //* 根據 commandType 替換 element id 字串
+  protected replaceCommandType (obj: any) {
     Object.getOwnPropertyNames(obj).forEach(k => {
       if (typeof obj[k] === 'object') {
         if (Object.prototype.hasOwnProperty.call(obj[k], 'id')) {
           obj[k].id = (obj[k].id as string).replace('{commandType}', this.commandType)
-          this.updateConfigByCommandType(obj[k])
+          this.replaceCommandType(obj[k])
         }
       }
     })

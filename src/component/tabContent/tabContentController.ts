@@ -53,9 +53,9 @@ export class TabContentController {
     let groupName: GroupType | null
     for (let i = 0; i < textLines.length; i++) {
       isGroupToMap = false
-
-      //* 若找不到區塊分割的判斷字串，則略過
       groupName = this.getGroupName(textLines[i])
+
+      //* 若找不到區塊分割的判斷字串，則略過換下一行
       if (groupName === null) {
         continue
       }
@@ -93,8 +93,8 @@ export class TabContentController {
     return textLinesGroupMap
   }
 
-  protected getCommandDataDetail (text: string, groupName: GroupType, prevCommandString: string): ICommandDataDetail {
-    prevCommandString += '\n' + text
+  protected getCommandDataDetail (text: string, groupName: GroupType, accumulatedCommand: string): ICommandDataDetail {
+    accumulatedCommand += '\n' + text
     text = text.trim()
     const detail: ICommandDataDetail = {
       messageType: MessageType.NONE,
@@ -113,7 +113,7 @@ export class TabContentController {
               conditionMap.forEach((isValid, conditionCommand) => {
                 if (isValid && this.mainConfig.complexCommands.has(conditionCommand!)) {
                   const contextRegExp = this.mainConfig.complexCommands.get(conditionCommand!)
-                  if (prevCommandString.toUpperCase().search(contextRegExp) > -1) {
+                  if (accumulatedCommand.toUpperCase().search(contextRegExp) > -1) {
                     isComplexCommandVaild = true
                   }
                 }
@@ -338,7 +338,7 @@ export class TabContentController {
         itemList.appendChild(listItem)
 
         const numOfItem = document.createElement('p')
-        numOfItem.className = 'num-of-item '
+        numOfItem.className = 'num-of-item'
         numOfItem.innerText = (index + 1).toString()
         listItem.appendChild(numOfItem)
 
