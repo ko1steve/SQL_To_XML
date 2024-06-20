@@ -447,6 +447,6 @@ export class TabContentController {
   }
 
   protected removeClassName (element: HTMLElement, ...classNames: string[]): void {
-    classNames.forEach(className => { element.className = element.className.replace(className, '').trim() })
+    classNames.forEach(className => { element.className = element.className.replace(className, '').replace('  ', ' ').trim() })
   }
 }
