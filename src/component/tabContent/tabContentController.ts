@@ -106,34 +106,31 @@ export class TabContentController {
       const groupInvalidCommandMap: TSMap<GroupType, TSMap<string, RegExp>> = this.mainConfig.invalidCommandMap.get(this.commandType)
       if (groupInvalidCommandMap.has(groupName)) {
         const invalidCommandMap: TSMap<string, RegExp> = groupInvalidCommandMap.get(groupName)
+        //* 取得該 GroupName 所有非法語法
         invalidCommandMap.forEach((regExp, command) => {
+          //* 若抓到該 Group 禁止的任一非法語法
           if (text.toUpperCase().search(regExp) > -1) {
             let isComplexCommandVaild = false
-            if (this.mainConfig.complexInvalidCommandCondition.has(command!)) {
-              const conditionMap = this.mainConfig.complexInvalidCommandCondition.get(command!)
-              conditionMap.forEach((isValid, conditionCommand) => {
-                if (isValid && this.mainConfig.complexCommands.has(conditionCommand!)) {
-                  const contextRegExp = this.mainConfig.complexCommands.get(conditionCommand!)
-                  if (accumulatedCommand.toUpperCase().search(contextRegExp) > -1) {
-                    isComplexCommandVaild = true
-                  }
-                }
-              })
-            }
-            if (!isComplexCommandVaild) {
+            //* 判斷該整段語法是否包含複合語法 (例如 CREATE PROCEDURE)
+            const conditionMap = this.mainConfig.complexInvalidCommandCondition.get(command!)
+            conditionMap.forEach((RegExp) => {
+              if (accumulatedCommand.toUpperCase().search(RegExp) > -1) {
+                isComplexCommandVaild = true
+              }
+            })
+            if (isComplexCommandVaild) {
+              //* 判斷該非法語法是否不該在複合語法內出現
+              if (!this.mainConfig.complexInvalidCommandCondition.has(command!)) {
+                detail.messageType = MessageType.INVALID_COMMAND_ERROR
+                detail.commands.push(command!)
+              }
+            } else {
               detail.messageType = MessageType.INVALID_COMMAND_ERROR
               detail.commands.push(command!)
             }
           }
         })
       }
-    } else {
-      this.mainConfig.generalInvalidCommands.forEach((regExp, command) => {
-        if (text.toUpperCase().search(regExp) > -1) {
-          detail.messageType = MessageType.INVALID_COMMAND_ERROR
-          detail.commands.push(command!)
-        }
-      })
     }
     //* 若是不存在不合規的語法，則檢查指令是否包含需略過的語法
     if (detail.commands.length === 0) {
