@@ -94,12 +94,32 @@ export class TabContentController {
     return textLinesGroupMap
   }
 
-  protected getCommandDataDetail (text: string, groupName: GroupType, accumulatedCommand: string): ICommandDataDetail {
-    accumulatedCommand += '\n' + text
-    text = text.trim()
+  protected getCommandDataDetail (command: string, groupName: GroupType): ICommandDataDetail {
     const detail: ICommandDataDetail = {
       messageType: MessageType.NONE,
       commands: []
+    }
+    //* 檢查指令是否至少包含任何一個合規的語法
+    if (this.mainConfig.validCommandMap.has(this.commandType)) {
+      const groupvalidCommandMap: TSMap<GroupType, TSMap<string, RegExp>> = this.mainConfig.validCommandMap.get(this.commandType)
+      if (groupvalidCommandMap.has(groupName)) {
+        const validCommandMap: TSMap<string, RegExp> = groupvalidCommandMap.get(groupName)
+        console.error('groupName : ', groupName)
+        //* 取得該 GroupName 所有合法語法
+        let hasValidCommand: boolean = false
+        validCommandMap.forEach((regExp, commandType) => {
+          console.error('regExp : ', regExp)
+          //* 若抓到該 Group 允許的任一合法語法
+          if (command.toUpperCase().search(regExp) > -1) {
+            hasValidCommand = true
+            console.error('hasValidCommand : ', hasValidCommand)
+          }
+        })
+        if (!hasValidCommand) {
+          detail.messageType = MessageType.NO_VALID_COMMAND_ERROR
+          detail.commands.push('')
+        }
+      }
     }
     //* 檢查指令是否包含不合規的語法
     if (this.mainConfig.invalidCommandMap.has(this.commandType)) {
@@ -107,27 +127,11 @@ export class TabContentController {
       if (groupInvalidCommandMap.has(groupName)) {
         const invalidCommandMap: TSMap<string, RegExp> = groupInvalidCommandMap.get(groupName)
         //* 取得該 GroupName 所有非法語法
-        invalidCommandMap.forEach((regExp, command) => {
+        invalidCommandMap.forEach((regExp, commandType) => {
           //* 若抓到該 Group 禁止的任一非法語法
-          if (text.toUpperCase().search(regExp) > -1) {
-            let isComplexCommandVaild = false
-            //* 判斷該整段語法是否包含複合語法 (例如 CREATE PROCEDURE)
-            const conditionMap = this.mainConfig.complexInvalidCommandCondition.get(command!)
-            conditionMap.forEach((RegExp) => {
-              if (accumulatedCommand.toUpperCase().search(RegExp) > -1) {
-                isComplexCommandVaild = true
-              }
-            })
-            if (isComplexCommandVaild) {
-              //* 判斷該非法語法是否不該在複合語法內出現
-              if (!this.mainConfig.complexInvalidCommandCondition.has(command!)) {
-                detail.messageType = MessageType.INVALID_COMMAND_ERROR
-                detail.commands.push(command!)
-              }
-            } else {
-              detail.messageType = MessageType.INVALID_COMMAND_ERROR
-              detail.commands.push(command!)
-            }
+          if (command.toUpperCase().search(regExp) > -1) {
+            detail.messageType = MessageType.INVALID_COMMAND_ERROR
+            detail.commands.push(commandType!)
           }
         })
       }
@@ -138,18 +142,18 @@ export class TabContentController {
         const groupIgnoredCommandMap: TSMap<GroupType, TSMap<string, RegExp>> = this.mainConfig.ignoredCommandMap.get(this.commandType)
         if (groupIgnoredCommandMap.has(groupName)) {
           const ignoredCommandMap: TSMap<string, RegExp> = groupIgnoredCommandMap.get(groupName)
-          ignoredCommandMap.forEach((regExp, command) => {
-            if (text.toUpperCase().search(regExp) > -1) {
+          ignoredCommandMap.forEach((regExp, commandType) => {
+            if (command.toUpperCase().search(regExp) > -1) {
               detail.messageType = MessageType.IGNORED_COMMAND
-              detail.commands.push(command!)
+              detail.commands.push(commandType!)
             }
           })
         }
       } else {
-        this.mainConfig.generalIgnoredCommands.forEach((regExp, command) => {
-          if (text.toUpperCase().search(regExp) > -1) {
+        this.mainConfig.generalIgnoredCommands.forEach((regExp, commandType) => {
+          if (command.toUpperCase().search(regExp) > -1) {
             detail.messageType = MessageType.IGNORED_COMMAND
-            detail.commands.push(command!)
+            detail.commands.push(commandType!)
           }
         })
       }
@@ -182,7 +186,6 @@ export class TabContentController {
 
         //* 取得指令資料
         if (newTextLine.length !== 0) {
-          commandDataDetail = this.getCommandDataDetail(newTextLine, groupName!, commandText)
           commandText = newTextLine + '\n'
         }
         //* 找到指令分割的判斷字串後，尋找指令的結束點
@@ -194,6 +197,7 @@ export class TabContentController {
               commandText = this.cleanEmptyLineAtCommandEnd(commandText)
             }
             if (!this.mainConfig.enableTrimCommand || commandText.length > 0) {
+              commandDataDetail = this.getCommandDataDetail(commandText, groupName!)
               commamds.push(new CommandData(commandText, commandDataDetail))
               commandGroupMap.set(groupName!, commamds)
             }
@@ -201,15 +205,6 @@ export class TabContentController {
             break
           } else {
             textLines[j] = textLines[j].replace(this.mainConfig.singleCommandIndicator, '')
-            if (textLines[j].trim().length > 0) {
-              const newCommandDataDetail = this.getCommandDataDetail(textLines[j], groupName!, commandText)
-              commandDataDetail = {
-                messageType: commandDataDetail.messageType === MessageType.NONE ? newCommandDataDetail.messageType : commandDataDetail.messageType,
-                commands: [
-                  ...commandDataDetail.commands.concat(newCommandDataDetail.commands)
-                ]
-              }
-            }
             if (!this.mainConfig.enableTrimCommand || textLines[j].trim().length > 0) {
               //* 找到結束點之前，不斷累加指令的內容
               commandText += textLines[j] + '\n'
@@ -224,11 +219,14 @@ export class TabContentController {
           if (this.mainConfig.enableTrimCommand) {
             commandText = this.cleanEmptyLineAtCommandEnd(commandText)
             if (commandText.length > 0) {
+              commandDataDetail = this.getCommandDataDetail(commandText, groupName!)
               commamds.push(new CommandData(commandText, commandDataDetail))
               commandGroupMap.set(groupName!, commamds)
             }
           } else {
+            commandDataDetail = this.getCommandDataDetail(commandText, groupName!)
             commamds.push(new CommandData(commandText, commandDataDetail))
+            commandGroupMap.set(groupName!, commamds)
           }
           isAddToMap = true
           break
@@ -361,6 +359,7 @@ export class TabContentController {
             break
           case MessageType.CONTENT_NOT_FOUND_ERROR:
           case MessageType.INVALID_COMMAND_ERROR:
+          case MessageType.NO_VALID_COMMAND_ERROR:
             this.commandValid = false
             this.addClassName(listItem, 'command-error')
             break
@@ -389,6 +388,7 @@ export class TabContentController {
             container = document.getElementById(config.messageContainer.id.replace('{groupType}', groupType)) as HTMLDivElement
             break
           case MessageType.INVALID_COMMAND_ERROR:
+          case MessageType.NO_VALID_COMMAND_ERROR:
           case MessageType.CONTENT_NOT_FOUND_ERROR:
             paragraph.className = config.messageContainer.errorMessage.className
             container = document.getElementById(config.messageContainer.id.replace('{groupType}', groupType)) as HTMLDivElement

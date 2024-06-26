@@ -8,9 +8,9 @@ export interface IMainConfig {
   groupSettingMap: TSMap<GroupType, IGroupSetting>
   singleCommandIndicator: string
   ignoredCommandMap: TSMap<CommandType, TSMap<GroupType, TSMap<string, RegExp>>>
+  validCommandMap: TSMap<CommandType, TSMap<GroupType, TSMap<string, RegExp>>>
   invalidCommandMap: TSMap<CommandType, TSMap<GroupType, TSMap<string, RegExp>>>
   generalIgnoredCommands: TSMap<string, RegExp>
-  complexInvalidCommandCondition: TSMap<string, TSMap<string, RegExp>>
   tabContentConfigMap: TSMap<CommandType, ITabContentConfig>
   messageMap: TSMap<MessageType, string>
   enableTrimCommand: boolean
@@ -86,6 +86,19 @@ export class MainConfig implements IMainConfig {
 
   public ignoredCommandMap: TSMap<CommandType, TSMap<GroupType, TSMap<string, RegExp>>> = new TSMap<CommandType, TSMap<GroupType, TSMap<string, RegExp>>>([])
 
+  public validCommandMap: TSMap<CommandType, TSMap<GroupType, TSMap<string, RegExp>>> = new TSMap<CommandType, TSMap<GroupType, TSMap<string, RegExp>>>([
+    [
+      CommandType.DDL, new TSMap<GroupType, TSMap<string, RegExp>>([
+        ...this.regExpConig.validRegExpMapDDL.entries()
+      ])
+    ],
+    [
+      CommandType.DML, new TSMap<GroupType, TSMap<string, RegExp>>([
+        ...this.regExpConig.validRegExpMapDML.entries()
+      ])
+    ]
+  ])
+
   public invalidCommandMap: TSMap<CommandType, TSMap<GroupType, TSMap<string, RegExp>>> = new TSMap<CommandType, TSMap<GroupType, TSMap<string, RegExp>>>([
     [
       CommandType.DDL, new TSMap<GroupType, TSMap<string, RegExp>>([
@@ -133,44 +146,10 @@ export class MainConfig implements IMainConfig {
     [
       MessageType.INVALID_COMMAND_ERROR,
       '{groupTitle}, index = {index}\n InvalidCommandError: "{command}" is not allowed. 請移除相關的指令。'
-    ]
-  ])
-
-  public complexInvalidCommandCondition: TSMap<string, TSMap<string, RegExp>> = new TSMap<string, TSMap<string, RegExp>>([
-    ['COMMIT',
-      new TSMap<string, RegExp>([
-        [
-          'CREATE PROCEDURE', /^\s*CREATE\s+PROCEDURE\s+|^\s*CREATE\s+OR\s+REPLACE\s+PROCEDURE\s+/
-        ]
-      ])
     ],
-    ['INSERT',
-      new TSMap<string, RegExp>([
-        [
-          'CREATE PROCEDURE', /^\s*CREATE\s+PROCEDURE\s+|^\s*CREATE\s+OR\s+REPLACE\s+PROCEDURE\s+/
-        ]
-      ])
-    ],
-    ['SELECT',
-      new TSMap<string, RegExp>([
-        [
-          'CREATE PROCEDURE', /^\s*CREATE\s+PROCEDURE\s+|^\s*CREATE\s+OR\s+REPLACE\s+PROCEDURE\s+/
-        ]
-      ])
-    ],
-    ['UPDATE',
-      new TSMap<string, RegExp>([
-        [
-          'CREATE PROCEDURE', /^\s*CREATE\s+PROCEDURE\s+|^\s*CREATE\s+OR\s+REPLACE\s+PROCEDURE\s+/
-        ]
-      ])
-    ],
-    ['DELETE',
-      new TSMap<string, RegExp>([
-        [
-          'CREATE PROCEDURE', /^\s*CREATE\s+PROCEDURE\s+|^\s*CREATE\s+OR\s+REPLACE\s+PROCEDURE\s+/
-        ]
-      ])
+    [
+      MessageType.NO_VALID_COMMAND_ERROR,
+      '{groupTitle}, index = {index}\n NoValidCommandError: "找不到任何符合語法規則的語法。'
     ]
   ])
 
