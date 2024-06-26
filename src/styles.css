@@ -9,13 +9,13 @@
   width: 100%;
 }
 
-#descriptContainer {
+#descript-container {
   border: solid 2px black;
   padding-top: 30px;
   height: fit-content;
 }
 
-.commandContainer {
+.command-container {
   border: solid 2px #4c84af;
   border-radius: 5px;
   padding: 10px;
@@ -23,7 +23,7 @@
   margin-bottom: 15px;
 }
 
-.errorMessageContainer {
+.error-message-container {
   border: none 2px crimson;
   border-radius: 5px;
   padding: 10px;
@@ -33,7 +33,7 @@
   margin-bottom: 15px;
 }
 
-.fileInputLabel {
+.file-input-label {
   border-radius: 5px;
   background-color: lightcoral;
   color: aliceblue;
@@ -44,7 +44,7 @@
   border: none;
 }
 
-.fileInput {
+.file-input {
   visibility: hidden;
   width: 0px;
   height: 0px;

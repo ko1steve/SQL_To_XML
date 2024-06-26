@@ -2,6 +2,7 @@ import { CommandType, GroupType, IGroupSetting, MainConfig } from 'src/mainConfi
 import { IGroupContainerConfig, ITabContentConfig } from './tabContentConfig'
 import { CommandData, MessageType, ICommandDataDetail } from 'src/element/CommandData'
 import { TSMap } from 'typescript-map'
+import * as He from 'he'
 
 export class TabContentController {
   protected mainConfig: MainConfig = new MainConfig()
@@ -53,9 +54,9 @@ export class TabContentController {
     let groupName: GroupType | null
     for (let i = 0; i < textLines.length; i++) {
       isGroupToMap = false
-
-      //* 若找不到區塊分割的判斷字串，則略過
       groupName = this.getGroupName(textLines[i])
+
+      //* 若找不到區塊分割的判斷字串，則略過換下一行
       if (groupName === null) {
         continue
       }
@@ -93,8 +94,8 @@ export class TabContentController {
     return textLinesGroupMap
   }
 
-  protected getCommandDataDetail (text: string, groupName: GroupType, prevCommandString: string): ICommandDataDetail {
-    prevCommandString += '\n' + text
+  protected getCommandDataDetail (text: string, groupName: GroupType, accumulatedCommand: string): ICommandDataDetail {
+    accumulatedCommand += '\n' + text
     text = text.trim()
     const detail: ICommandDataDetail = {
       messageType: MessageType.NONE,
@@ -105,34 +106,31 @@ export class TabContentController {
       const groupInvalidCommandMap: TSMap<GroupType, TSMap<string, RegExp>> = this.mainConfig.invalidCommandMap.get(this.commandType)
       if (groupInvalidCommandMap.has(groupName)) {
         const invalidCommandMap: TSMap<string, RegExp> = groupInvalidCommandMap.get(groupName)
+        //* 取得該 GroupName 所有非法語法
         invalidCommandMap.forEach((regExp, command) => {
+          //* 若抓到該 Group 禁止的任一非法語法
           if (text.toUpperCase().search(regExp) > -1) {
             let isComplexCommandVaild = false
-            if (this.mainConfig.complexInvalidCommandCondition.has(command!)) {
-              const conditionMap = this.mainConfig.complexInvalidCommandCondition.get(command!)
-              conditionMap.forEach((isValid, conditionCommand) => {
-                if (isValid && this.mainConfig.complexCommands.has(conditionCommand!)) {
-                  const contextRegExp = this.mainConfig.complexCommands.get(conditionCommand!)
-                  if (prevCommandString.toUpperCase().search(contextRegExp) > -1) {
-                    isComplexCommandVaild = true
-                  }
-                }
-              })
-            }
-            if (!isComplexCommandVaild) {
+            //* 判斷該整段語法是否包含複合語法 (例如 CREATE PROCEDURE)
+            const conditionMap = this.mainConfig.complexInvalidCommandCondition.get(command!)
+            conditionMap.forEach((RegExp) => {
+              if (accumulatedCommand.toUpperCase().search(RegExp) > -1) {
+                isComplexCommandVaild = true
+              }
+            })
+            if (isComplexCommandVaild) {
+              //* 判斷該非法語法是否不該在複合語法內出現
+              if (!this.mainConfig.complexInvalidCommandCondition.has(command!)) {
+                detail.messageType = MessageType.INVALID_COMMAND_ERROR
+                detail.commands.push(command!)
+              }
+            } else {
               detail.messageType = MessageType.INVALID_COMMAND_ERROR
               detail.commands.push(command!)
             }
           }
         })
       }
-    } else {
-      this.mainConfig.generalInvalidCommands.forEach((regExp, command) => {
-        if (text.toUpperCase().search(regExp) > -1) {
-          detail.messageType = MessageType.INVALID_COMMAND_ERROR
-          detail.commands.push(command!)
-        }
-      })
     }
     //* 若是不存在不合規的語法，則檢查指令是否包含需略過的語法
     if (detail.commands.length === 0) {
@@ -294,10 +292,10 @@ export class TabContentController {
     commandContainer.className = config.commandContainer.className
     groupContainer.appendChild(commandContainer)
 
-    const errorMessageContainer: HTMLDivElement = document.createElement('div')
-    errorMessageContainer.id = config.errorMessageContainer.id.replace('{groupType}', groupType)
-    errorMessageContainer.className = config.errorMessageContainer.className
-    groupContainer.appendChild(errorMessageContainer)
+    const messageContainer: HTMLDivElement = document.createElement('div')
+    messageContainer.id = config.messageContainer.id.replace('{groupType}', groupType)
+    messageContainer.className = config.messageContainer.className
+    groupContainer.appendChild(messageContainer)
 
     const title = document.createElement('p')
     title.id = config.commandContainer.title.id.replace('{groupType}', groupType)
@@ -319,9 +317,9 @@ export class TabContentController {
       errorMessage = errorMessage.replace('{groupTitle}', groupTitle)
       this.addClassName(title, 'command-error')
       const span: HTMLSpanElement = document.createElement('span')
-      span.className = config.errorMessageContainer.errorMessage.className
+      span.className = config.messageContainer.errorMessage.className
       span.innerText = errorMessage
-      errorMessageContainer.appendChild(span)
+      messageContainer.appendChild(span)
     }
 
     if (commands.length > 0) {
@@ -338,7 +336,7 @@ export class TabContentController {
         itemList.appendChild(listItem)
 
         const numOfItem = document.createElement('p')
-        numOfItem.className = 'num-of-item '
+        numOfItem.className = 'num-of-item'
         numOfItem.innerText = (index + 1).toString()
         listItem.appendChild(numOfItem)
 
@@ -369,8 +367,8 @@ export class TabContentController {
         }
       })
     }
-    if (errorMessageContainer.children.length === 0) {
-      this.addClassName(errorMessageContainer, 'invisible')
+    if (messageContainer.children.length === 0) {
+      this.addClassName(messageContainer, 'invisible')
     }
   }
 
@@ -387,13 +385,13 @@ export class TabContentController {
         paragraph.innerText = message
         switch (command.detail.messageType) {
           case MessageType.IGNORED_COMMAND:
-            paragraph.className = config.errorMessageContainer.warningMessage.className
-            container = document.getElementById(config.errorMessageContainer.id.replace('{groupType}', groupType)) as HTMLDivElement
+            paragraph.className = config.messageContainer.warningMessage.className
+            container = document.getElementById(config.messageContainer.id.replace('{groupType}', groupType)) as HTMLDivElement
             break
           case MessageType.INVALID_COMMAND_ERROR:
           case MessageType.CONTENT_NOT_FOUND_ERROR:
-            paragraph.className = config.errorMessageContainer.errorMessage.className
-            container = document.getElementById(config.errorMessageContainer.id.replace('{groupType}', groupType)) as HTMLDivElement
+            paragraph.className = config.messageContainer.errorMessage.className
+            container = document.getElementById(config.messageContainer.id.replace('{groupType}', groupType)) as HTMLDivElement
             break
         }
         container.appendChild(paragraph)
@@ -425,7 +423,8 @@ export class TabContentController {
       if (this.commandGroupMap.has(groupType)) {
         this.commandGroupMap.get(groupType).forEach((command, index) => {
           let sqlCommandStr = '    <SQL sql_idx="' + (index + 1) + '">'
-          sqlCommandStr += command.content + '</SQL>'
+          //* 需透過編碼轉換 "<"、">"、"=" 等特殊字元
+          sqlCommandStr += He.encode(command.content) + '</SQL>'
           xmlContent += sqlCommandStr + '\r\n'
         })
       }
@@ -447,6 +446,6 @@ export class TabContentController {
   }
 
   protected removeClassName (element: HTMLElement, ...classNames: string[]): void {
-    classNames.forEach(className => { element.className = element.className.replace(className, '').trim() })
+    classNames.forEach(className => { element.className = element.className.replace(className, '').replace('  ', ' ').trim() })
   }
 }

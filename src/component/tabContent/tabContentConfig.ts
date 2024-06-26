@@ -4,15 +4,16 @@ import { CommandType } from 'src/mainConfig'
 export class TabContentConfig implements ITabContentConfig {
   constructor (commandType: CommandType) {
     this.commandType = commandType
-    this.updateConfigByCommandType(this)
+    this.replaceCommandType(this)
   }
 
-  protected updateConfigByCommandType (obj: any) {
+  //* 根據 commandType 替換 element id 字串
+  protected replaceCommandType (obj: any) {
     Object.getOwnPropertyNames(obj).forEach(k => {
       if (typeof obj[k] === 'object') {
         if (Object.prototype.hasOwnProperty.call(obj[k], 'id')) {
           obj[k].id = (obj[k].id as string).replace('{commandType}', this.commandType)
-          this.updateConfigByCommandType(obj[k])
+          this.replaceCommandType(obj[k])
         }
       }
     })
@@ -33,8 +34,8 @@ export class TabContentConfig implements ITabContentConfig {
     id: 'groupContainer-{groupType}-{commandType}',
     className: 'groupContainer row',
     commandContainer: {
-      id: 'commandContainer-{groupType}-{commandType}',
-      className: 'col-8 col-md-8 commandContainer mx-auto',
+      id: 'command-container-{groupType}-{commandType}',
+      className: 'col-8 col-md-8 command-container mx-auto',
       title: {
         id: '{groupType}-title-{commandType}',
         className: 'fw-bold fs-3'
@@ -44,9 +45,9 @@ export class TabContentConfig implements ITabContentConfig {
         className: 'command'
       }
     },
-    errorMessageContainer: {
-      id: 'errorMessageContainer-{groupType}-{commandType}',
-      className: 'col-4 col-md-4 errorMessageContainer',
+    messageContainer: {
+      id: 'error-message-container-{groupType}-{commandType}',
+      className: 'col-4 col-md-4 error-message-container',
       warningMessage: {
         id: 'warning-message-{index}-{commandType}',
         className: 'warning-message'
@@ -71,7 +72,7 @@ export interface IMainContainerConfig extends IHtmlElementConfig {
 
 export interface IGroupContainerConfig extends IHtmlElementConfig {
   commandContainer: ICommandContainer
-  errorMessageContainer: IErrorMessageContainer
+  messageContainer: IMessageContainer
 }
 
 export interface ICommandContainer extends IHtmlElementConfig {
@@ -79,7 +80,7 @@ export interface ICommandContainer extends IHtmlElementConfig {
   paragraph: IHtmlElementConfig
 }
 
-export interface IErrorMessageContainer extends IHtmlElementConfig {
+export interface IMessageContainer extends IHtmlElementConfig {
   warningMessage: IHtmlElementConfig
   errorMessage: IHtmlElementConfig
 }

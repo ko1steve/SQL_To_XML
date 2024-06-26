@@ -9,9 +9,7 @@ export interface IMainConfig {
   ignoredCommandMap: TSMap<CommandType, TSMap<GroupType, TSMap<string, RegExp>>>
   invalidCommandMap: TSMap<CommandType, TSMap<GroupType, TSMap<string, RegExp>>>
   generalIgnoredCommands: TSMap<string, RegExp>
-  generalInvalidCommands: TSMap<string, RegExp>
-  complexCommands: TSMap<string, RegExp>
-  complexInvalidCommandCondition: TSMap<string, TSMap<string, boolean>>
+  complexInvalidCommandCondition: TSMap<string, TSMap<string, RegExp>>
   tabContentConfigMap: TSMap<CommandType, ITabContentConfig>
   messageMap: TSMap<MessageType, string>
   enableTrimCommand: boolean
@@ -84,12 +82,6 @@ export class MainConfig implements IMainConfig {
     ]
   ])
 
-  public generalInvalidCommands: TSMap<string, RegExp> = new TSMap<string, RegExp>([
-    [
-      'COMMIT', /^\s*COMMIT\s+/
-    ]
-  ])
-
   public ignoredCommandMap: TSMap<CommandType, TSMap<GroupType, TSMap<string, RegExp>>> = new TSMap<CommandType, TSMap<GroupType, TSMap<string, RegExp>>>([])
 
   protected invalidComandMapDdl: TSMap<GroupType, TSMap<string, RegExp>> = new TSMap<GroupType, TSMap<string, RegExp>>([
@@ -118,6 +110,9 @@ export class MainConfig implements IMainConfig {
         ],
         [
           'TRUNCATE', /^\s*TRUNCATE\s+/
+        ],
+        [
+          'COMMIT', /^\s*COMMIT\s+/
         ]
       ])
     ],
@@ -133,7 +128,7 @@ export class MainConfig implements IMainConfig {
           'INSERT', /^\s*INSERT\s+/
         ],
         // [
-        //   'SELECT', /^\s*UPDATE\s+/
+        //   'SELECT', /^\s*SELECT\s+/
         // ],
         [
           'CREATE', /^\s*CREATE\s+/
@@ -164,7 +159,7 @@ export class MainConfig implements IMainConfig {
           'INSERT', /^\s*INSERT\s+/
         ],
         // [
-        //   'SELECT', /^\s*UPDATE\s+/
+        //   'SELECT', /^\s*SELECT\s+/
         // ],
         [
           'CREATE', /^\s*CREATE\s+/
@@ -195,8 +190,8 @@ export class MainConfig implements IMainConfig {
           'INSERT', /^\s*INSERT\s+/
         ],
         [
-          'SELECT', /^\s*UPDATE\s+/
-        ]
+          'SELECT', /^\s*SELECT\s+/
+        ],
         // [
         //   'CREATE', /^\s*CREATE\s+/
         // ],
@@ -208,7 +203,10 @@ export class MainConfig implements IMainConfig {
         // ],
         // [
         //   'TRUNCATE', /^\s*TRUNCATE\s+/
-        // ]
+        // ],
+        [
+          'COMMIT', /^\s*COMMIT\s+/
+        ]
       ])
     ],
     [
@@ -223,7 +221,7 @@ export class MainConfig implements IMainConfig {
           'INSERT', /^\s*INSERT\s+/
         ],
         [
-          'SELECT', /^\s*UPDATE\s+/
+          'SELECT', /^\s*SELECT\s+/
         ],
         [
           'CREATE', /^\s*CREATE\s+/
@@ -236,6 +234,9 @@ export class MainConfig implements IMainConfig {
         // ],
         [
           'TRUNCATE', /^\s*TRUNCATE\s+/
+        ],
+        [
+          'COMMIT', /^\s*COMMIT\s+/
         ]
       ])
     ]
@@ -267,6 +268,9 @@ export class MainConfig implements IMainConfig {
         ],
         [
           'TRUNCATE', /^\s*TRUNCATE\s+/
+        ],
+        [
+          'COMMIT', /^\s*COMMIT\s+/
         ]
       ])
     ],
@@ -282,7 +286,7 @@ export class MainConfig implements IMainConfig {
           'INSERT', /^\s*INSERT\s+/
         ],
         // [
-        //   'SELECT', /^\s*UPDATE\s+/
+        //   'SELECT', /^\s*SELECT\s+/
         // ],
         [
           'CREATE', /^\s*CREATE\s+/
@@ -313,7 +317,7 @@ export class MainConfig implements IMainConfig {
           'INSERT', /^\s*INSERT\s+/
         ],
         // [
-        //   'SELECT', /^\s*UPDATE\s+/
+        //   'SELECT', /^\s*SELECT\s+/
         // ],
         [
           'CREATE', /^\s*CREATE\s+/
@@ -344,7 +348,7 @@ export class MainConfig implements IMainConfig {
         //   'INSERT', /^\s*INSERT\s+/
         // ],
         // [
-        //   'SELECT', /^\s*UPDATE\s+/
+        //   'SELECT', /^\s*SELECT\s+/
         // ]
         [
           'CREATE', /^\s*CREATE\s+/
@@ -357,6 +361,9 @@ export class MainConfig implements IMainConfig {
         ],
         [
           'TRUNCATE', /^\s*TRUNCATE\s+/
+        ],
+        [
+          'COMMIT', /^\s*COMMIT\s+/
         ]
       ])
     ],
@@ -372,7 +379,7 @@ export class MainConfig implements IMainConfig {
           'INSERT', /^\s*INSERT\s+/
         ],
         [
-          'SELECT', /^\s*UPDATE\s+/
+          'SELECT', /^\s*SELECT\s+/
         ],
         [
           'CREATE', /^\s*CREATE\s+/
@@ -385,6 +392,9 @@ export class MainConfig implements IMainConfig {
         // ],
         [
           'TRUNCATE', /^\s*TRUNCATE\s+/
+        ],
+        [
+          'COMMIT', /^\s*COMMIT\s+/
         ]
       ])
     ]
@@ -440,45 +450,39 @@ export class MainConfig implements IMainConfig {
     ]
   ])
 
-  public complexCommands: TSMap<string, RegExp> = new TSMap<string, RegExp>([
-    [
-      'CREATE PROCEDURE', /^\s*CREATE PROCEDURE\s+/
-    ]
-  ])
-
-  public complexInvalidCommandCondition: TSMap<string, TSMap<string, boolean>> = new TSMap<string, TSMap<string, boolean>>([
+  public complexInvalidCommandCondition: TSMap<string, TSMap<string, RegExp>> = new TSMap<string, TSMap<string, RegExp>>([
     ['COMMIT',
-      new TSMap<string, boolean>([
+      new TSMap<string, RegExp>([
         [
-          'CREATE PROCEDURE', true
+          'CREATE PROCEDURE', /^\s*CREATE\s+PROCEDURE\s+|^\s*CREATE\s+OR\s+REPLACE\s+PROCEDURE\s+/
         ]
       ])
     ],
     ['INSERT',
-      new TSMap<string, boolean>([
+      new TSMap<string, RegExp>([
         [
-          'CREATE PROCEDURE', true
+          'CREATE PROCEDURE', /^\s*CREATE\s+PROCEDURE\s+|^\s*CREATE\s+OR\s+REPLACE\s+PROCEDURE\s+/
         ]
       ])
     ],
     ['SELECT',
-      new TSMap<string, boolean>([
+      new TSMap<string, RegExp>([
         [
-          'CREATE PROCEDURE', true
+          'CREATE PROCEDURE', /^\s*CREATE\s+PROCEDURE\s+|^\s*CREATE\s+OR\s+REPLACE\s+PROCEDURE\s+/
         ]
       ])
     ],
     ['UPDATE',
-      new TSMap<string, boolean>([
+      new TSMap<string, RegExp>([
         [
-          'CREATE PROCEDURE', true
+          'CREATE PROCEDURE', /^\s*CREATE\s+PROCEDURE\s+|^\s*CREATE\s+OR\s+REPLACE\s+PROCEDURE\s+/
         ]
       ])
     ],
     ['DELETE',
-      new TSMap<string, boolean>([
+      new TSMap<string, RegExp>([
         [
-          'CREATE PROCEDURE', true
+          'CREATE PROCEDURE', /^\s*CREATE\s+PROCEDURE\s+|^\s*CREATE\s+OR\s+REPLACE\s+PROCEDURE\s+/
         ]
       ])
     ]

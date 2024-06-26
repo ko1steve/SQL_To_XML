@@ -34,11 +34,11 @@ export class MainController {
   }
 
   protected addEventListeners (): void {
-    const fileInputDdl: HTMLInputElement = document.getElementById('fileInput-DDL') as HTMLInputElement
+    const fileInputDdl: HTMLInputElement = document.getElementById('file-input-DDL') as HTMLInputElement
     if (fileInputDdl != null) {
       fileInputDdl.onchange = this.onFileInput.bind(this, fileInputDdl)
     }
-    const fileInputDml: HTMLInputElement = document.getElementById('fileInput-DML') as HTMLInputElement
+    const fileInputDml: HTMLInputElement = document.getElementById('file-input-DML') as HTMLInputElement
     if (fileInputDml != null) {
       fileInputDml.onchange = this.onFileInput.bind(this, fileInputDml)
     }

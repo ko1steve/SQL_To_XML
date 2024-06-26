@@ -22,11 +22,11 @@
     </div>
   </div>
   <div class='row container-fluid px-5 mt-100'>
-    <div class='col-4 container' id='descriptContainer'>
+    <div class='col-4 container' id='descript-container'>
       <div>
-        <p class='h2 d-flex justify-content-center'>格式說明</p>
+        <p class='h2 d-flex justify-content-center' id='description-title'>格式說明</p>
       </div>
-      <div class='d-flex justify-content-center '>
+      <div class='d-flex justify-content-center' id='description-content'>
         <ul>
           <li class='list-text'>在五大區塊語法第一行放置下列對應的特殊字串,讓程式做辨識擷取SQL語法。<br>
             (1) 前置語法:--#PreSQL<br>
@@ -42,15 +42,15 @@
           </li>
           <li class='list-text'>包含GO的語法將會被自動刪除</li>
           <li class='list-text'>DML語法結尾的分號(;)將會被自動刪除</li>
-          <li class='list-text'>不得使用commit語法</li>
+          <li class='list-text'>不得在 PROCEDURE 以外的任何情境使用 COMMIT 語法</li>
         </ul>
       </div>
     </div>
     <div class='col-8 container position-relative'>
       <div class='d-flex justify-content-right position-absolute end-0'>
         <div class="upload-button-container">
-          <label for="fileInput-DML" class="fileInputLabel" id='fileInputLabel-DML'>Import SQL File</label>
-          <input type="file" accept=".sql" id="fileInput-DML" class="fileInput" data-sql-type="DML">
+          <label for="file-input-DML" class="file-input-label" id='file-input-label-DML'>Import SQL File</label>
+          <input type="file" accept=".sql" id="file-input-DML" class="file-input" data-sql-type="DML">
         </div>
         <div class="download-button-container">
           <button id='download-button'>Export as XML</button>
