@@ -51,6 +51,9 @@ export class RegExpConig implements IRegExpConfig {
           'CREATE [OR REPLACE] PROCEDURE', /\s*CREATE\s+(?:OR\s+REPLACE)?\s+PROCEDURE\s+/
         ],
         [
+          'CREATE [OR REPLACE] TRIGGER', /\s*CREATE\s+(?:OR\s+REPLACE)?\s+TRIGGER\s+/
+        ],
+        [
           'ALTER PROCEDURE', /\s*ALTER\s+PROCEDURE\s+/
         ],
         [

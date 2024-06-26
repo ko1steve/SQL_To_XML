@@ -104,15 +104,12 @@ export class TabContentController {
       const groupvalidCommandMap: TSMap<GroupType, TSMap<string, RegExp>> = this.mainConfig.validCommandMap.get(this.commandType)
       if (groupvalidCommandMap.has(groupName)) {
         const validCommandMap: TSMap<string, RegExp> = groupvalidCommandMap.get(groupName)
-        console.error('groupName : ', groupName)
         //* 取得該 GroupName 所有合法語法
         let hasValidCommand: boolean = false
         validCommandMap.forEach((regExp, commandType) => {
-          console.error('regExp : ', regExp)
           //* 若抓到該 Group 允許的任一合法語法
           if (command.toUpperCase().search(regExp) > -1) {
             hasValidCommand = true
-            console.error('hasValidCommand : ', hasValidCommand)
           }
         })
         if (!hasValidCommand) {
