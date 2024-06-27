@@ -30,10 +30,11 @@
         <ul>
           <li class='list-text'>在五大區塊語法第一行放置下列對應的特殊字串,讓程式做辨識擷取SQL語法。<br>
             (1) 前置語法:--#PreSQL<br>
-            (2) Count語法:--#CountSQL<br>
-            (3) 異動前/後語法:--#SelectSQL<br>
-            (4) 異動語法:--#MainSQL<br>
-            (5) 後置語法:--#PostSQL
+            (2) PreProd前置語法:--#PreProdSQL<br>
+            (3) Count語法:--#CountSQL<br>
+            (4) 異動前/後語法:--#SelectSQL<br>
+            (5) 異動語法:--#MainSQL<br>
+            (6) 後置語法:--#PostSQL
           </li>
           <li class='list-text'>統一在 SQL 檔每一段 SQL 指令的前一行放置特殊字串「/*--!*/」,讓程式做辨識截取SQL語法。</li>
           <li class='list-text'>SQL檔案內容需至少有以下的內容才視為完整的SQL檔案<br>
@@ -42,7 +43,7 @@
           </li>
           <li class='list-text'>包含GO的語法將會被自動刪除</li>
           <li class='list-text'>DML語法結尾的分號(;)將會被自動刪除</li>
-          <li class='list-text'>不得在 PROCEDURE 以外的任何情境使用 COMMIT 語法</li>
+          <li class='list-text'>不得在 DDL 指令內部以外的情境使用 COMMIT 語法</li>
         </ul>
       </div>
     </div>
