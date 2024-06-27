@@ -24,6 +24,7 @@ export interface IGroupSetting {
 
 export enum GroupType {
   PreSQL = 'PreSQL',
+  PreProdSQL = 'PreProdSQL',
   CountSQL = 'CountSQL',
   SelectSQL = 'SelectSQL',
   MainSQL = 'MainSQL',
@@ -43,35 +44,42 @@ export class MainConfig implements IMainConfig {
       GroupType.PreSQL, {
         title: '前置語法',
         indicator: '--#PreSQL',
-        searchEndPattern: ['--#CountSQL', '--#SelectSQL', '--#MainSQL', '--#PostSQL']
+        searchEndPattern: ['--#PreProdSQL', '--#CountSQL', '--#SelectSQL', '--#MainSQL', '--#PostSQL']
+      }
+    ],
+    [
+      GroupType.PreProdSQL, {
+        title: 'PreProd前置語法',
+        indicator: '--#PreProdSQL',
+        searchEndPattern: ['--#PreSQL', '--#CountSQL', '--#SelectSQL', '--#MainSQL', '--#PostSQL']
       }
     ],
     [
       GroupType.CountSQL, {
         title: 'Count語法',
         indicator: '--#CountSQL',
-        searchEndPattern: ['--#PreSQL', '--#SelectSQL', '--#MainSQL', '--#PostSQL']
+        searchEndPattern: ['--#PreSQL', '--#PreProdSQL', '--#SelectSQL', '--#MainSQL', '--#PostSQL']
       }
     ],
     [
       GroupType.SelectSQL, {
         title: '異動前/後語法',
         indicator: '--#SelectSQL',
-        searchEndPattern: ['--#PreSQL', '--#CountSQL', '--#MainSQL', '--#PostSQL']
+        searchEndPattern: ['--#PreSQL', '--#PreProdSQL', '--#CountSQL', '--#MainSQL', '--#PostSQL']
       }
     ],
     [
       GroupType.MainSQL, {
         title: '異動語法',
         indicator: '--#MainSQL',
-        searchEndPattern: ['--#PreSQL', '--#CountSQL', '--#SelectSQL', '--#PostSQL']
+        searchEndPattern: ['--#PreSQL', '--#PreProdSQL', '--#CountSQL', '--#SelectSQL', '--#PostSQL']
       }
     ],
     [
       GroupType.PostSQL, {
         title: '後置語法',
         indicator: '--#PostSQL',
-        searchEndPattern: ['--#PreSQL', '--#CountSQL', '--#SelectSQL', '--#MainSQL']
+        searchEndPattern: ['--#PreSQL', '--#PreProdSQL', '--#CountSQL', '--#SelectSQL', '--#MainSQL']
       }
     ]
   ])
