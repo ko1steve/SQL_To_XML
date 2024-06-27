@@ -7,13 +7,15 @@ import * as He from 'he'
 export class TabContentController {
   protected mainConfig: MainConfig = new MainConfig()
   protected commandType: CommandType = CommandType.NONE
+  protected fileName: string = ''
   protected textFromFileLoaded: string
 
   protected commandValid: boolean = true
 
   protected commandGroupMap: TSMap<GroupType, CommandData[]> = new TSMap()
 
-  constructor (commandType: CommandType, textFromFileLoaded: string) {
+  constructor (commandType: CommandType, textFromFileLoaded: string, fileName: string) {
+    this.fileName = fileName
     this.commandType = commandType
     this.textFromFileLoaded = textFromFileLoaded
     this.commandValid = true
@@ -33,7 +35,7 @@ export class TabContentController {
     this.createPageContent(mainContainer, this.commandGroupMap, elementConfig)
   }
 
-  public resetPageContent (textFromFileLoaded: string): void {
+  public resetPageContent (textFromFileLoaded: string, fileName: string): void {
     const mainContainer: HTMLDivElement = document.getElementById('main-container-' + this.commandType) as HTMLDivElement
     const contentContainer: HTMLDivElement = document.getElementById('content-container-' + this.commandType) as HTMLDivElement
     if (contentContainer == null) {
@@ -41,6 +43,7 @@ export class TabContentController {
     }
     mainContainer.removeChild(contentContainer)
     this.commandValid = true
+    this.fileName = fileName
     this.textFromFileLoaded = textFromFileLoaded
     this.getCommandGroup()
     this.createContent()
@@ -420,7 +423,7 @@ export class TabContentController {
       if (this.commandGroupMap.has(groupType)) {
         this.commandGroupMap.get(groupType).forEach((command, index) => {
           let sqlCommandStr = '    <SQL sql_idx="' + (index + 1) + '">'
-          //* 需透過編碼轉換 "<"、">"、"=" 等特殊字元
+          //* 需透過編碼轉換 XML 跳脫字元
           sqlCommandStr += He.encode(command.content) + '</SQL>'
           xmlContent += sqlCommandStr + '\r\n'
         })
@@ -432,7 +435,7 @@ export class TabContentController {
     const blob = new Blob([xmlContent], { type: 'text/xml' })
     const a = document.createElement('a')
     a.href = URL.createObjectURL(blob)
-    a.download = 'data.xml'
+    a.download = this.fileName.replace(/.sql$/, '.xml')
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)

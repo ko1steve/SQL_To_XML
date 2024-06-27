@@ -65,6 +65,7 @@ export class MainController {
       return
     }
     const file: File = fileInput.files[0]
+    const fileName = file.name
     let commandType: CommandType = CommandType.NONE
     Object.values(CommandType).forEach(e => {
       if (e.toString() === fileInput.dataset.sqlType) {
@@ -96,9 +97,9 @@ export class MainController {
         const text = event.target.result as string
         if (this.tabContentControllerMap.has(commandType)) {
           const tabContentController = this.tabContentControllerMap.get(commandType) as TabContentController
-          tabContentController.resetPageContent(text)
+          tabContentController.resetPageContent(text, fileName)
         } else {
-          const tabContentController = new TabContentController(commandType, text)
+          const tabContentController = new TabContentController(commandType, text, fileName)
           this.tabContentControllerMap.set(commandType, tabContentController)
         }
       }
