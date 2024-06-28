@@ -83,8 +83,14 @@ export class MainController {
       const arrayBuffer: ArrayBuffer = event.target.result as ArrayBuffer
 
       //* 將 ArrayBuffer 轉成 String Type
-      const uint8Array: Uint8Array = new Uint8Array(arrayBuffer)
-      const binaryString: string = Array.from(uint8Array, byte => String.fromCharCode(byte)).join('')
+      const chunkSize: number = 65536
+      const uint8Arrays = this.splitArrayBuffer(arrayBuffer, chunkSize)
+      // const uint8Array: Uint8Array = new Uint8Array(arrayBuffer)
+      // const binaryString: string = Array.from(uint8Array, byte => String.fromCharCode(byte)).join('')
+      let binaryString = ''
+      uint8Arrays.forEach(uint8Arr => {
+        binaryString += Array.from(uint8Arr, byte => String.fromCharCode(byte)).join('')
+      })
 
       //* 偵測文字編碼
       const detectedInfo: jschardet.IDetectedMap = jschardet.detect(binaryString)
@@ -114,6 +120,15 @@ export class MainController {
     if (fileInput.files != null) {
       arrayBufferReader.readAsArrayBuffer(file)
     }
+  }
+
+  protected splitArrayBuffer (buffer: ArrayBuffer, chunkSize: number): Uint8Array[] {
+    const result: Uint8Array[] = []
+    for (let i: number = 0; i < buffer.byteLength; i += chunkSize) {
+      const chunk: ArrayBuffer = buffer.slice(i, i + chunkSize)
+      result.push(new Uint8Array(chunk))
+    }
+    return result
   }
 
   protected onNavClick (commandType: CommandType) {

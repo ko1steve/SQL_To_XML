@@ -51,8 +51,10 @@ export class TabContentController {
   }
 
   protected getTextGroupMap (textFromFileLoaded: string): TSMap<GroupType, string> {
+    console.error('getTextGroupMap')
     const textLinesGroupMap: TSMap<GroupType, string> = new TSMap<GroupType, string>()
     const textLines: string[] = textFromFileLoaded.split('\n')
+    console.error('textLines.length : ' + textLines.length)
     let isGroupToMap = false
     let groupName: GroupType | null
     for (let i = 0; i < textLines.length; i++) {
