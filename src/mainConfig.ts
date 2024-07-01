@@ -144,8 +144,8 @@ export class MainConfig implements IMainConfig {
 
   public messageMap: TSMap<MessageType, string> = new TSMap<MessageType, string>([
     [
-      MessageType.IGNORED_COMMAND,
-      '{groupTitle}, index = {index}\n IgnoredCommand: Command "{command}" has been commented out.'
+      MessageType.COMMENT_OUT_COMMAND,
+      '{groupTitle}, index = {index}\n Warning: Command "{command}" has been commented out.'
     ],
     [
       MessageType.CONTENT_NOT_FOUND_ERROR,

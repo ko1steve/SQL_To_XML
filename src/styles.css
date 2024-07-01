@@ -104,7 +104,7 @@
 }
 
 .command-ignored {
-  text-decoration: line-through;
+  color: royalblue;
 }
 
 .command-error {
@@ -122,7 +122,7 @@
 }
 
 .warning-message {
-  color: orange;
+  color: royalblue;
 }
 
 .error-message {
