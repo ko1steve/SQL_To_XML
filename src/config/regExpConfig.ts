@@ -14,7 +14,7 @@ export class RegExpConig implements IRegExpConfig {
       //* 指定「Select count(1)」或「Select count(*)」
       GroupType.CountSQL, new TSMap<string, RegExp>([
         [
-          'SELECT COUNT', /^\s*^(?:Select\s+count\([*|1]\)\s+From\s+[A-Za-z]+\.[A-Za-z]+)$/
+          'SELECT COUNT', /^[\s\t]*SELECT\s+COUNT\([\s\t]*[*|1][\s\t]*\)/
         ]
       ])
     ],
@@ -22,7 +22,7 @@ export class RegExpConig implements IRegExpConfig {
       //* 指定「Select *」或「Select欄位」
       GroupType.SelectSQL, new TSMap<string, RegExp>([
         [
-          'SELECT', /^\s*Select\s+(?:\*|.*)\s+From\s+/
+          'SELECT', /^[\s\t]*SELECT\s+(\*|.*)?/
         ]
       ])
     ],
@@ -30,121 +30,121 @@ export class RegExpConig implements IRegExpConfig {
       //* 指定每種 DDL 語法
       GroupType.MainSQL, new TSMap<string, RegExp>([
         [
-          'CREATE TABLE', /\s*CREATE\s+TABLE\s+/
+          'CREATE TABLE', /[\s\t]*CREATE\s+TABLE\s+/
         ],
         [
-          'ALTER TABLE', /\s*ALTER\s+TABLE\s+/
+          'ALTER TABLE', /[\s\t]*ALTER\s+TABLE\s+/
         ],
         [
-          'DROP TABLE', /\s*DROP\s+TABLE\s+/
+          'DROP TABLE', /[\s\t]*DROP\s+TABLE\s+/
         ],
         [
-          'CREATE INDEX', /\s*CREATE\s+INDEX\s+/
+          'CREATE INDEX', /[\s\t]*CREATE\s+INDEX\s+/
         ],
         [
-          'ALTER INDEX', /\s*ALTER\s+INDEX\s+/
+          'ALTER INDEX', /[\s\t]*ALTER\s+INDEX\s+/
         ],
         [
-          'DROP INDEX', /\s*DROP\s+INDEX\s+/
+          'DROP INDEX', /[\s\t]*DROP\s+INDEX\s+/
         ],
         [
-          'CREATE [OR REPLACE] PROCEDURE', /\s*CREATE\s+(?:OR\s+REPLACE)?\s+PROCEDURE\s+/
+          'CREATE [OR REPLACE] PROCEDURE', /[\s\t]*CREATE\s+(?:OR\s+REPLACE)?\s+PROCEDURE\s+/
         ],
         [
-          'CREATE [OR REPLACE] TRIGGER', /\s*CREATE\s+(?:OR\s+REPLACE)?\s+TRIGGER\s+/
+          'CREATE [OR REPLACE] TRIGGER', /[\s\t]*CREATE\s+(?:OR\s+REPLACE)?\s+TRIGGER\s+/
         ],
         [
-          'ALTER PROCEDURE', /\s*ALTER\s+PROCEDURE\s+/
+          'ALTER PROCEDURE', /[\s\t]*ALTER\s+PROCEDURE\s+/
         ],
         [
-          'DROP PROCEDURE', /\s*DROP\s+PROCEDURE\s+/
+          'DROP PROCEDURE', /[\s\t]*DROP\s+PROCEDURE\s+/
         ],
         [
-          'CREATE [OR REPLACE] FUNCTION', /\s*CREATE\s+(?:OR\s+REPLACE\s+)?FUNCTION\s+/
+          'CREATE [OR REPLACE] FUNCTION', /[\s\t]*CREATE\s+(?:OR\s+REPLACE\s+)?FUNCTION\s+/
         ],
         [
-          'CREATE [OR REPLACE] PACKAGE', /\s*CREATE\s+(?:OR\s+REPLACE\s+)?PACKAGE\s+/
+          'CREATE [OR REPLACE] PACKAGE', /[\s\t]*CREATE\s+(?:OR\s+REPLACE\s+)?PACKAGE\s+/
         ],
         [
-          'CREATE [OR REPLACE] [FORCE] [EDITIONABLE] VIEW', /\s*CREATE\s+(?:OR\s+REPLACE\s+)?(?:FORCE\s+)?(?:EDITIONABLE\s+)?VIEW\s+/
+          'CREATE [OR REPLACE] [FORCE] [EDITIONABLE] VIEW', /[\s\t]*CREATE\s+(?:OR\s+REPLACE\s+)?(?:FORCE\s+)?(?:EDITIONABLE\s+)?VIEW\s+/
         ],
         [
-          'TRUNCATE TABLE', /\s*TRUNCATE\s+TABLE\s+/
+          'TRUNCATE TABLE', /[\s\t]*TRUNCATE\s+TABLE\s+/
         ],
         [
-          'COMMENT ON', /\s*COMMENT\s+ON\s+/
+          'COMMENT ON', /[\s\t]*COMMENT\s+ON\s+/
         ],
         [
-          'CREATE CONTEXT', /\s*CREATE\s+CONTEXT\s+/
+          'CREATE CONTEXT', /[\s\t]*CREATE\s+CONTEXT\s+/
         ],
         [
-          'CREATE DIRECTORY', /\s*CREATE\s+DIRECTORY\s+/
+          'CREATE DIRECTORY', /[\s\t]*CREATE\s+DIRECTORY\s+/
         ],
         [
-          'CREATE MATERIALIZED VIEW', /\s*CREATE\s+MATERIALIZED\s+VIEW\s+/
+          'CREATE MATERIALIZED VIEW', /[\s\t]*CREATE\s+MATERIALIZED\s+VIEW\s+/
         ],
         [
-          'CREATE SEQUENCE', /\s*CREATE\s+SEQUENCE\s+/
+          'CREATE SEQUENCE', /[\s\t]*CREATE\s+SEQUENCE\s+/
         ],
         [
-          'CREATE SYNONYM', /\s*CREATE\s+SYNONYM\s+/
+          'CREATE SYNONYM', /[\s\t]*CREATE\s+SYNONYM\s+/
         ],
         [
-          'CREATE TRIGGER', /\s*CREATE\s+TRIGGER\s+/
+          'CREATE TRIGGER', /[\s\t]*CREATE\s+TRIGGER\s+/
         ],
         [
-          'CREATE TYPE', /\s*CREATE\s+TYPE\s+/
+          'CREATE TYPE', /[\s\t]*CREATE\s+TYPE\s+/
         ],
         [
-          'CREATE DATABASE LINK', /\s*CREATE\s+DATABASE\s+LINK\s+/
+          'CREATE DATABASE LINK', /[\s\t]*CREATE\s+DATABASE\s+LINK\s+/
         ],
         [
-          'CREATE PUBLIC DATABASE LINK', /\s*CREATE\s+PUBLIC\s+DATABASE\s+LINK\s+/
+          'CREATE PUBLIC DATABASE LINK', /[\s\t]*CREATE\s+PUBLIC\s+DATABASE\s+LINK\s+/
         ],
         [
-          'CREATE PUBLIC SYNONYM', /\s*CREATE\s+PUBLIC\s+SYNONYM\s+/
+          'CREATE PUBLIC SYNONYM', /[\s\t]*CREATE\s+PUBLIC\s+SYNONYM\s+/
         ],
         [
-          'ALTER MATERIALIZED VIEW', /\s*ALTER\s+MATERIALIZED\s+VIEW\s+/
+          'ALTER MATERIALIZED VIEW', /[\s\t]*ALTER\s+MATERIALIZED\s+VIEW\s+/
         ],
         [
-          'ALTER SEQUENCE', /\s*ALTER\s+SEQUENCE\s+/
+          'ALTER SEQUENCE', /[\s\t]*ALTER\s+SEQUENCE\s+/
         ],
         [
-          'ALTER SYNONYM', /\s*ALTER\s+SYNONYM\s+/
+          'ALTER SYNONYM', /[\s\t]*ALTER\s+SYNONYM\s+/
         ],
         [
-          'ALTER TRIGGER', /\s*ALTER\s+TRIGGER\s+/
+          'ALTER TRIGGER', /[\s\t]*ALTER\s+TRIGGER\s+/
         ],
         [
-          'ALTER TYPE', /\s*ALTER\s+TYPE\s+/
+          'ALTER TYPE', /[\s\t]*ALTER\s+TYPE\s+/
         ],
         [
-          'ALTER DATABASE LINK', /\s*ALTER\s+DATABASE\s+LINK\s+/
+          'ALTER DATABASE LINK', /[\s\t]*ALTER\s+DATABASE\s+LINK\s+/
         ],
         [
-          'DROP DIRECTORY', /\s*DROP\s+DIRECTORY\s+/
+          'DROP DIRECTORY', /[\s\t]*DROP\s+DIRECTORY\s+/
         ],
         [
-          'DROP MATERIALIZED VIEW', /\s*DROP\s+MATERIALIZED\s+VIEW\s+/
+          'DROP MATERIALIZED VIEW', /[\s\t]*DROP\s+MATERIALIZED\s+VIEW\s+/
         ],
         [
-          'DROP SEQUENCE', /\s*DROP\s+SEQUENCE\s+/
+          'DROP SEQUENCE', /[\s\t]*DROP\s+SEQUENCE\s+/
         ],
         [
-          'DROP SYNONYM', /\s*DROP\s+SYNONYM\s+/
+          'DROP SYNONYM', /[\s\t]*DROP\s+SYNONYM\s+/
         ],
         [
-          'DROP TRIGGER', /\s*DROP\s+TRIGGER\s+/
+          'DROP TRIGGER', /[\s\t]*DROP\s+TRIGGER\s+/
         ],
         [
-          'DROP VIEW', /\s*DROP\s+VIEW\s+/
+          'DROP VIEW', /[\s\t]*DROP\s+VIEW\s+/
         ],
         [
-          'DROP PUBLIC DATABASE LINK', /\s*DROP\s+PUBLIC\s+DATABASE\s+LINK\s+/
+          'DROP PUBLIC DATABASE LINK', /[\s\t]*DROP\s+PUBLIC\s+DATABASE\s+LINK\s+/
         ],
         [
-          'DROP PUBLIC SYNONYM', /\s*DROP\s+PUBLIC\s+SYNONYM\s+/
+          'DROP PUBLIC SYNONYM', /[\s\t]*DROP\s+PUBLIC\s+SYNONYM\s+/
         ]
       ])
     ]
@@ -155,7 +155,7 @@ export class RegExpConig implements IRegExpConfig {
       //* 指定「Select count(1)」或「Select count(*)」
       GroupType.CountSQL, new TSMap<string, RegExp>([
         [
-          'SELECT COUNT', /^\s*^(?:Select\s+count\([*|1]\)\s+From\s+[A-Za-z]+\.[A-Za-z]+)$/
+          'SELECT COUNT', /^[\s\t]*SELECT\s+COUNT\([\s\t]*[*|1][\s\t]*\)/
         ]
       ])
     ],
@@ -163,7 +163,7 @@ export class RegExpConig implements IRegExpConfig {
       //* 指定「Select *」或「Select欄位」
       GroupType.SelectSQL, new TSMap<string, RegExp>([
         [
-          'SELECT', /^\s*Select\s+(?:\*|.*)\s+From\s+/
+          'SELECT', /^[\s\t]*SELECT\s+/
         ]
       ])
     ],
@@ -171,16 +171,16 @@ export class RegExpConig implements IRegExpConfig {
       //* 指定「Insert into」、「Update set」、「Delete」、「Select into」
       GroupType.MainSQL, new TSMap<string, RegExp>([
         [
-          'INSERT INTO', /^\s*INSERT\s+.*\s+INTO\s+/
+          'INSERT INTO', /^[\s\t]*INSERT\s+.*\s+INTO\s+/
         ],
         [
-          'UPDATE SET', /^\s*UPDATE\s+.*\s+SET\s+/
+          'UPDATE SET', /^[\s\t]*UPDATE\s+.*\s+SET\s+/
         ],
         [
-          'DELETE', /^\s*DELETE\s+/
+          'DELETE', /^[\s\t]*DELETE\s+/
         ],
         [
-          'SELECT INTO', /^\s*SELECT\s+.*\s+INTO\s+/
+          'SELECT INTO', /^[\s\t]*SELECT\s+.*\s+INTO\s+/
         ]
       ])
     ]
@@ -192,36 +192,36 @@ export class RegExpConig implements IRegExpConfig {
       GroupType.PreSQL, new TSMap<string, RegExp>([
         //* DML
         [
-          'UPDATE', /^\s*UPDATE\s+/
+          'UPDATE', /^[\s\t]*UPDATE\s+/
         ],
         [
-          'DELETE', /^\s*DELETE\s+/
+          'DELETE', /^[\s\t]*DELETE\s+/
         ],
         [
-          'INSERT', /^\s*INSERT\s+/
+          'INSERT', /^[\s\t]*INSERT\s+/
         ],
         [
-          'SELECT', /^\s*SELECT(?!\s+INTO)\s+/
+          'SELECT', /^[\s\t]*SELECT(?!\s+INTO)\s+/
         ],
         //* DDL
         [
-          'CREATE', /^\s*CREATE\s+/
+          'CREATE', /^[\s\t]*CREATE\s+/
         ],
         [
-          'ALTER', /^\s*ALTER\s+/
+          'ALTER', /^[\s\t]*ALTER\s+/
         ],
         [
-          'DROP', /^\s*DROP\s+/
+          'DROP', /^[\s\t]*DROP\s+/
         ],
         [
-          'TRUNCATE', /^\s*TRUNCATE\s+/
+          'TRUNCATE', /^[\s\t]*TRUNCATE\s+/
         ],
         //* GRANT & REVOKE
         [
-          'GRANT', /^\s*GRANT\s+/
+          'GRANT', /^[\s\t]*GRANT\s+/
         ],
         [
-          'REVOKE', /^\s*REVOKE\s+/
+          'REVOKE', /^[\s\t]*REVOKE\s+/
         ]
       ])
     ],
@@ -229,36 +229,36 @@ export class RegExpConig implements IRegExpConfig {
       GroupType.PostSQL, new TSMap<string, RegExp>([
         //* DML
         [
-          'UPDATE', /^\s*UPDATE\s+/
+          'UPDATE', /^[\s\t]*UPDATE\s+/
         ],
         [
-          'DELETE', /^\s*DELETE\s+/
+          'DELETE', /^[\s\t]*DELETE\s+/
         ],
         [
-          'INSERT', /^\s*INSERT\s+/
+          'INSERT', /^[\s\t]*INSERT\s+/
         ],
         [
-          'SELECT', /^\s*SELECT(?!\s+INTO)\s+/
+          'SELECT', /^[\s\t]*SELECT(?!\s+INTO)\s+/
         ],
         //* DDL
         [
-          'CREATE', /^\s*CREATE\s+/
+          'CREATE', /^[\s\t]*CREATE\s+/
         ],
         [
-          'ALTER', /^\s*ALTER\s+/
+          'ALTER', /^[\s\t]*ALTER\s+/
         ],
         [
-          'DROP', /^\s*DROP\s+/
+          'DROP', /^[\s\t]*DROP\s+/
         ],
         [
-          'TRUNCATE', /^\s*TRUNCATE\s+/
+          'TRUNCATE', /^[\s\t]*TRUNCATE\s+/
         ],
         //* GRANT & REVOKE
         [
-          'GRANT', /^\s*GRANT\s+/
+          'GRANT', /^[\s\t]*GRANT\s+/
         ],
         [
-          'REVOKE', /^\s*REVOKE\s+/
+          'REVOKE', /^[\s\t]*REVOKE\s+/
         ]
       ])
     ]
@@ -270,36 +270,36 @@ export class RegExpConig implements IRegExpConfig {
       GroupType.PreSQL, new TSMap<string, RegExp>([
         //* DML
         [
-          'UPDATE', /^\s*UPDATE\s+/
+          'UPDATE', /^[\s\t]*UPDATE\s+/
         ],
         [
-          'DELETE', /^\s*DELETE\s+/
+          'DELETE', /^[\s\t]*DELETE\s+/
         ],
         [
-          'INSERT', /^\s*INSERT\s+/
+          'INSERT', /^[\s\t]*INSERT\s+/
         ],
         [
-          'SELECT', /^\s*SELECT\s+/
+          'SELECT', /^[\s\t]*SELECT\s+/
         ],
         //* DDL
         [
-          'CREATE', /^\s*CREATE\s+/
+          'CREATE', /^[\s\t]*CREATE\s+/
         ],
         [
-          'ALTER', /^\s*ALTER\s+/
+          'ALTER', /^[\s\t]*ALTER\s+/
         ],
         [
-          'DROP', /^\s*DROP\s+/
+          'DROP', /^[\s\t]*DROP\s+/
         ],
         [
-          'TRUNCATE', /^\s*TRUNCATE\s+/
+          'TRUNCATE', /^[\s\t]*TRUNCATE\s+/
         ],
         //* GRANT & REVOKE
         [
-          'GRANT', /^\s*GRANT\s+/
+          'GRANT', /^[\s\t]*GRANT\s+/
         ],
         [
-          'REVOKE', /^\s*REVOKE\s+/
+          'REVOKE', /^[\s\t]*REVOKE\s+/
         ]
       ])
     ],
@@ -307,36 +307,36 @@ export class RegExpConig implements IRegExpConfig {
       GroupType.PostSQL, new TSMap<string, RegExp>([
         //* DML
         [
-          'UPDATE', /^\s*UPDATE\s+/
+          'UPDATE', /^[\s\t]*UPDATE\s+/
         ],
         [
-          'DELETE', /^\s*DELETE\s+/
+          'DELETE', /^[\s\t]*DELETE\s+/
         ],
         [
-          'INSERT', /^\s*INSERT\s+/
+          'INSERT', /^[\s\t]*INSERT\s+/
         ],
         [
-          'SELECT', /^\s*SELECT\s+/
+          'SELECT', /^[\s\t]*SELECT\s+/
         ],
         //* DDL
         [
-          'CREATE', /^\s*CREATE\s+/
+          'CREATE', /^[\s\t]*CREATE\s+/
         ],
         [
-          'ALTER', /^\s*ALTER\s+/
+          'ALTER', /^[\s\t]*ALTER\s+/
         ],
         [
-          'DROP', /^\s*DROP\s+/
+          'DROP', /^[\s\t]*DROP\s+/
         ],
         [
-          'TRUNCATE', /^\s*TRUNCATE\s+/
+          'TRUNCATE', /^[\s\t]*TRUNCATE\s+/
         ],
         //* GRANT & REVOKE
         [
-          'GRANT', /^\s*GRANT\s+/
+          'GRANT', /^[\s\t]*GRANT\s+/
         ],
         [
-          'REVOKE', /^\s*REVOKE\s+/
+          'REVOKE', /^[\s\t]*REVOKE\s+/
         ]
       ])
     ]
