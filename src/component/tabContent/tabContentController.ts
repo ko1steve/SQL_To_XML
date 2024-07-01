@@ -398,7 +398,6 @@ export class TabContentController {
         switch (command.detail.messageType) {
           case MessageType.COMMENT_OUT_COMMAND:
             this.addClassName(listItem, 'command-ignored')
-            command.content = '-- ' + command.content
             break
           case MessageType.CONTENT_NOT_FOUND_ERROR:
           case MessageType.INVALID_COMMAND_ERROR:
