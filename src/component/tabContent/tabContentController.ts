@@ -152,7 +152,7 @@ export class TabContentController {
           //* 抓到指定的 DDL 指令，抓 Oracle 的 "/" 結束符號
           let matchOracle = false
           for (let j: number = commandTextLines.length - 1; j >= 0; j--) {
-            if (commandTextLines[j].trim() === '/') {
+            if (oracleComplexCommandEnds.includes(commandTextLines[j].trim())) {
               matchOracle = true
               break
             } else if (commandTextLines[j].toUpperCase().search(commandGoRegExp) > -1 && commandTextLines[j].toUpperCase().search(/^--\s*/) < 0) {
@@ -172,7 +172,32 @@ export class TabContentController {
       }
 
       //* 檢查 COMMIT
-      //* TODO
+      const commandCommitRegExp: RegExp = /^[\s\t]*COMMIT[\s\t]*|^[\s\t]*COMMIT[\s\t]*;/
+      //* 抓 Procedure/Function/Trigger/Package/View 等指定的 DDL 指令
+      for (let i: number = 0; i < commandTextLines.length; i++) {
+        if (commandTextLines[i].toUpperCase().trim().search(this.mainConfig.ddlComplexCommandStart) > -1) {
+          //* 抓到指定的 DDL 指令，抓 Oracle 的 "/" 結束符號
+          let matchOracle = false
+          for (let j: number = commandTextLines.length - 1; j >= 0; j--) {
+            if (DdlComplexCommandEnds.includes(commandTextLines[j].trim())) {
+              matchOracle = true
+              break
+            } else if (commandTextLines[j].toUpperCase().search(commandCommitRegExp) > -1 && commandTextLines[j].toUpperCase().search(/^--\s*/) < 0) {
+              commandTextLines[j] = '--' + commandTextLines[j]
+              detail.messageType = MessageType.COMMENT_OUT_COMMAND
+              detail.commands.push('COMMIT')
+            }
+          }
+          if (matchOracle) {
+            break
+          }
+        } else if (commandTextLines[i].toUpperCase().search(commandCommitRegExp) > -1 && commandTextLines[i].toUpperCase().search(/^--\s*/) < 0) {
+          commandTextLines[i] = '--' + commandTextLines[i]
+          detail.messageType = MessageType.COMMENT_OUT_COMMAND
+          detail.commands.push('COMMIT')
+        }
+      }
+
       detail.commandText = commandTextLines.join('\r\n')
     }
     return detail
