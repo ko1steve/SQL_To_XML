@@ -7,13 +7,12 @@ export interface IMainConfig {
   checkCommandGroup: TSMap<CommandType, GroupType[]>
   groupSettingMap: TSMap<GroupType, IGroupSetting>
   singleCommandIndicator: string
-  ignoredCommandMap: TSMap<CommandType, TSMap<GroupType, TSMap<string, RegExp>>>
   validCommandMap: TSMap<CommandType, TSMap<GroupType, TSMap<string, RegExp>>>
   invalidCommandMap: TSMap<CommandType, TSMap<GroupType, TSMap<string, RegExp>>>
-  generalIgnoredCommands: TSMap<string, RegExp>
   tabContentConfigMap: TSMap<CommandType, ITabContentConfig>
   messageMap: TSMap<MessageType, string>
   enableTrimCommand: boolean
+  ddlComplexCommandStart: RegExp
 }
 
 export interface IGroupSetting {
@@ -86,14 +85,6 @@ export class MainConfig implements IMainConfig {
 
   public singleCommandIndicator: string = '/*--!*/'
 
-  public generalIgnoredCommands: TSMap<string, RegExp> = new TSMap<string, RegExp>([
-    [
-      'GO', /^GO$|^GO[^\w]|[^\w]GO;*$|[^\w]+GO[^\w]+/
-    ]
-  ])
-
-  public ignoredCommandMap: TSMap<CommandType, TSMap<GroupType, TSMap<string, RegExp>>> = new TSMap<CommandType, TSMap<GroupType, TSMap<string, RegExp>>>([])
-
   public validCommandMap: TSMap<CommandType, TSMap<GroupType, TSMap<string, RegExp>>> = new TSMap<CommandType, TSMap<GroupType, TSMap<string, RegExp>>>([
     [
       CommandType.DDL, new TSMap<GroupType, TSMap<string, RegExp>>([
@@ -144,8 +135,8 @@ export class MainConfig implements IMainConfig {
 
   public messageMap: TSMap<MessageType, string> = new TSMap<MessageType, string>([
     [
-      MessageType.IGNORED_COMMAND,
-      '{groupTitle}, index = {index}\n IgnoredCommand: Command "{command}" has been commented out.'
+      MessageType.COMMENT_OUT_COMMAND,
+      '{groupTitle}, index = {index}\n Warning: Command "{command}" has been commented out.'
     ],
     [
       MessageType.CONTENT_NOT_FOUND_ERROR,
@@ -162,4 +153,5 @@ export class MainConfig implements IMainConfig {
   ])
 
   public enableTrimCommand: boolean = true
+  public ddlComplexCommandStart: RegExp = /^\s*(CREATE|ALTER|DROP)(\s+OR\s+REPLACE)?\s+(.*\s+)?(PROCEDURE|FUNCTION|TRIGGER|PACKAGE|VIEW)/
 }

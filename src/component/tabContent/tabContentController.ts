@@ -99,10 +99,11 @@ export class TabContentController {
     return textLinesGroupMap
   }
 
-  protected getCommandDataDetail (command: string, groupName: GroupType): ICommandDataDetail {
+  protected getCommandDataDetail (commandText: string, groupName: GroupType): ICommandDataDetail {
     const detail: ICommandDataDetail = {
       messageType: MessageType.NONE,
-      commands: []
+      commands: [],
+      commandText
     }
     //* 檢查指令是否至少包含任何一個合規的語法
     if (this.mainConfig.validCommandMap.has(this.commandType)) {
@@ -113,7 +114,7 @@ export class TabContentController {
         let hasValidCommand: boolean = false
         validCommandMap.forEach((regExp, commandType) => {
           //* 若抓到該 Group 允許的任一合法語法
-          if (command.toUpperCase().search(regExp) > -1) {
+          if (commandText.toUpperCase().search(regExp) > -1) {
             hasValidCommand = true
           }
         })
@@ -131,34 +132,75 @@ export class TabContentController {
         //* 取得該 GroupName 所有非法語法
         invalidCommandMap.forEach((regExp, commandType) => {
           //* 若抓到該 Group 禁止的任一非法語法
-          if (command.toUpperCase().search(regExp) > -1) {
+          if (commandText.toUpperCase().search(regExp) > -1) {
             detail.messageType = MessageType.INVALID_COMMAND_ERROR
             detail.commands.push(commandType!)
           }
         })
       }
     }
-    //* 若是不存在不合規的語法，則檢查指令是否包含需略過的語法
+    //* 若是不存在不合規的語法，則檢查指令是否包含需註解的語法
     if (detail.commands.length === 0) {
-      if (this.mainConfig.ignoredCommandMap.has(this.commandType)) {
-        const groupIgnoredCommandMap: TSMap<GroupType, TSMap<string, RegExp>> = this.mainConfig.ignoredCommandMap.get(this.commandType)
-        if (groupIgnoredCommandMap.has(groupName)) {
-          const ignoredCommandMap: TSMap<string, RegExp> = groupIgnoredCommandMap.get(groupName)
-          ignoredCommandMap.forEach((regExp, commandType) => {
-            if (command.toUpperCase().search(regExp) > -1) {
-              detail.messageType = MessageType.IGNORED_COMMAND
-              detail.commands.push(commandType!)
+      const oracleComplexCommandEnds: string[] = ['/']
+      const msSqlComplexCommandEnds: string[] = ['END', 'END;']
+      const DdlComplexCommandEnds: string[] = oracleComplexCommandEnds.concat(msSqlComplexCommandEnds)
+
+      //* 檢查 GO
+      const commandTextLines: string[] = commandText.split('\r\n')
+      const commandGoRegExp: RegExp = /^\s*GO\s*|^\s*GO\s*;/
+      //* 抓 Procedure/Function/Trigger/Package/View 等指定的 DDL 指令
+      for (let i: number = 0; i < commandTextLines.length; i++) {
+        if (commandTextLines[i].toUpperCase().trim().search(this.mainConfig.ddlComplexCommandStart) > -1) {
+          //* 抓到指定的 DDL 指令，抓 Oracle 的 "/" 結束符號
+          let matchOracle = false
+          for (let j: number = commandTextLines.length - 1; j >= 0; j--) {
+            if (oracleComplexCommandEnds.includes(commandTextLines[j].trim())) {
+              matchOracle = true
+              break
+            } else if (commandTextLines[j].toUpperCase().search(commandGoRegExp) > -1 && commandTextLines[j].toUpperCase().search(/^--\s*/) < 0) {
+              commandTextLines[j] = '--' + commandTextLines[j]
+              detail.messageType = MessageType.COMMENT_OUT_COMMAND
+              detail.commands.push('GO')
             }
-          })
-        }
-      } else {
-        this.mainConfig.generalIgnoredCommands.forEach((regExp, commandType) => {
-          if (command.toUpperCase().search(regExp) > -1) {
-            detail.messageType = MessageType.IGNORED_COMMAND
-            detail.commands.push(commandType!)
           }
-        })
+          if (matchOracle) {
+            break
+          }
+        } else if (commandTextLines[i].toUpperCase().search(commandGoRegExp) > -1 && commandTextLines[i].toUpperCase().search(/^--\s*/) < 0) {
+          commandTextLines[i] = '--' + commandTextLines[i]
+          detail.messageType = MessageType.COMMENT_OUT_COMMAND
+          detail.commands.push('GO')
+        }
       }
+
+      //* 檢查 COMMIT
+      const commandCommitRegExp: RegExp = /^[\s\t]*COMMIT[\s\t]*|^[\s\t]*COMMIT[\s\t]*;/
+      //* 抓 Procedure/Function/Trigger/Package/View 等指定的 DDL 指令
+      for (let i: number = 0; i < commandTextLines.length; i++) {
+        if (commandTextLines[i].toUpperCase().trim().search(this.mainConfig.ddlComplexCommandStart) > -1) {
+          //* 抓到指定的 DDL 指令，抓 Oracle 的 "/" 結束符號
+          let matchOracle = false
+          for (let j: number = commandTextLines.length - 1; j >= 0; j--) {
+            if (DdlComplexCommandEnds.includes(commandTextLines[j].trim())) {
+              matchOracle = true
+              break
+            } else if (commandTextLines[j].toUpperCase().search(commandCommitRegExp) > -1 && commandTextLines[j].toUpperCase().search(/^--\s*/) < 0) {
+              commandTextLines[j] = '--' + commandTextLines[j]
+              detail.messageType = MessageType.COMMENT_OUT_COMMAND
+              detail.commands.push('COMMIT')
+            }
+          }
+          if (matchOracle) {
+            break
+          }
+        } else if (commandTextLines[i].toUpperCase().search(commandCommitRegExp) > -1 && commandTextLines[i].toUpperCase().search(/^--\s*/) < 0) {
+          commandTextLines[i] = '--' + commandTextLines[i]
+          detail.messageType = MessageType.COMMENT_OUT_COMMAND
+          detail.commands.push('COMMIT')
+        }
+      }
+
+      detail.commandText = commandTextLines.join('\r\n')
     }
     return detail
   }
@@ -177,7 +219,8 @@ export class TabContentController {
         let isAddToMap = false
         let commandDataDetail: ICommandDataDetail = {
           messageType: MessageType.NONE,
-          commands: []
+          commands: [],
+          commandText: ''
         }
         //* 若找不到指令分割的判斷字串，則略過
         if (!textLines[i].trim().startsWith(this.mainConfig.singleCommandIndicator)) {
@@ -200,7 +243,7 @@ export class TabContentController {
             }
             if (!this.mainConfig.enableTrimCommand || commandText.length > 0) {
               commandDataDetail = this.getCommandDataDetail(commandText, groupName!)
-              commamds.push(new CommandData(commandText, commandDataDetail))
+              commamds.push(new CommandData(commandDataDetail.commandText, commandDataDetail))
               commandGroupMap.set(groupName!, commamds)
             }
             isAddToMap = true
@@ -222,12 +265,12 @@ export class TabContentController {
             commandText = this.cleanEmptyLineAtCommandEnd(commandText)
             if (commandText.length > 0) {
               commandDataDetail = this.getCommandDataDetail(commandText, groupName!)
-              commamds.push(new CommandData(commandText, commandDataDetail))
+              commamds.push(new CommandData(commandDataDetail.commandText, commandDataDetail))
               commandGroupMap.set(groupName!, commamds)
             }
           } else {
             commandDataDetail = this.getCommandDataDetail(commandText, groupName!)
-            commamds.push(new CommandData(commandText, commandDataDetail))
+            commamds.push(new CommandData(commandDataDetail.commandText, commandDataDetail))
             commandGroupMap.set(groupName!, commamds)
           }
           isAddToMap = true
@@ -355,9 +398,8 @@ export class TabContentController {
         listItem.appendChild(paragraph)
 
         switch (command.detail.messageType) {
-          case MessageType.IGNORED_COMMAND:
+          case MessageType.COMMENT_OUT_COMMAND:
             this.addClassName(listItem, 'command-ignored')
-            command.content = '-- ' + command.content
             break
           case MessageType.CONTENT_NOT_FOUND_ERROR:
           case MessageType.INVALID_COMMAND_ERROR:
@@ -385,7 +427,7 @@ export class TabContentController {
         message = message.replace('{command}', e)
         paragraph.innerText = message
         switch (command.detail.messageType) {
-          case MessageType.IGNORED_COMMAND:
+          case MessageType.COMMENT_OUT_COMMAND:
             paragraph.className = config.messageContainer.warningMessage.className
             container = document.getElementById(config.messageContainer.id.replace('{groupType}', groupType)) as HTMLDivElement
             break
