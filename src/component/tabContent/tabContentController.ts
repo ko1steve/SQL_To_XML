@@ -7,13 +7,15 @@ import * as He from 'he'
 export class TabContentController {
   protected mainConfig: MainConfig = new MainConfig()
   protected commandType: CommandType = CommandType.NONE
+  protected fileName: string = ''
   protected textFromFileLoaded: string
 
   protected commandValid: boolean = true
 
   protected commandGroupMap: TSMap<GroupType, CommandData[]> = new TSMap()
 
-  constructor (commandType: CommandType, textFromFileLoaded: string) {
+  constructor (commandType: CommandType, textFromFileLoaded: string, fileName: string) {
+    this.fileName = fileName
     this.commandType = commandType
     this.textFromFileLoaded = textFromFileLoaded
     this.commandValid = true
@@ -33,7 +35,7 @@ export class TabContentController {
     this.createPageContent(mainContainer, this.commandGroupMap, elementConfig)
   }
 
-  public resetPageContent (textFromFileLoaded: string): void {
+  public resetPageContent (textFromFileLoaded: string, fileName: string): void {
     const mainContainer: HTMLDivElement = document.getElementById('main-container-' + this.commandType) as HTMLDivElement
     const contentContainer: HTMLDivElement = document.getElementById('content-container-' + this.commandType) as HTMLDivElement
     if (contentContainer == null) {
@@ -41,6 +43,7 @@ export class TabContentController {
     }
     mainContainer.removeChild(contentContainer)
     this.commandValid = true
+    this.fileName = fileName
     this.textFromFileLoaded = textFromFileLoaded
     this.getCommandGroup()
     this.createContent()
@@ -94,12 +97,30 @@ export class TabContentController {
     return textLinesGroupMap
   }
 
-  protected getCommandDataDetail (text: string, groupName: GroupType, accumulatedCommand: string): ICommandDataDetail {
-    accumulatedCommand += '\n' + text
-    text = text.trim()
+  protected getCommandDataDetail (commandText: string, groupName: GroupType): ICommandDataDetail {
     const detail: ICommandDataDetail = {
       messageType: MessageType.NONE,
-      commands: []
+      commands: [],
+      commandText
+    }
+    //* 檢查指令是否至少包含任何一個合規的語法
+    if (this.mainConfig.validCommandMap.has(this.commandType)) {
+      const groupvalidCommandMap: TSMap<GroupType, TSMap<string, RegExp>> = this.mainConfig.validCommandMap.get(this.commandType)
+      if (groupvalidCommandMap.has(groupName)) {
+        const validCommandMap: TSMap<string, RegExp> = groupvalidCommandMap.get(groupName)
+        //* 取得該 GroupName 所有合法語法
+        let hasValidCommand: boolean = false
+        validCommandMap.forEach((regExp, commandType) => {
+          //* 若抓到該 Group 允許的任一合法語法
+          if (commandText.toUpperCase().search(regExp) > -1) {
+            hasValidCommand = true
+          }
+        })
+        if (!hasValidCommand) {
+          detail.messageType = MessageType.NO_VALID_COMMAND_ERROR
+          detail.commands.push('')
+        }
+      }
     }
     //* 檢查指令是否包含不合規的語法
     if (this.mainConfig.invalidCommandMap.has(this.commandType)) {
@@ -107,52 +128,77 @@ export class TabContentController {
       if (groupInvalidCommandMap.has(groupName)) {
         const invalidCommandMap: TSMap<string, RegExp> = groupInvalidCommandMap.get(groupName)
         //* 取得該 GroupName 所有非法語法
-        invalidCommandMap.forEach((regExp, command) => {
+        invalidCommandMap.forEach((regExp, commandType) => {
           //* 若抓到該 Group 禁止的任一非法語法
-          if (text.toUpperCase().search(regExp) > -1) {
-            let isComplexCommandVaild = false
-            //* 判斷該整段語法是否包含複合語法 (例如 CREATE PROCEDURE)
-            const conditionMap = this.mainConfig.complexInvalidCommandCondition.get(command!)
-            conditionMap.forEach((RegExp) => {
-              if (accumulatedCommand.toUpperCase().search(RegExp) > -1) {
-                isComplexCommandVaild = true
-              }
-            })
-            if (isComplexCommandVaild) {
-              //* 判斷該非法語法是否不該在複合語法內出現
-              if (!this.mainConfig.complexInvalidCommandCondition.has(command!)) {
-                detail.messageType = MessageType.INVALID_COMMAND_ERROR
-                detail.commands.push(command!)
-              }
-            } else {
-              detail.messageType = MessageType.INVALID_COMMAND_ERROR
-              detail.commands.push(command!)
-            }
+          if (commandText.toUpperCase().search(regExp) > -1) {
+            detail.messageType = MessageType.INVALID_COMMAND_ERROR
+            detail.commands.push(commandType!)
           }
         })
       }
     }
-    //* 若是不存在不合規的語法，則檢查指令是否包含需略過的語法
+    //* 若是不存在不合規的語法，則檢查指令是否包含需註解的語法
     if (detail.commands.length === 0) {
-      if (this.mainConfig.ignoredCommandMap.has(this.commandType)) {
-        const groupIgnoredCommandMap: TSMap<GroupType, TSMap<string, RegExp>> = this.mainConfig.ignoredCommandMap.get(this.commandType)
-        if (groupIgnoredCommandMap.has(groupName)) {
-          const ignoredCommandMap: TSMap<string, RegExp> = groupIgnoredCommandMap.get(groupName)
-          ignoredCommandMap.forEach((regExp, command) => {
-            if (text.toUpperCase().search(regExp) > -1) {
-              detail.messageType = MessageType.IGNORED_COMMAND
-              detail.commands.push(command!)
+      const oracleComplexCommandEnds: string[] = ['/']
+      const msSqlComplexCommandEnds: string[] = ['END', 'END;']
+      const DdlComplexCommandEnds: string[] = oracleComplexCommandEnds.concat(msSqlComplexCommandEnds)
+
+      //* 檢查 GO
+      const commandTextLines: string[] = commandText.split('\r\n')
+      const commandGoRegExp: RegExp = /^\s*GO\s*|^\s*GO\s*;/
+      //* 抓 Procedure/Function/Trigger/Package/View 等指定的 DDL 指令
+      for (let i: number = 0; i < commandTextLines.length; i++) {
+        if (commandTextLines[i].toUpperCase().trim().search(this.mainConfig.ddlComplexCommandStart) > -1) {
+          //* 抓到指定的 DDL 指令，抓 Oracle 的 "/" 結束符號
+          let matchOracle = false
+          for (let j: number = commandTextLines.length - 1; j >= 0; j--) {
+            if (oracleComplexCommandEnds.includes(commandTextLines[j].trim())) {
+              matchOracle = true
+              break
+            } else if (commandTextLines[j].toUpperCase().search(commandGoRegExp) > -1 && commandTextLines[j].toUpperCase().search(/^--\s*/) < 0) {
+              commandTextLines[j] = '--' + commandTextLines[j]
+              detail.messageType = MessageType.COMMENT_OUT_COMMAND
+              detail.commands.push('GO')
             }
-          })
-        }
-      } else {
-        this.mainConfig.generalIgnoredCommands.forEach((regExp, command) => {
-          if (text.toUpperCase().search(regExp) > -1) {
-            detail.messageType = MessageType.IGNORED_COMMAND
-            detail.commands.push(command!)
           }
-        })
+          if (matchOracle) {
+            break
+          }
+        } else if (commandTextLines[i].toUpperCase().search(commandGoRegExp) > -1 && commandTextLines[i].toUpperCase().search(/^--\s*/) < 0) {
+          commandTextLines[i] = '--' + commandTextLines[i]
+          detail.messageType = MessageType.COMMENT_OUT_COMMAND
+          detail.commands.push('GO')
+        }
       }
+
+      //* 檢查 COMMIT
+      const commandCommitRegExp: RegExp = /^[\s\t]*COMMIT[\s\t]*|^[\s\t]*COMMIT[\s\t]*;/
+      //* 抓 Procedure/Function/Trigger/Package/View 等指定的 DDL 指令
+      for (let i: number = 0; i < commandTextLines.length; i++) {
+        if (commandTextLines[i].toUpperCase().trim().search(this.mainConfig.ddlComplexCommandStart) > -1) {
+          //* 抓到指定的 DDL 指令，抓 Oracle 的 "/" 結束符號
+          let matchOracle = false
+          for (let j: number = commandTextLines.length - 1; j >= 0; j--) {
+            if (DdlComplexCommandEnds.includes(commandTextLines[j].trim())) {
+              matchOracle = true
+              break
+            } else if (commandTextLines[j].toUpperCase().search(commandCommitRegExp) > -1 && commandTextLines[j].toUpperCase().search(/^--\s*/) < 0) {
+              commandTextLines[j] = '--' + commandTextLines[j]
+              detail.messageType = MessageType.COMMENT_OUT_COMMAND
+              detail.commands.push('COMMIT')
+            }
+          }
+          if (matchOracle) {
+            break
+          }
+        } else if (commandTextLines[i].toUpperCase().search(commandCommitRegExp) > -1 && commandTextLines[i].toUpperCase().search(/^--\s*/) < 0) {
+          commandTextLines[i] = '--' + commandTextLines[i]
+          detail.messageType = MessageType.COMMENT_OUT_COMMAND
+          detail.commands.push('COMMIT')
+        }
+      }
+
+      detail.commandText = commandTextLines.join('\r\n')
     }
     return detail
   }
@@ -171,7 +217,8 @@ export class TabContentController {
         let isAddToMap = false
         let commandDataDetail: ICommandDataDetail = {
           messageType: MessageType.NONE,
-          commands: []
+          commands: [],
+          commandText: ''
         }
         //* 若找不到指令分割的判斷字串，則略過
         if (!textLines[i].trim().startsWith(this.mainConfig.singleCommandIndicator)) {
@@ -182,7 +229,6 @@ export class TabContentController {
 
         //* 取得指令資料
         if (newTextLine.length !== 0) {
-          commandDataDetail = this.getCommandDataDetail(newTextLine, groupName!, commandText)
           commandText = newTextLine + '\n'
         }
         //* 找到指令分割的判斷字串後，尋找指令的結束點
@@ -194,22 +240,14 @@ export class TabContentController {
               commandText = this.cleanEmptyLineAtCommandEnd(commandText)
             }
             if (!this.mainConfig.enableTrimCommand || commandText.length > 0) {
-              commamds.push(new CommandData(commandText, commandDataDetail))
+              commandDataDetail = this.getCommandDataDetail(commandText, groupName!)
+              commamds.push(new CommandData(commandDataDetail.commandText, commandDataDetail))
               commandGroupMap.set(groupName!, commamds)
             }
             isAddToMap = true
             break
           } else {
             textLines[j] = textLines[j].replace(this.mainConfig.singleCommandIndicator, '')
-            if (textLines[j].trim().length > 0) {
-              const newCommandDataDetail = this.getCommandDataDetail(textLines[j], groupName!, commandText)
-              commandDataDetail = {
-                messageType: commandDataDetail.messageType === MessageType.NONE ? newCommandDataDetail.messageType : commandDataDetail.messageType,
-                commands: [
-                  ...commandDataDetail.commands.concat(newCommandDataDetail.commands)
-                ]
-              }
-            }
             if (!this.mainConfig.enableTrimCommand || textLines[j].trim().length > 0) {
               //* 找到結束點之前，不斷累加指令的內容
               commandText += textLines[j] + '\n'
@@ -224,11 +262,14 @@ export class TabContentController {
           if (this.mainConfig.enableTrimCommand) {
             commandText = this.cleanEmptyLineAtCommandEnd(commandText)
             if (commandText.length > 0) {
-              commamds.push(new CommandData(commandText, commandDataDetail))
+              commandDataDetail = this.getCommandDataDetail(commandText, groupName!)
+              commamds.push(new CommandData(commandDataDetail.commandText, commandDataDetail))
               commandGroupMap.set(groupName!, commamds)
             }
           } else {
-            commamds.push(new CommandData(commandText, commandDataDetail))
+            commandDataDetail = this.getCommandDataDetail(commandText, groupName!)
+            commamds.push(new CommandData(commandDataDetail.commandText, commandDataDetail))
+            commandGroupMap.set(groupName!, commamds)
           }
           isAddToMap = true
           break
@@ -355,12 +396,12 @@ export class TabContentController {
         listItem.appendChild(paragraph)
 
         switch (command.detail.messageType) {
-          case MessageType.IGNORED_COMMAND:
+          case MessageType.COMMENT_OUT_COMMAND:
             this.addClassName(listItem, 'command-ignored')
-            command.content = '-- ' + command.content
             break
           case MessageType.CONTENT_NOT_FOUND_ERROR:
           case MessageType.INVALID_COMMAND_ERROR:
+          case MessageType.NO_VALID_COMMAND_ERROR:
             this.commandValid = false
             this.addClassName(listItem, 'command-error')
             break
@@ -384,11 +425,12 @@ export class TabContentController {
         message = message.replace('{command}', e)
         paragraph.innerText = message
         switch (command.detail.messageType) {
-          case MessageType.IGNORED_COMMAND:
+          case MessageType.COMMENT_OUT_COMMAND:
             paragraph.className = config.messageContainer.warningMessage.className
             container = document.getElementById(config.messageContainer.id.replace('{groupType}', groupType)) as HTMLDivElement
             break
           case MessageType.INVALID_COMMAND_ERROR:
+          case MessageType.NO_VALID_COMMAND_ERROR:
           case MessageType.CONTENT_NOT_FOUND_ERROR:
             paragraph.className = config.messageContainer.errorMessage.className
             container = document.getElementById(config.messageContainer.id.replace('{groupType}', groupType)) as HTMLDivElement
@@ -423,7 +465,7 @@ export class TabContentController {
       if (this.commandGroupMap.has(groupType)) {
         this.commandGroupMap.get(groupType).forEach((command, index) => {
           let sqlCommandStr = '    <SQL sql_idx="' + (index + 1) + '">'
-          //* 需透過編碼轉換 "<"、">"、"=" 等特殊字元
+          //* 需透過編碼轉換 XML 跳脫字元
           sqlCommandStr += He.encode(command.content) + '</SQL>'
           xmlContent += sqlCommandStr + '\r\n'
         })
@@ -435,7 +477,7 @@ export class TabContentController {
     const blob = new Blob([xmlContent], { type: 'text/xml' })
     const a = document.createElement('a')
     a.href = URL.createObjectURL(blob)
-    a.download = 'data.xml'
+    a.download = this.fileName.replace(/.sql$/, '.xml')
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
