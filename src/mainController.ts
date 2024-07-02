@@ -6,7 +6,7 @@ import { TabContentController } from './component/tabContent/tabContentControlle
 import TopButtonImage from './image/top-button.png'
 import jschardet from 'jschardet'
 import { StringBuilder } from './element/CommandData'
-import readFileChunkScript from './util/worker/readFileChunkScript'
+import getBinaryString from './util/worker/getBinaryString'
 
 export class MainController {
   protected tabContentControllerMap: Map<CommandType, TabContentController> = new Map()
@@ -67,8 +67,6 @@ export class MainController {
       return
     }
     const file: File = fileInput.files[0]
-    const chunkSize: number = 65536
-    const fileName = file.name
     let commandType: CommandType = CommandType.NONE
     Object.values(CommandType).forEach(e => {
       if (e.toString() === fileInput.dataset.sqlType) {
@@ -80,25 +78,37 @@ export class MainController {
     }
 
     // 创建并启动 Web Worker
-    const worker = new Worker(readFileChunkScript)
+    const worker = new Worker(getBinaryString)
 
     // 监听来自 Web Worker 的消息
     worker.onmessage = (event: any) => {
       const { type, data } = event.data
       if (type === 'progress') {
-        const { offset, totalSize } = data
-        console.log(`Read chunk from ${offset} to ${Math.min(offset + chunkSize, totalSize)} of ${totalSize}`)
-      } else if (type === 'finalChunk') {
-        const { text } = data
+        //
+      } else if (type === 'complete') {
         setTimeout(() => {
-          this.onReadFileComplete(text, commandType, file)
+          const { binaryString } = data
+
+          //* 偵測文字編碼
+          const detectedInfo: jschardet.IDetectedMap = jschardet.detect(binaryString)
+
+          const textReader = new FileReader()
+          textReader.onload = (event) => {
+            if (event.target == null) {
+              return
+            }
+            const text = event.target.result as string
+            this.onReadFileComplete(text, commandType, file)
+          }
+          //* 以偵測到的編碼讀取文字檔
+          textReader.readAsText(file, detectedInfo.encoding)
         }, 1)
         worker.terminate() // 在不再需要时终止 Web Worker
       }
     }
 
     // 向 Web Worker 发送文件和相关信息
-    worker.postMessage({ file, chunkSize })
+    worker.postMessage(file)
 
     fileInput.files = null
     fileInput.value = ''
