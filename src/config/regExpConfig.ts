@@ -204,7 +204,7 @@ export class RegExpConig implements IRegExpConfig {
           'INSERT', /^[\s\t]*INSERT\s+/
         ],
         [
-          'SELECT', /^[\s\t]*SELECT(?!\s+.*\s+INTO)\s+/
+          'SELECT', /^[\s\t]*SELECT\s+(?!INTO\s+(#|##)[A-Za-z0-9]+)/
         ],
         //* DDL
         [
@@ -241,7 +241,7 @@ export class RegExpConig implements IRegExpConfig {
           'INSERT', /^[\s\t]*INSERT\s+/
         ],
         [
-          'SELECT', /^[\s\t]*SELECT(?!\s+INTO)\s+/
+          'SELECT', /^[\s\t]*SELECT\s+/
         ],
         //* DDL
         [
@@ -282,7 +282,7 @@ export class RegExpConig implements IRegExpConfig {
           'INSERT', /^[\s\t]*INSERT\s+/
         ],
         [
-          'SELECT', /^[\s\t]*SELECT(?!\s+.*\s+INTO)\s+/
+          'SELECT', /^[\s\t]*SELECT\s+(?!INTO\s+(#|##)[A-Za-z0-9]+)/
         ],
         //* DDL
         [
