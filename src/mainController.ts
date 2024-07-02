@@ -75,8 +75,19 @@ export class MainController {
     if (commandType === CommandType.NONE) {
       return
     }
+    const overlay = document.getElementById('overlay') as HTMLDivElement
     const textReader = new FileReader()
+
+    textReader.onloadstart = function () {
+      overlay.style.display = 'flex'
+    }
+
+    textReader.onerror = function () {
+      overlay.style.display = 'none'
+    }
+
     textReader.onload = (event) => {
+      overlay.style.display = 'none'
       if (event.target == null) {
         return
       }
