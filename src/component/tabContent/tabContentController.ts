@@ -14,11 +14,14 @@ export class TabContentController {
 
   protected commandGroupMap: TSMap<GroupType, CommandData[]> = new TSMap()
 
+  protected progressText: HTMLDivElement
+
   constructor (commandType: CommandType, textFromFileLoaded: string, fileName: string) {
     this.fileName = fileName
     this.commandType = commandType
     this.textFromFileLoaded = textFromFileLoaded
     this.commandValid = true
+    this.progressText = document.getElementById('progress-text') as HTMLDivElement
     this.getCommandGroup()
     this.createContent()
     this.updateDownloadButtonStatus()
@@ -189,6 +192,7 @@ export class TabContentController {
               commandDataDetail = this.getCommandDataDetail(commandText, groupName!)
               commamds.push(new CommandData(commandText, commandDataDetail))
               commandGroupMap.set(groupName!, commamds)
+              this.progressText.textContent = '[' + groupName + '] : ' + commamds.length
               textLinesGroupMap.delete(groupName!)
             }
             isAddToMap = true
@@ -212,12 +216,14 @@ export class TabContentController {
               commandDataDetail = this.getCommandDataDetail(commandText, groupName!)
               commamds.push(new CommandData(commandText, commandDataDetail))
               commandGroupMap.set(groupName!, commamds)
+              this.progressText.textContent = '[' + groupName + '] : ' + commamds.length
               textLinesGroupMap.delete(groupName!)
             }
           } else {
             commandDataDetail = this.getCommandDataDetail(commandText, groupName!)
             commamds.push(new CommandData(commandText, commandDataDetail))
             commandGroupMap.set(groupName!, commamds)
+            this.progressText.textContent = '[' + groupName + '] : ' + commamds.length
             textLinesGroupMap.delete(groupName!)
           }
           isAddToMap = true
