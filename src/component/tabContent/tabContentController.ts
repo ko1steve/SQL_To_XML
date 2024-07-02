@@ -123,68 +123,61 @@ export class TabContentController {
    * @returns TSMap<GroupType, CommandData[]>
    */
   protected getCommandGroupMap (textLinesGroupMap: TSMap<GroupType, string>): TSMap<GroupType, CommandData[]> {
-    const commandGroupMap = new TSMap<GroupType, CommandData[]>()
+    const commandGroupMap = new TSMap<GroupType, CommandData[]>();
+
     textLinesGroupMap.forEach((text, groupName) => {
       const textLines = text.split('\n')
       const commands: CommandData[] = []
-      for (let i = 0; i < textLines.length; i++) {
-        let isAddToMap = false
-        const commadTextSB: StringBuilder = new StringBuilder()
-        let commandDataDetail: ICommandDataDetail = {
-          messageType: MessageType.NONE,
-          commands: []
-        }
-        //* 若找不到指令分割的判斷字串，則略過
-        if (!textLines[i].trim().startsWith(this.mainConfig.singleCommandIndicator)) {
-          continue
-        }
-        const newTextLine: string = textLines[i].replace(this.mainConfig.singleCommandIndicator, '').trim()
+      let commadTextSB: StringBuilder | null = null
+      let commandDataDetail: ICommandDataDetail | null = null
 
-        //* 取得指令資料
+      for (let i = 0; i < textLines.length; i++) {
+        if (!textLines[i].trim().startsWith(this.mainConfig.singleCommandIndicator)) {
+          continue;
+        }
+
+        commadTextSB = new StringBuilder();
+        commandDataDetail = { messageType: MessageType.NONE, commands: [] };
+
+        const newTextLine = textLines[i].replace(this.mainConfig.singleCommandIndicator, '').trim();
         if (newTextLine.length !== 0) {
-          commadTextSB.append(newTextLine)
+          commadTextSB.append(newTextLine);
         }
-        //* 找到指令分割的判斷字串後，尋找指令的結束點
-        let j: number
+
+        let j: number;
         for (j = i + 1; j < textLines.length; j++) {
-          i = j - 1
           if (textLines[j].trim().startsWith(this.mainConfig.singleCommandIndicator)) {
-            const commandText = commadTextSB.toString('\n')
+            const commandText = commadTextSB.toString('\n');
             if (!this.mainConfig.enableTrimCommand || commandText.length > 0) {
-              commandDataDetail = this.getCommandDataDetail(commandText, groupName!)
-              commands.push(new CommandData(commandText, commandDataDetail))
-              commandGroupMap.set(groupName!, commands)
-              this.progressText.textContent = '[' + groupName + '] : ' + commands.length
+              commandDataDetail = this.getCommandDataDetail(commandText, groupName!);
+              commands.push(new CommandData(commandText, commandDataDetail));
             }
-            isAddToMap = true
-            break
+            i = j - 1; // Continue from next line
+            break;
           } else {
-            textLines[j] = textLines[j].replace(this.mainConfig.singleCommandIndicator, '')
+            textLines[j] = textLines[j].replace(this.mainConfig.singleCommandIndicator, '');
             if (!this.mainConfig.enableTrimCommand || textLines[j].trim().length > 0) {
-              //* 找到結束點之前，不斷累加指令的內容
-              commadTextSB.append(textLines[j])
+              commadTextSB.append(textLines[j]);
             }
-          }
-          if (isAddToMap) {
-            break
           }
         }
-        //* 如果直到最後都沒有出現結束點文字，則判斷結束點為最後一行文字
+
         if (j === textLines.length) {
-          const commandText = commadTextSB.toString('\n')
+          const commandText = commadTextSB.toString('\n');
           if (commandText.length > 0) {
-            commandDataDetail = this.getCommandDataDetail(commandText, groupName!)
-            commands.push(new CommandData(commandText, commandDataDetail))
-            commandGroupMap.set(groupName!, commands)
-            this.progressText.textContent = '[' + groupName + '] : ' + commands.length
+            commandDataDetail = this.getCommandDataDetail(commandText, groupName!);
+            commands.push(new CommandData(commandText, commandDataDetail));
           }
-          isAddToMap = true
-          break
+          break;
         }
       }
-      textLinesGroupMap.set(groupName!, '')
-    })
-    return commandGroupMap
+
+      if (commands.length > 0) {
+        commandGroupMap.set(groupName!, commands);
+      }
+    });
+
+    return commandGroupMap;
   }
 
   protected getGroupName (textLine: string): GroupType | null {
