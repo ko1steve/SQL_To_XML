@@ -72,6 +72,9 @@ export class RegExpConig implements IRegExpConfig {
           'TRUNCATE TABLE', /[\s\t]*TRUNCATE\s+TABLE/
         ],
         [
+          'EXEC SYS.SP_ADDEXTENDEDPROPERTY', /[\s\t]*EXEC\s+SYS\.SP_ADDEXTENDEDPROPERTY\s+/
+        ],
+        [
           'COMMENT ON', /[\s\t]*COMMENT\s+ON/
         ],
         [
