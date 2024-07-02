@@ -1,27 +1,27 @@
 import { CommandType, GroupType, IGroupSetting, MainConfig } from 'src/mainConfig'
 import { IGroupContainerConfig, ITabContentConfig } from './tabContentConfig'
-import { CommandData, MessageType, ICommandDataDetail } from 'src/element/CommandData'
+import { CommandData, MessageType, ICommandDataDetail, StringBuilder } from 'src/element/CommandData'
 import { TSMap } from 'typescript-map'
 import * as He from 'he'
 
 export class TabContentController {
   protected mainConfig: MainConfig = new MainConfig()
   protected commandType: CommandType = CommandType.NONE
-  protected fileName: string = ''
-  protected textFromFileLoaded: string = ''
-
+  protected fileName: string
+  protected textFromFileLoaded: string
   protected commandValid: boolean = true
-
-  protected commandGroupMap: TSMap<GroupType, CommandData[]> = new TSMap()
-
+  protected commandGroupMap: TSMap<GroupType, CommandData[]> = new TSMap<GroupType, CommandData[]>()
   protected progressText: HTMLDivElement
 
   constructor (commandType: CommandType, textFromFileLoaded: string, fileName: string) {
     this.fileName = fileName
     this.commandType = commandType
     this.textFromFileLoaded = textFromFileLoaded
-    this.commandValid = true
     this.progressText = document.getElementById('progress-text') as HTMLDivElement
+    this.initialize()
+  }
+
+  protected initialize (): void {
     this.getCommandGroup()
     this.createContent()
     this.updateDownloadButtonStatus()
@@ -41,27 +41,19 @@ export class TabContentController {
   public resetPageContent (textFromFileLoaded: string, fileName: string): void {
     const mainContainer: HTMLDivElement = document.getElementById('main-container-' + this.commandType) as HTMLDivElement
     const contentContainer: HTMLDivElement = document.getElementById('content-container-' + this.commandType) as HTMLDivElement
-    if (contentContainer == null) {
-      return
-    }
     mainContainer.removeChild(contentContainer)
     this.commandValid = true
     this.fileName = fileName
     this.textFromFileLoaded = textFromFileLoaded
-    this.getCommandGroup()
-    this.createContent()
-    this.updateDownloadButtonStatus()
+    this.initialize()
   }
 
   protected getTextGroupMap (): TSMap<GroupType, string> {
-    this.progressText.textContent = 'getTextGroupMap'
     const textLinesGroupMap: TSMap<GroupType, string> = new TSMap<GroupType, string>()
     const textLines: string[] = this.textFromFileLoaded.split('\n')
     this.textFromFileLoaded = ''
-    let isGroupToMap = false
     let groupName: GroupType | null
     for (let i = 0; i < textLines.length; i++) {
-      isGroupToMap = false
       groupName = this.getGroupName(textLines[i])
 
       //* 若找不到區塊分割的判斷字串，則略過換下一行
@@ -75,19 +67,9 @@ export class TabContentController {
       let j: number
       for (j = i + 1; j < textLines.length; j++) {
         i = j - 1
-        for (let k = 0; k < searchEndArr.length; k++) {
-          if (textLines[j].trim().startsWith(searchEndArr[k])) {
-            //* 找到結束點後，將整個區塊指令儲存至 Map
-            textLinesGroupMap.set(groupName, text)
-            isGroupToMap = true
-            break
-          }
-        }
-        if (isGroupToMap) {
+        if (searchEndArr.some(pattern => textLines[j].trim().startsWith(pattern))) {
+          textLinesGroupMap.set(groupName, text)
           break
-        }
-        if (this.commandType === CommandType.DML) {
-          textLines[j] = this.cleanSemicolon(textLines[j])
         }
         //* 找到結束點之前，不斷累加該行的指令文字
         text += textLines[j] + '\n'
@@ -95,7 +77,6 @@ export class TabContentController {
       //* 如果直到最後都沒有出現結束點文字，則判斷結束點為最後一行文字
       if (j === textLines.length) {
         textLinesGroupMap.set(groupName, text)
-        isGroupToMap = true
         break
       }
     }
@@ -107,32 +88,14 @@ export class TabContentController {
       messageType: MessageType.NONE,
       commands: []
     }
-    const commandTextLines = commandText.split('\r\n')
-    for (let i: number = 0; i < commandTextLines.length; i++) {
-      if (commandTextLines[i].search(/^[\s\t]*$|^[\s\t]*--/) > -1) {
-        commandTextLines.splice(i, 1)
-        i--
-      }
-    }
-    commandText = commandTextLines.join('\r\n')
+    const cleanedText = commandText.split('\r\n').filter(line => !line.match(/^[\s\t]*$|^[\s\t]*--/)).join('\r\n')
+    const upperText = cleanedText.toUpperCase()
 
     //* 檢查指令是否至少包含任何一個合規的語法
     if (this.mainConfig.validCommandMap.has(this.commandType)) {
-      const groupvalidCommandMap: TSMap<GroupType, TSMap<string, RegExp>> = this.mainConfig.validCommandMap.get(this.commandType)
-      if (groupvalidCommandMap.has(groupName)) {
-        const validCommandMap: TSMap<string, RegExp> = groupvalidCommandMap.get(groupName)
-        //* 取得該 GroupName 所有合法語法
-        let hasValidCommand: boolean = false
-        validCommandMap.forEach((regExp) => {
-          //* 若抓到該 Group 允許的任一合法語法
-          if (commandText.toUpperCase().search(regExp) > -1) {
-            hasValidCommand = true
-          }
-        })
-        if (!hasValidCommand) {
-          detail.messageType = MessageType.NO_VALID_COMMAND_ERROR
-          detail.commands.push('')
-        }
+      const groupValidCommandMap: TSMap<string, RegExp> = this.mainConfig.validCommandMap.get(this.commandType)?.get(groupName)
+      if (groupValidCommandMap && !Array.from(groupValidCommandMap.values()).some(regExp => upperText.search(regExp) > -1)) {
+        detail.messageType = MessageType.NO_VALID_COMMAND_ERROR
       }
     }
     //* 檢查指令是否包含不合規的語法
@@ -143,7 +106,7 @@ export class TabContentController {
         //* 取得該 GroupName 所有非法語法
         invalidCommandMap.forEach((regExp, commandType) => {
           //* 若抓到該 Group 禁止的任一非法語法
-          if (commandText.toUpperCase().search(regExp) > -1) {
+          if (upperText.search(regExp) > -1) {
             detail.messageType = MessageType.INVALID_COMMAND_ERROR
             detail.commands.push(commandType!)
           }
@@ -162,9 +125,10 @@ export class TabContentController {
     const commandGroupMap = new TSMap<GroupType, CommandData[]>()
     textLinesGroupMap.forEach((text, groupName) => {
       const textLines = text.split('\n')
-      const commamds: CommandData[] = []
+      const commands: CommandData[] = []
       for (let i = 0; i < textLines.length; i++) {
         let isAddToMap = false
+        const commadTextSB: StringBuilder = new StringBuilder()
         let commandDataDetail: ICommandDataDetail = {
           messageType: MessageType.NONE,
           commands: []
@@ -173,27 +137,23 @@ export class TabContentController {
         if (!textLines[i].trim().startsWith(this.mainConfig.singleCommandIndicator)) {
           continue
         }
-        let commandText: string = ''
         const newTextLine: string = textLines[i].replace(this.mainConfig.singleCommandIndicator, '').trim()
 
         //* 取得指令資料
         if (newTextLine.length !== 0) {
-          commandText = newTextLine + '\n'
+          commadTextSB.append(newTextLine)
         }
         //* 找到指令分割的判斷字串後，尋找指令的結束點
         let j: number
         for (j = i + 1; j < textLines.length; j++) {
           i = j - 1
           if (textLines[j].trim().startsWith(this.mainConfig.singleCommandIndicator)) {
-            if (this.mainConfig.enableTrimCommand) {
-              commandText = this.cleanEmptyLineAtCommandEnd(commandText)
-            }
+            const commandText = commadTextSB.toString('\n')
             if (!this.mainConfig.enableTrimCommand || commandText.length > 0) {
               commandDataDetail = this.getCommandDataDetail(commandText, groupName!)
-              commamds.push(new CommandData(commandText, commandDataDetail))
-              commandGroupMap.set(groupName!, commamds)
-              this.progressText.textContent = '[' + groupName + '] : ' + commamds.length
-              textLinesGroupMap.delete(groupName!)
+              commands.push(new CommandData(commandText, commandDataDetail))
+              commandGroupMap.set(groupName!, commands)
+              this.progressText.textContent = '[' + groupName + '] : ' + commands.length
             }
             isAddToMap = true
             break
@@ -201,7 +161,7 @@ export class TabContentController {
             textLines[j] = textLines[j].replace(this.mainConfig.singleCommandIndicator, '')
             if (!this.mainConfig.enableTrimCommand || textLines[j].trim().length > 0) {
               //* 找到結束點之前，不斷累加指令的內容
-              commandText += textLines[j] + '\n'
+              commadTextSB.append(textLines[j])
             }
           }
           if (isAddToMap) {
@@ -210,44 +170,20 @@ export class TabContentController {
         }
         //* 如果直到最後都沒有出現結束點文字，則判斷結束點為最後一行文字
         if (j === textLines.length) {
-          if (this.mainConfig.enableTrimCommand) {
-            commandText = this.cleanEmptyLineAtCommandEnd(commandText)
-            if (commandText.length > 0) {
-              commandDataDetail = this.getCommandDataDetail(commandText, groupName!)
-              commamds.push(new CommandData(commandText, commandDataDetail))
-              commandGroupMap.set(groupName!, commamds)
-              this.progressText.textContent = '[' + groupName + '] : ' + commamds.length
-              textLinesGroupMap.delete(groupName!)
-            }
-          } else {
+          const commandText = commadTextSB.toString('\n')
+          if (commandText.length > 0) {
             commandDataDetail = this.getCommandDataDetail(commandText, groupName!)
-            commamds.push(new CommandData(commandText, commandDataDetail))
-            commandGroupMap.set(groupName!, commamds)
-            this.progressText.textContent = '[' + groupName + '] : ' + commamds.length
-            textLinesGroupMap.delete(groupName!)
+            commands.push(new CommandData(commandText, commandDataDetail))
+            commandGroupMap.set(groupName!, commands)
+            this.progressText.textContent = '[' + groupName + '] : ' + commands.length
           }
           isAddToMap = true
           break
         }
       }
+      textLinesGroupMap.set(groupName!, '')
     })
     return commandGroupMap
-  }
-
-  protected cleanSemicolon (commandText: string): string {
-    const newText = commandText.trimEnd()
-    if (newText.endsWith(';')) {
-      return newText.substring(0, newText.length - 1)
-    }
-    return commandText
-  }
-
-  protected cleanEmptyLineAtCommandEnd (commandText: string): string {
-    while (commandText.endsWith('\n')) {
-      const i: number = commandText.lastIndexOf('\n')
-      commandText = commandText.substring(0, i).trim()
-    }
-    return commandText
   }
 
   protected getGroupName (textLine: string): GroupType | null {

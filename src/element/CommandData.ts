@@ -37,3 +37,18 @@ export class CommandData implements ICommandData {
     return this._detail
   }
 }
+
+export class StringBuilder {
+  protected _strings: string[]
+  constructor () {
+    this._strings = []
+  }
+
+  append (str: string) {
+    this._strings.push(str)
+  }
+
+  toString (symbol: string = '') {
+    return this._strings.join(symbol)
+  }
+}
