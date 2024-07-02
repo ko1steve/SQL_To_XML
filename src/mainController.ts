@@ -99,6 +99,9 @@ export class MainController {
 
     // 向 Web Worker 发送文件和相关信息
     worker.postMessage({ file, chunkSize })
+
+    fileInput.files = null
+    fileInput.value = ''
   }
 
   protected onReadFileComplete (text: string, commandType: CommandType, file: File): void {
