@@ -77,37 +77,32 @@ export class MainController {
       return
     }
 
-    // 创建并启动 Web Worker
     const worker = new Worker(getBinaryString)
 
-    // 监听来自 Web Worker 的消息
     worker.onmessage = (event: any) => {
       const { type, data } = event.data
       if (type === 'progress') {
         //
       } else if (type === 'complete') {
-        setTimeout(() => {
-          const { binaryString } = data
+        worker.terminate()
 
-          //* 偵測文字編碼
-          const detectedInfo: jschardet.IDetectedMap = jschardet.detect(binaryString)
+        //* 偵測文字編碼
+        const { binaryString } = data
+        const detectedInfo: jschardet.IDetectedMap = jschardet.detect(binaryString)
 
-          const textReader = new FileReader()
-          textReader.onload = (event) => {
-            if (event.target == null) {
-              return
-            }
-            const text = event.target.result as string
-            this.onReadFileComplete(text, commandType, file)
+        const textReader = new FileReader()
+        textReader.onload = (event) => {
+          if (event.target == null) {
+            return
           }
-          //* 以偵測到的編碼讀取文字檔
-          textReader.readAsText(file, detectedInfo.encoding)
-        }, 1)
-        worker.terminate() // 在不再需要时终止 Web Worker
+          const text = event.target.result as string
+          this.onReadFileComplete(text, commandType, file)
+        }
+        //* 以偵測到的編碼讀取文字檔
+        textReader.readAsText(file, detectedInfo.encoding)
       }
     }
 
-    // 向 Web Worker 发送文件和相关信息
     worker.postMessage(file)
 
     fileInput.files = null
