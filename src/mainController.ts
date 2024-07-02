@@ -64,7 +64,7 @@ export class MainController {
     if (!fileInput || !fileInput.files || fileInput?.files?.length === 0) {
       return
     }
-    let file: File | null = fileInput.files[0]
+    const file: File = fileInput.files[0]
     const fileName = file.name
     let commandType: CommandType = CommandType.NONE
     Object.values(CommandType).forEach(e => {
@@ -75,39 +75,55 @@ export class MainController {
     if (commandType === CommandType.NONE) {
       return
     }
-    const overlay = document.getElementById('overlay') as HTMLDivElement
-    const textReader = new FileReader()
-
-    textReader.onloadstart = function () {
-      overlay.style.display = 'flex'
-    }
-
-    textReader.onerror = function () {
-      overlay.style.display = 'none'
-    }
-
-    textReader.onload = (event) => {
-      overlay.style.display = 'none'
+    const arrayBufferReader: FileReader = new FileReader()
+    arrayBufferReader.onload = (event) => {
       if (event.target == null) {
         return
       }
-      let text = event.target.result as string
-      if (this.tabContentControllerMap.has(commandType)) {
-        const tabContentController = this.tabContentControllerMap.get(commandType) as TabContentController
-        tabContentController.resetPageContent(text, fileName)
-      } else {
-        const tabContentController = new TabContentController(commandType, text, fileName)
-        this.tabContentControllerMap.set(commandType, tabContentController)
+      const arrayBuffer: ArrayBuffer = event.target.result as ArrayBuffer
+
+      //* 將 ArrayBuffer 轉成 String Type
+      const uint8Array: Uint8Array = new Uint8Array(arrayBuffer)
+      const binaryString: string = Array.from(uint8Array, byte => String.fromCharCode(byte)).join('')
+
+      //* 偵測文字編碼
+      const detectedInfo: jschardet.IDetectedMap = jschardet.detect(binaryString)
+
+      const overlay = document.getElementById('overlay') as HTMLDivElement
+      const textReader = new FileReader()
+
+      textReader.onloadstart = function () {
+        overlay.style.display = 'flex'
       }
-      text = ''
+
+      textReader.onerror = function () {
+        overlay.style.display = 'none'
+      }
+      textReader.onload = (event) => {
+        overlay.style.display = 'none'
+        if (event.target == null) {
+          return
+        }
+        const text = event.target.result as string
+        if (this.tabContentControllerMap.has(commandType)) {
+          const tabContentController = this.tabContentControllerMap.get(commandType) as TabContentController
+          tabContentController.resetPageContent(text, fileName)
+        } else {
+          const tabContentController = new TabContentController(commandType, text, fileName)
+          this.tabContentControllerMap.set(commandType, tabContentController)
+        }
+      }
+      //* 以偵測到的編碼讀取文字檔
+      if (fileInput.files != null) {
+        textReader.readAsText(file, detectedInfo.encoding)
+      }
+      fileInput.files = null
+      fileInput.value = ''
     }
-    //* 以偵測到的編碼讀取文字檔
+    //* 將文字檔讀取為 ArrayBuffer Type
     if (fileInput.files != null) {
-      textReader.readAsText(file)
+      arrayBufferReader.readAsArrayBuffer(file)
     }
-    file = null
-    fileInput.files = null
-    fileInput.value = ''
   }
 
   protected onNavClick (commandType: CommandType) {
