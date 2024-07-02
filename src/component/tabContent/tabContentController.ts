@@ -103,6 +103,15 @@ export class TabContentController {
       commands: [],
       commandText
     }
+    const commandTextLines = commandText.split('\r\n')
+    for (let i: number = 0; i < commandTextLines.length; i++) {
+      if (commandTextLines[i].search(/^[\s\t]*(--)?/)) {
+        commandTextLines.splice(i, 1)
+        i--
+      }
+    }
+    commandText = commandTextLines.join('\r\n')
+
     //* 檢查指令是否至少包含任何一個合規的語法
     if (this.mainConfig.validCommandMap.has(this.commandType)) {
       const groupvalidCommandMap: TSMap<GroupType, TSMap<string, RegExp>> = this.mainConfig.validCommandMap.get(this.commandType)
@@ -110,7 +119,7 @@ export class TabContentController {
         const validCommandMap: TSMap<string, RegExp> = groupvalidCommandMap.get(groupName)
         //* 取得該 GroupName 所有合法語法
         let hasValidCommand: boolean = false
-        validCommandMap.forEach((regExp, commandType) => {
+        validCommandMap.forEach((regExp) => {
           //* 若抓到該 Group 允許的任一合法語法
           if (commandText.toUpperCase().search(regExp) > -1) {
             hasValidCommand = true
@@ -137,69 +146,6 @@ export class TabContentController {
         })
       }
     }
-    // //* 若是不存在不合規的語法，則檢查指令是否包含需註解的語法
-    // if (detail.commands.length === 0) {
-    //   const oracleComplexCommandEnds: string[] = ['/']
-    //   const msSqlComplexCommandEnds: string[] = ['END', 'END;']
-    //   const DdlComplexCommandEnds: string[] = oracleComplexCommandEnds.concat(msSqlComplexCommandEnds)
-
-    //   //* 檢查 GO
-    //   const commandTextLines: string[] = commandText.split('\r\n')
-    //   const commandGoRegExp: RegExp = /^\s*GO\s*|^\s*GO\s*;/
-    //   //* 抓 Procedure/Function/Trigger/Package/View 等指定的 DDL 指令
-    //   for (let i: number = 0; i < commandTextLines.length; i++) {
-    //     if (commandTextLines[i].toUpperCase().trim().search(this.mainConfig.ddlComplexCommandStart) > -1) {
-    //       //* 抓到指定的 DDL 指令，抓 Oracle 的 "/" 結束符號
-    //       let matchOracle = false
-    //       for (let j: number = commandTextLines.length - 1; j >= 0; j--) {
-    //         if (oracleComplexCommandEnds.includes(commandTextLines[j].trim())) {
-    //           matchOracle = true
-    //           break
-    //         } else if (commandTextLines[j].toUpperCase().search(commandGoRegExp) > -1 && commandTextLines[j].toUpperCase().search(/^--\s*/) < 0) {
-    //           commandTextLines[j] = '--' + commandTextLines[j]
-    //           detail.messageType = MessageType.COMMENT_OUT_COMMAND
-    //           detail.commands.push('GO')
-    //         }
-    //       }
-    //       if (matchOracle) {
-    //         break
-    //       }
-    //     } else if (commandTextLines[i].toUpperCase().search(commandGoRegExp) > -1 && commandTextLines[i].toUpperCase().search(/^--\s*/) < 0) {
-    //       commandTextLines[i] = '--' + commandTextLines[i]
-    //       detail.messageType = MessageType.COMMENT_OUT_COMMAND
-    //       detail.commands.push('GO')
-    //     }
-    //   }
-
-    //   //* 檢查 COMMIT
-    //   const commandCommitRegExp: RegExp = /^[\s\t]*COMMIT[\s\t]*|^[\s\t]*COMMIT[\s\t]*;/
-    //   //* 抓 Procedure/Function/Trigger/Package/View 等指定的 DDL 指令
-    //   for (let i: number = 0; i < commandTextLines.length; i++) {
-    //     if (commandTextLines[i].toUpperCase().trim().search(this.mainConfig.ddlComplexCommandStart) > -1) {
-    //       //* 抓到指定的 DDL 指令，抓 Oracle 的 "/" 結束符號
-    //       let matchOracle = false
-    //       for (let j: number = commandTextLines.length - 1; j >= 0; j--) {
-    //         if (DdlComplexCommandEnds.includes(commandTextLines[j].trim())) {
-    //           matchOracle = true
-    //           break
-    //         } else if (commandTextLines[j].toUpperCase().search(commandCommitRegExp) > -1 && commandTextLines[j].toUpperCase().search(/^--\s*/) < 0) {
-    //           commandTextLines[j] = '--' + commandTextLines[j]
-    //           detail.messageType = MessageType.COMMENT_OUT_COMMAND
-    //           detail.commands.push('COMMIT')
-    //         }
-    //       }
-    //       if (matchOracle) {
-    //         break
-    //       }
-    //     } else if (commandTextLines[i].toUpperCase().search(commandCommitRegExp) > -1 && commandTextLines[i].toUpperCase().search(/^--\s*/) < 0) {
-    //       commandTextLines[i] = '--' + commandTextLines[i]
-    //       detail.messageType = MessageType.COMMENT_OUT_COMMAND
-    //       detail.commands.push('COMMIT')
-    //     }
-    //   }
-
-    //   detail.commandText = commandTextLines.join('\r\n')
-    // }
     return detail
   }
 
@@ -241,7 +187,7 @@ export class TabContentController {
             }
             if (!this.mainConfig.enableTrimCommand || commandText.length > 0) {
               commandDataDetail = this.getCommandDataDetail(commandText, groupName!)
-              commamds.push(new CommandData(commandDataDetail.commandText, commandDataDetail))
+              commamds.push(new CommandData(commandText, commandDataDetail))
               commandGroupMap.set(groupName!, commamds)
             }
             isAddToMap = true
@@ -263,12 +209,12 @@ export class TabContentController {
             commandText = this.cleanEmptyLineAtCommandEnd(commandText)
             if (commandText.length > 0) {
               commandDataDetail = this.getCommandDataDetail(commandText, groupName!)
-              commamds.push(new CommandData(commandDataDetail.commandText, commandDataDetail))
+              commamds.push(new CommandData(commandText, commandDataDetail))
               commandGroupMap.set(groupName!, commamds)
             }
           } else {
             commandDataDetail = this.getCommandDataDetail(commandText, groupName!)
-            commamds.push(new CommandData(commandDataDetail.commandText, commandDataDetail))
+            commamds.push(new CommandData(commandText, commandDataDetail))
             commandGroupMap.set(groupName!, commamds)
           }
           isAddToMap = true
