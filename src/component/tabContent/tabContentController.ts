@@ -123,7 +123,7 @@ export class TabContentController {
    * @returns TSMap<GroupType, CommandData[]>
    */
   protected getCommandGroupMap (textLinesGroupMap: TSMap<GroupType, string>): TSMap<GroupType, CommandData[]> {
-    const commandGroupMap = new TSMap<GroupType, CommandData[]>();
+    const commandGroupMap = new TSMap<GroupType, CommandData[]>()
 
     textLinesGroupMap.forEach((text, groupName) => {
       const textLines = text.split('\n')
@@ -133,51 +133,51 @@ export class TabContentController {
 
       for (let i = 0; i < textLines.length; i++) {
         if (!textLines[i].trim().startsWith(this.mainConfig.singleCommandIndicator)) {
-          continue;
+          continue
         }
 
-        commadTextSB = new StringBuilder();
-        commandDataDetail = { messageType: MessageType.NONE, commands: [] };
+        commadTextSB = new StringBuilder()
+        commandDataDetail = { messageType: MessageType.NONE, commands: [] }
 
-        const newTextLine = textLines[i].replace(this.mainConfig.singleCommandIndicator, '').trim();
+        const newTextLine = textLines[i].replace(this.mainConfig.singleCommandIndicator, '').trim()
         if (newTextLine.length !== 0) {
-          commadTextSB.append(newTextLine);
+          commadTextSB.append(newTextLine)
         }
 
-        let j: number;
+        let j: number
         for (j = i + 1; j < textLines.length; j++) {
           if (textLines[j].trim().startsWith(this.mainConfig.singleCommandIndicator)) {
-            const commandText = commadTextSB.toString('\n');
+            const commandText = commadTextSB.toString('\n')
             if (!this.mainConfig.enableTrimCommand || commandText.length > 0) {
-              commandDataDetail = this.getCommandDataDetail(commandText, groupName!);
-              commands.push(new CommandData(commandText, commandDataDetail));
+              commandDataDetail = this.getCommandDataDetail(commandText, groupName!)
+              commands.push(new CommandData(commandText, commandDataDetail))
             }
-            i = j - 1; // Continue from next line
-            break;
+            i = j - 1 // Continue from next line
+            break
           } else {
-            textLines[j] = textLines[j].replace(this.mainConfig.singleCommandIndicator, '');
+            textLines[j] = textLines[j].replace(this.mainConfig.singleCommandIndicator, '')
             if (!this.mainConfig.enableTrimCommand || textLines[j].trim().length > 0) {
-              commadTextSB.append(textLines[j]);
+              commadTextSB.append(textLines[j])
             }
           }
         }
 
         if (j === textLines.length) {
-          const commandText = commadTextSB.toString('\n');
+          const commandText = commadTextSB.toString('\n')
           if (commandText.length > 0) {
-            commandDataDetail = this.getCommandDataDetail(commandText, groupName!);
-            commands.push(new CommandData(commandText, commandDataDetail));
+            commandDataDetail = this.getCommandDataDetail(commandText, groupName!)
+            commands.push(new CommandData(commandText, commandDataDetail))
           }
-          break;
+          break
         }
       }
 
       if (commands.length > 0) {
-        commandGroupMap.set(groupName!, commands);
+        commandGroupMap.set(groupName!, commands)
       }
-    });
+    })
 
-    return commandGroupMap;
+    return commandGroupMap
   }
 
   protected getGroupName (textLine: string): GroupType | null {
