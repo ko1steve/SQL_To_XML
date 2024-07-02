@@ -109,7 +109,7 @@ export class TabContentController {
     }
     const commandTextLines = commandText.split('\r\n')
     for (let i: number = 0; i < commandTextLines.length; i++) {
-      if (commandTextLines[i].search(/^[\s\t]*(--)?/)) {
+      if (commandTextLines[i].search(/^[\s\t]*$|^[\s\t]*--/) > -1) {
         commandTextLines.splice(i, 1)
         i--
       }
