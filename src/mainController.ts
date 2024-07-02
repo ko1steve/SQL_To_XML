@@ -105,8 +105,18 @@ export class MainController {
       //* 偵測文字編碼
       const detectedInfo: jschardet.IDetectedMap = jschardet.detect(binaryString)
 
+      const overlay = document.getElementById('overlay') as HTMLDivElement
       const textReader = new FileReader()
+
+      textReader.onloadstart = function () {
+        overlay.style.display = 'flex'
+      }
+
+      textReader.onerror = function () {
+        overlay.style.display = 'none'
+      }
       textReader.onload = (event) => {
+        overlay.style.display = 'none'
         if (event.target == null) {
           return
         }

@@ -48,103 +48,103 @@ export class RegExpConig implements IRegExpConfig {
           'DROP INDEX', /[\s\t]*DROP\s+INDEX\s+/
         ],
         [
-          'CREATE [OR REPLACE] PROCEDURE', /[\s\t]*CREATE\s+(?:OR\s+REPLACE)?\s+PROCEDURE\s+/
+          'CREATE [OR REPLACE] PROCEDURE', /[\s\t]*CREATE\s+(OR\s+REPLACE\s+)?PROCEDURE/
         ],
         [
-          'CREATE [OR REPLACE] TRIGGER', /[\s\t]*CREATE\s+(?:OR\s+REPLACE)?\s+TRIGGER\s+/
+          'CREATE [OR REPLACE] TRIGGER', /[\s\t]*CREATE\s+(OR\s+REPLACE\s+)?TRIGGER/
         ],
         [
-          'ALTER PROCEDURE', /[\s\t]*ALTER\s+PROCEDURE\s+/
+          'ALTER PROCEDURE', /[\s\t]*ALTER\s+PROCEDURE/
         ],
         [
-          'DROP PROCEDURE', /[\s\t]*DROP\s+PROCEDURE\s+/
+          'DROP PROCEDURE', /[\s\t]*DROP\s+PROCEDURE/
         ],
         [
-          'CREATE [OR REPLACE] FUNCTION', /[\s\t]*CREATE\s+(?:OR\s+REPLACE\s+)?FUNCTION\s+/
+          'CREATE [OR REPLACE] FUNCTION', /[\s\t]*CREATE\s+(OR\s+REPLACE\s+)?FUNCTION/
         ],
         [
-          'CREATE [OR REPLACE] PACKAGE', /[\s\t]*CREATE\s+(?:OR\s+REPLACE\s+)?PACKAGE\s+/
+          'CREATE [OR REPLACE] PACKAGE', /[\s\t]*CREATE\s+(OR\s+REPLACE\s+)?PACKAGE/
         ],
         [
-          'CREATE [OR REPLACE] [FORCE] [EDITIONABLE] VIEW', /[\s\t]*CREATE\s+(?:OR\s+REPLACE\s+)?(?:FORCE\s+)?(?:EDITIONABLE\s+)?VIEW\s+/
+          'CREATE [OR REPLACE] [FORCE] [EDITIONABLE] VIEW', /[\s\t]*CREATE\s+(OR\s+REPLACE\s+)?(FORCE\s+)?(EDITIONABLE\s+)?VIEW/
         ],
         [
-          'TRUNCATE TABLE', /[\s\t]*TRUNCATE\s+TABLE\s+/
+          'TRUNCATE TABLE', /[\s\t]*TRUNCATE\s+TABLE/
         ],
         [
-          'COMMENT ON', /[\s\t]*COMMENT\s+ON\s+/
+          'COMMENT ON', /[\s\t]*COMMENT\s+ON/
         ],
         [
-          'CREATE CONTEXT', /[\s\t]*CREATE\s+CONTEXT\s+/
+          'CREATE CONTEXT', /[\s\t]*CREATE\s+CONTEXT/
         ],
         [
-          'CREATE DIRECTORY', /[\s\t]*CREATE\s+DIRECTORY\s+/
+          'CREATE DIRECTORY', /[\s\t]*CREATE\s+DIRECTORY/
         ],
         [
-          'CREATE MATERIALIZED VIEW', /[\s\t]*CREATE\s+MATERIALIZED\s+VIEW\s+/
+          'CREATE MATERIALIZED VIEW', /[\s\t]*CREATE\s+MATERIALIZED\s+VIEW/
         ],
         [
-          'CREATE SEQUENCE', /[\s\t]*CREATE\s+SEQUENCE\s+/
+          'CREATE SEQUENCE', /[\s\t]*CREATE\s+SEQUENCE/
         ],
         [
-          'CREATE SYNONYM', /[\s\t]*CREATE\s+SYNONYM\s+/
+          'CREATE SYNONYM', /[\s\t]*CREATE\s+SYNONYM/
         ],
         [
-          'CREATE TRIGGER', /[\s\t]*CREATE\s+TRIGGER\s+/
+          'CREATE TRIGGER', /[\s\t]*CREATE\s+TRIGGER/
         ],
         [
-          'CREATE TYPE', /[\s\t]*CREATE\s+TYPE\s+/
+          'CREATE TYPE', /[\s\t]*CREATE\s+TYPE/
         ],
         [
-          'CREATE DATABASE LINK', /[\s\t]*CREATE\s+DATABASE\s+LINK\s+/
+          'CREATE DATABASE LINK', /[\s\t]*CREATE\s+DATABASE\s+LINK/
         ],
         [
-          'CREATE PUBLIC DATABASE LINK', /[\s\t]*CREATE\s+PUBLIC\s+DATABASE\s+LINK\s+/
+          'CREATE PUBLIC DATABASE LINK', /[\s\t]*CREATE\s+PUBLIC\s+DATABASE\s+LINK/
         ],
         [
-          'CREATE PUBLIC SYNONYM', /[\s\t]*CREATE\s+PUBLIC\s+SYNONYM\s+/
+          'CREATE PUBLIC SYNONYM', /[\s\t]*CREATE\s+PUBLIC\s+SYNONYM/
         ],
         [
-          'ALTER MATERIALIZED VIEW', /[\s\t]*ALTER\s+MATERIALIZED\s+VIEW\s+/
+          'ALTER MATERIALIZED VIEW', /[\s\t]*ALTER\s+MATERIALIZED\s+VIEW/
         ],
         [
-          'ALTER SEQUENCE', /[\s\t]*ALTER\s+SEQUENCE\s+/
+          'ALTER SEQUENCE', /[\s\t]*ALTER\s+SEQUENCE/
         ],
         [
-          'ALTER SYNONYM', /[\s\t]*ALTER\s+SYNONYM\s+/
+          'ALTER SYNONYM', /[\s\t]*ALTER\s+SYNONYM/
         ],
         [
-          'ALTER TRIGGER', /[\s\t]*ALTER\s+TRIGGER\s+/
+          'ALTER TRIGGER', /[\s\t]*ALTER\s+TRIGGER/
         ],
         [
-          'ALTER TYPE', /[\s\t]*ALTER\s+TYPE\s+/
+          'ALTER TYPE', /[\s\t]*ALTER\s+TYPE/
         ],
         [
-          'ALTER DATABASE LINK', /[\s\t]*ALTER\s+DATABASE\s+LINK\s+/
+          'ALTER DATABASE LINK', /[\s\t]*ALTER\s+DATABASE\s+LINK/
         ],
         [
-          'DROP DIRECTORY', /[\s\t]*DROP\s+DIRECTORY\s+/
+          'DROP DIRECTORY', /[\s\t]*DROP\s+DIRECTORY/
         ],
         [
-          'DROP MATERIALIZED VIEW', /[\s\t]*DROP\s+MATERIALIZED\s+VIEW\s+/
+          'DROP MATERIALIZED VIEW', /[\s\t]*DROP\s+MATERIALIZED\s+VIEW/
         ],
         [
-          'DROP SEQUENCE', /[\s\t]*DROP\s+SEQUENCE\s+/
+          'DROP SEQUENCE', /[\s\t]*DROP\s+SEQUENCE/
         ],
         [
-          'DROP SYNONYM', /[\s\t]*DROP\s+SYNONYM\s+/
+          'DROP SYNONYM', /[\s\t]*DROP\s+SYNONYM/
         ],
         [
-          'DROP TRIGGER', /[\s\t]*DROP\s+TRIGGER\s+/
+          'DROP TRIGGER', /[\s\t]*DROP\s+TRIGGER/
         ],
         [
-          'DROP VIEW', /[\s\t]*DROP\s+VIEW\s+/
+          'DROP VIEW', /[\s\t]*DROP\s+VIEW/
         ],
         [
-          'DROP PUBLIC DATABASE LINK', /[\s\t]*DROP\s+PUBLIC\s+DATABASE\s+LINK\s+/
+          'DROP PUBLIC DATABASE LINK', /[\s\t]*DROP\s+PUBLIC\s+DATABASE\s+LINK/
         ],
         [
-          'DROP PUBLIC SYNONYM', /[\s\t]*DROP\s+PUBLIC\s+SYNONYM\s+/
+          'DROP PUBLIC SYNONYM', /[\s\t]*DROP\s+PUBLIC\s+SYNONYM/
         ]
       ])
     ]
@@ -171,16 +171,16 @@ export class RegExpConig implements IRegExpConfig {
       //* 指定「Insert into」、「Update set」、「Delete」、「Select into」
       GroupType.MainSQL, new TSMap<string, RegExp>([
         [
-          'INSERT INTO', /^[\s\t]*INSERT\s+.*\s+INTO\s+/
+          'INSERT INTO', /^[\s\t]*INSERT\s+INTO\s+/
         ],
         [
-          'UPDATE SET', /^[\s\t]*UPDATE\s+.*\s+SET\s+/
+          'UPDATE', /^[\s\t]*UPDATE\s+/
         ],
         [
           'DELETE', /^[\s\t]*DELETE\s+/
         ],
         [
-          'SELECT INTO', /^[\s\t]*SELECT\s+.*\s+INTO\s+/
+          'SELECT INTO', /^[\s\t]*SELECT\s+.*\s+INTO/
         ]
       ])
     ]
@@ -201,7 +201,7 @@ export class RegExpConig implements IRegExpConfig {
           'INSERT', /^[\s\t]*INSERT\s+/
         ],
         [
-          'SELECT', /^[\s\t]*SELECT(?!\s+INTO)\s+/
+          'SELECT', /^[\s\t]*SELECT(?!\s+.*\s+INTO)\s+/
         ],
         //* DDL
         [
@@ -279,7 +279,7 @@ export class RegExpConig implements IRegExpConfig {
           'INSERT', /^[\s\t]*INSERT\s+/
         ],
         [
-          'SELECT', /^[\s\t]*SELECT\s+/
+          'SELECT', /^[\s\t]*SELECT(?!\s+.*\s+INTO)\s+/
         ],
         //* DDL
         [
