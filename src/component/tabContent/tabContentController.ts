@@ -8,7 +8,7 @@ export class TabContentController {
   protected mainConfig: MainConfig = new MainConfig()
   protected commandType: CommandType = CommandType.NONE
   protected fileName: string = ''
-  protected textFromFileLoaded: string
+  protected textFromFileLoaded: string = ''
 
   protected commandValid: boolean = true
 
@@ -25,7 +25,7 @@ export class TabContentController {
   }
 
   protected getCommandGroup (): void {
-    const textLinesGroupMap: TSMap<GroupType, string> = this.getTextGroupMap(this.textFromFileLoaded)
+    const textLinesGroupMap: TSMap<GroupType, string> = this.getTextGroupMap()
     this.commandGroupMap = this.getCommandGroupMap(textLinesGroupMap)
   }
 
@@ -50,9 +50,11 @@ export class TabContentController {
     this.updateDownloadButtonStatus()
   }
 
-  protected getTextGroupMap (textFromFileLoaded: string): TSMap<GroupType, string> {
+  protected getTextGroupMap (): TSMap<GroupType, string> {
+    this.progressText.textContent = 'getTextGroupMap'
     const textLinesGroupMap: TSMap<GroupType, string> = new TSMap<GroupType, string>()
-    const textLines: string[] = textFromFileLoaded.split('\n')
+    const textLines: string[] = this.textFromFileLoaded.split('\n')
+    this.textFromFileLoaded = ''
     let isGroupToMap = false
     let groupName: GroupType | null
     for (let i = 0; i < textLines.length; i++) {
@@ -100,8 +102,7 @@ export class TabContentController {
   protected getCommandDataDetail (commandText: string, groupName: GroupType): ICommandDataDetail {
     const detail: ICommandDataDetail = {
       messageType: MessageType.NONE,
-      commands: [],
-      commandText
+      commands: []
     }
     const commandTextLines = commandText.split('\r\n')
     for (let i: number = 0; i < commandTextLines.length; i++) {
@@ -163,8 +164,7 @@ export class TabContentController {
         let isAddToMap = false
         let commandDataDetail: ICommandDataDetail = {
           messageType: MessageType.NONE,
-          commands: [],
-          commandText: ''
+          commands: []
         }
         //* 若找不到指令分割的判斷字串，則略過
         if (!textLines[i].trim().startsWith(this.mainConfig.singleCommandIndicator)) {
@@ -189,6 +189,7 @@ export class TabContentController {
               commandDataDetail = this.getCommandDataDetail(commandText, groupName!)
               commamds.push(new CommandData(commandText, commandDataDetail))
               commandGroupMap.set(groupName!, commamds)
+              textLinesGroupMap.delete(groupName!)
             }
             isAddToMap = true
             break
@@ -211,11 +212,13 @@ export class TabContentController {
               commandDataDetail = this.getCommandDataDetail(commandText, groupName!)
               commamds.push(new CommandData(commandText, commandDataDetail))
               commandGroupMap.set(groupName!, commamds)
+              textLinesGroupMap.delete(groupName!)
             }
           } else {
             commandDataDetail = this.getCommandDataDetail(commandText, groupName!)
             commamds.push(new CommandData(commandText, commandDataDetail))
             commandGroupMap.set(groupName!, commamds)
+            textLinesGroupMap.delete(groupName!)
           }
           isAddToMap = true
           break

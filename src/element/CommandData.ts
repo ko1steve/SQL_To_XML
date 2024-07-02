@@ -14,7 +14,6 @@ export interface ICommandData {
 export interface ICommandDataDetail {
   messageType: MessageType
   commands: string[]
-  commandText: string
 }
 
 export class CommandData implements ICommandData {

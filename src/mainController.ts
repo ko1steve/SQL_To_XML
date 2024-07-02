@@ -64,7 +64,7 @@ export class MainController {
     if (!fileInput || !fileInput.files || fileInput?.files?.length === 0) {
       return
     }
-    const file: File = fileInput.files[0]
+    let file: File | null = fileInput.files[0]
     const fileName = file.name
     let commandType: CommandType = CommandType.NONE
     Object.values(CommandType).forEach(e => {
@@ -80,7 +80,7 @@ export class MainController {
       if (event.target == null) {
         return
       }
-      const text = event.target.result as string
+      let text = event.target.result as string
       if (this.tabContentControllerMap.has(commandType)) {
         const tabContentController = this.tabContentControllerMap.get(commandType) as TabContentController
         tabContentController.resetPageContent(text, fileName)
@@ -88,11 +88,13 @@ export class MainController {
         const tabContentController = new TabContentController(commandType, text, fileName)
         this.tabContentControllerMap.set(commandType, tabContentController)
       }
+      text = ''
     }
     //* 以偵測到的編碼讀取文字檔
     if (fileInput.files != null) {
       textReader.readAsText(file)
     }
+    file = null
     fileInput.files = null
     fileInput.value = ''
   }
