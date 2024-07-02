@@ -96,6 +96,7 @@ export class TabContentController {
       const groupValidCommandMap: TSMap<string, RegExp> = this.mainConfig.validCommandMap.get(this.commandType)?.get(groupName)
       if (groupValidCommandMap && !Array.from(groupValidCommandMap.values()).some(regExp => upperText.search(regExp) > -1)) {
         detail.messageType = MessageType.NO_VALID_COMMAND_ERROR
+        detail.commands.push('')
       }
     }
     //* 檢查指令是否包含不合規的語法
