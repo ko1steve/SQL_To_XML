@@ -75,45 +75,26 @@ export class MainController {
     if (commandType === CommandType.NONE) {
       return
     }
-    const arrayBufferReader: FileReader = new FileReader()
-    arrayBufferReader.onload = (event) => {
+    const textReader = new FileReader()
+    textReader.onload = (event) => {
       if (event.target == null) {
         return
       }
-      const arrayBuffer: ArrayBuffer = event.target.result as ArrayBuffer
-
-      //* 將 ArrayBuffer 轉成 String Type
-      const uint8Array: Uint8Array = new Uint8Array(arrayBuffer)
-      const binaryString: string = Array.from(uint8Array, byte => String.fromCharCode(byte)).join('')
-
-      //* 偵測文字編碼
-      const detectedInfo: jschardet.IDetectedMap = jschardet.detect(binaryString)
-
-      const textReader = new FileReader()
-      textReader.onload = (event) => {
-        if (event.target == null) {
-          return
-        }
-        const text = event.target.result as string
-        if (this.tabContentControllerMap.has(commandType)) {
-          const tabContentController = this.tabContentControllerMap.get(commandType) as TabContentController
-          tabContentController.resetPageContent(text, fileName)
-        } else {
-          const tabContentController = new TabContentController(commandType, text, fileName)
-          this.tabContentControllerMap.set(commandType, tabContentController)
-        }
+      const text = event.target.result as string
+      if (this.tabContentControllerMap.has(commandType)) {
+        const tabContentController = this.tabContentControllerMap.get(commandType) as TabContentController
+        tabContentController.resetPageContent(text, fileName)
+      } else {
+        const tabContentController = new TabContentController(commandType, text, fileName)
+        this.tabContentControllerMap.set(commandType, tabContentController)
       }
-      //* 以偵測到的編碼讀取文字檔
-      if (fileInput.files != null) {
-        textReader.readAsText(file, detectedInfo.encoding)
-      }
-      fileInput.files = null
-      fileInput.value = ''
     }
-    //* 將文字檔讀取為 ArrayBuffer Type
+    //* 以偵測到的編碼讀取文字檔
     if (fileInput.files != null) {
-      arrayBufferReader.readAsArrayBuffer(file)
+      textReader.readAsText(file)
     }
+    fileInput.files = null
+    fileInput.value = ''
   }
 
   protected onNavClick (commandType: CommandType) {
