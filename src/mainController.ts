@@ -5,6 +5,7 @@ import { CommandType } from './mainConfig'
 import { TabContentController } from './component/tabContent/tabContentController'
 import TopButtonImage from './image/top-button.png'
 import jschardet from 'jschardet'
+import { StringBuilder } from './element/CommandData'
 
 export class MainController {
   protected tabContentControllerMap: Map<CommandType, TabContentController> = new Map()
@@ -65,6 +66,7 @@ export class MainController {
       return
     }
     const file: File = fileInput.files[0]
+    const chunkSize: number = 65536
     const fileName = file.name
     let commandType: CommandType = CommandType.NONE
     Object.values(CommandType).forEach(e => {
@@ -75,54 +77,89 @@ export class MainController {
     if (commandType === CommandType.NONE) {
       return
     }
-    const arrayBufferReader: FileReader = new FileReader()
+
+    this.readFileInChunks(file, chunkSize, commandType, fileName, (chunk: ArrayBuffer, offset: number, totalSize: number) => {
+      const progress: number = +(offset + chunkSize) > totalSize ? +totalSize : (offset + chunkSize)
+      console.log(`Read chunk from ${offset} to ${progress} of ${totalSize}`)
+      // Process the chunk
+    })
+  }
+
+  protected readFileInChunks (file: File, chunkSize: number, commandType: CommandType, fileName: string, callback: Function): void {
+    const arrayBufferReader = new FileReader()
+    let offset: number = 0
+    const binaryStringAB: StringBuilder = new StringBuilder()
+
     arrayBufferReader.onload = (event) => {
+      if (!event.target || event.target.readyState !== FileReader.DONE) {
+        return
+      }
+      const chunkArrayBuffer: ArrayBuffer = event.target.result as ArrayBuffer
+
+      //* 將 ArrayBuffer 轉成 String Type
+      let uint8Arrays = this.splitArrayBuffer(chunkArrayBuffer, chunkSize)
+      uint8Arrays.forEach(uint8Arr => {
+        binaryStringAB.append(Array.from(uint8Arr, byte => String.fromCharCode(byte)).join(''))
+      })
+      uint8Arrays = []
+
+      callback(chunkArrayBuffer, offset, file.size)
+
+      offset += chunkSize
+      if (+offset + chunkSize < +file.size) {
+        readNextChunk()
+      } else {
+        this.readFinalChunk(binaryStringAB, commandType, file)
+      }
+    }
+
+    function readNextChunk () {
+      const slice = file.slice(offset, offset + chunkSize)
+      arrayBufferReader.readAsArrayBuffer(slice)
+    }
+    readNextChunk()
+  }
+
+  protected splitArrayBuffer (buffer: ArrayBuffer, chunkSize: number): Uint8Array[] {
+    const result: Uint8Array[] = []
+    for (let i: number = 0; i < buffer.byteLength; i += chunkSize) {
+      const chunk: ArrayBuffer = buffer.slice(i, i + chunkSize)
+      result.push(new Uint8Array(chunk))
+    }
+    return result
+  }
+
+  protected readFinalChunk (binaryStringAB: StringBuilder, commandType: CommandType, file: File) {
+    //* 偵測文字編碼
+    const detectedInfo: jschardet.IDetectedMap = jschardet.detect(binaryStringAB.toString())
+
+    const overlay = document.getElementById('overlay') as HTMLDivElement
+    const textReader = new FileReader()
+
+    textReader.onloadstart = function () {
+      overlay.style.display = 'flex'
+    }
+
+    textReader.onerror = function () {
+      overlay.style.display = 'none'
+    }
+    textReader.onload = (event) => {
+      overlay.style.display = 'none'
       if (event.target == null) {
         return
       }
-      const arrayBuffer: ArrayBuffer = event.target.result as ArrayBuffer
-
-      //* 將 ArrayBuffer 轉成 String Type
-      const uint8Array: Uint8Array = new Uint8Array(arrayBuffer)
-      const binaryString: string = Array.from(uint8Array, byte => String.fromCharCode(byte)).join('')
-
-      //* 偵測文字編碼
-      const detectedInfo: jschardet.IDetectedMap = jschardet.detect(binaryString)
-
-      const overlay = document.getElementById('overlay') as HTMLDivElement
-      const textReader = new FileReader()
-
-      textReader.onloadstart = function () {
-        overlay.style.display = 'flex'
+      const text = event.target.result as string
+      if (this.tabContentControllerMap.has(commandType)) {
+        const tabContentController = this.tabContentControllerMap.get(commandType) as TabContentController
+        tabContentController.resetPageContent(text, file.name)
+      } else {
+        const tabContentController = new TabContentController(commandType, text, file.name)
+        this.tabContentControllerMap.set(commandType, tabContentController)
       }
-
-      textReader.onerror = function () {
-        overlay.style.display = 'none'
-      }
-      textReader.onload = (event) => {
-        overlay.style.display = 'none'
-        if (event.target == null) {
-          return
-        }
-        const text = event.target.result as string
-        if (this.tabContentControllerMap.has(commandType)) {
-          const tabContentController = this.tabContentControllerMap.get(commandType) as TabContentController
-          tabContentController.resetPageContent(text, fileName)
-        } else {
-          const tabContentController = new TabContentController(commandType, text, fileName)
-          this.tabContentControllerMap.set(commandType, tabContentController)
-        }
-      }
-      //* 以偵測到的編碼讀取文字檔
-      if (fileInput.files != null) {
-        textReader.readAsText(file, detectedInfo.encoding)
-      }
-      fileInput.files = null
-      fileInput.value = ''
     }
-    //* 將文字檔讀取為 ArrayBuffer Type
-    if (fileInput.files != null) {
-      arrayBufferReader.readAsArrayBuffer(file)
+    //* 以偵測到的編碼讀取文字檔
+    if (file != null) {
+      textReader.readAsText(file, detectedInfo.encoding)
     }
   }
 
