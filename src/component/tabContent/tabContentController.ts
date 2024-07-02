@@ -25,7 +25,7 @@ export class TabContentController {
   }
 
   protected getCommandGroup (): void {
-    const textLinesGroupMap: TSMap<GroupType, string> = this.getTextGroupMap(this.textFromFileLoaded)
+    const textLinesGroupMap: TSMap<GroupType, string> = this.getTextGroupMap()
     this.commandGroupMap = this.getCommandGroupMap(textLinesGroupMap)
   }
 
@@ -50,11 +50,10 @@ export class TabContentController {
     this.updateDownloadButtonStatus()
   }
 
-  protected getTextGroupMap (textFromFileLoaded: string): TSMap<GroupType, string> {
-    console.error('getTextGroupMap')
+  protected getTextGroupMap (): TSMap<GroupType, string> {
     const textLinesGroupMap: TSMap<GroupType, string> = new TSMap<GroupType, string>()
-    const textLines: string[] = textFromFileLoaded.split('\n')
-    console.error('textLines.length : ' + textLines.length)
+    const textLines: string[] = this.textFromFileLoaded.split('\n')
+    this.textFromFileLoaded = ''
     let isGroupToMap = false
     let groupName: GroupType | null
     for (let i = 0; i < textLines.length; i++) {

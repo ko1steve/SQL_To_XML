@@ -65,6 +65,7 @@ export class MainController {
       return
     }
     const file: File = fileInput.files[0]
+    const chunkSize: number = 65536
     const fileName = file.name
     let commandType: CommandType = CommandType.NONE
     Object.values(CommandType).forEach(e => {
@@ -75,22 +76,31 @@ export class MainController {
     if (commandType === CommandType.NONE) {
       return
     }
-    const arrayBufferReader: FileReader = new FileReader()
+
+    this.readFileInChunks(file, chunkSize, commandType, fileName, (chunk: ArrayBuffer, offset: number, totalSize: number) => {
+      const progress: number = +(offset + chunkSize) > totalSize ? +totalSize : (offset + chunkSize)
+      console.log(`Read chunk from ${offset} to ${progress} of ${totalSize}`)
+      // Process the chunk
+    })
+  }
+
+  protected readFileInChunks (file: File, chunkSize: number, commandType: CommandType, fileName: string, callback: Function): void {
+    const arrayBufferReader = new FileReader()
+    let offset: number = 0
+
     arrayBufferReader.onload = (event) => {
-      if (event.target == null) {
+      if (!event.target || event.target.readyState !== FileReader.DONE) {
         return
       }
-      const arrayBuffer: ArrayBuffer = event.target.result as ArrayBuffer
+      const chunkArrayBuffer: ArrayBuffer = event.target.result as ArrayBuffer
 
       //* 將 ArrayBuffer 轉成 String Type
-      const chunkSize: number = 65536
-      const uint8Arrays = this.splitArrayBuffer(arrayBuffer, chunkSize)
-      // const uint8Array: Uint8Array = new Uint8Array(arrayBuffer)
-      // const binaryString: string = Array.from(uint8Array, byte => String.fromCharCode(byte)).join('')
+      let uint8Arrays = this.splitArrayBuffer(chunkArrayBuffer, chunkSize)
       let binaryString = ''
       uint8Arrays.forEach(uint8Arr => {
         binaryString += Array.from(uint8Arr, byte => String.fromCharCode(byte)).join('')
       })
+      uint8Arrays = []
 
       //* 偵測文字編碼
       const detectedInfo: jschardet.IDetectedMap = jschardet.detect(binaryString)
@@ -110,16 +120,24 @@ export class MainController {
         }
       }
       //* 以偵測到的編碼讀取文字檔
-      if (fileInput.files != null) {
+      if (file != null) {
         textReader.readAsText(file, detectedInfo.encoding)
       }
-      fileInput.files = null
-      fileInput.value = ''
+
+      callback(chunkArrayBuffer, offset, file.size)
+
+      offset += chunkSize
+      if (+offset < +file.size) {
+        readNextChunk()
+      }
     }
-    //* 將文字檔讀取為 ArrayBuffer Type
-    if (fileInput.files != null) {
-      arrayBufferReader.readAsArrayBuffer(file)
+
+    function readNextChunk () {
+      const slice = file.slice(offset, offset + chunkSize)
+      arrayBufferReader.readAsArrayBuffer(slice)
     }
+
+    readNextChunk()
   }
 
   protected splitArrayBuffer (buffer: ArrayBuffer, chunkSize: number): Uint8Array[] {
