@@ -104,7 +104,7 @@ export class MainController {
       }
     }
 
-    worker.postMessage(file.slice(0, 1024 * 1024))
+    worker.postMessage(file.slice(0, 1024))
 
     fileInput.files = null
     fileInput.value = ''
