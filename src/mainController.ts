@@ -79,34 +79,33 @@ export class MainController {
     const overlay = document.getElementById('overlay') as HTMLDivElement
     overlay.style.display = 'flex'
 
-    // 创建并启动 Web Worker
     const worker = new Worker(getBinaryString)
 
-    // 监听来自 Web Worker 的消息
     worker.onmessage = (event: any) => {
       const { type, data } = event.data
-      if (type === 'complete') {
-        setTimeout(() => {
-          const { binaryString } = data
-          const detectedInfo = jschardet.detect(binaryString)
+      if (type === 'progress') {
+        //
+      } else if (type === 'complete') {
+        worker.terminate()
 
-          const textReader = new FileReader()
-          textReader.onload = (event) => {
-            if (event.target == null) {
-              return
-            }
-            const text = event.target.result as string
-            this.onReadFileComplete(text, commandType, file)
+        //* 偵測文字編碼
+        const { binaryString } = data
+        const encoding: string = jschardet.detect(binaryString).encoding
+
+        const textReader = new FileReader()
+        textReader.onload = (event) => {
+          if (event.target == null) {
+            return
           }
-          //* 以偵測到的編碼讀取文字檔
-          textReader.readAsText(file, detectedInfo.encoding)
-        }, 1)
-        worker.terminate() // 在不再需要时终止 Web Worker
+          const text = event.target.result as string
+          this.onReadFileComplete(text, commandType, file)
+        }
+        //* 以偵測到的編碼讀取文字檔
+        console.log('encoding : ' + encoding)
+        textReader.readAsText(file, encoding)
       }
     }
-
-    // 向 Web Worker 发送文件和相关信息
-    worker.postMessage({ file })
+    worker.postMessage(file.slice(0, 1024))
 
     fileInput.files = null
     fileInput.value = ''
