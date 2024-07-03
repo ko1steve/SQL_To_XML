@@ -191,7 +191,9 @@ export class RegExpConig implements IRegExpConfig {
 
   public invalidRegExpMapDDL = new TSMap<GroupType, TSMap<string, RegExp>>([
     [
-      //* 不允許 SELECT INTO 以外的 SELECT 語法、其他 DML 語法、DDL語法、GRANT語法、REVOKE語法
+      //* 不允許 SELECT INTO #TEMP_TABLE (或 ##TEMP_TABLE) 以外的 SELECT 語法、其他 DML 語法
+      //* 不允許 CREATE TABLE #TEMP_TABLE (或 ##TEMP_TABLE) 以外的 DDL語法
+      //* 不允許 GRANT、REVOKE 語法
       GroupType.PreSQL, new TSMap<string, RegExp>([
         //* DML
         [
@@ -208,7 +210,7 @@ export class RegExpConig implements IRegExpConfig {
         ],
         //* DDL
         [
-          'CREATE', /^[\s\t]*CREATE\s+/
+          'CREATE', /^[\s\t]*CREATE\s+(?!TABLE\s+(#|##)[A-Za-z0-9]+)/
         ],
         [
           'ALTER', /^[\s\t]*ALTER\s+/
@@ -229,7 +231,9 @@ export class RegExpConig implements IRegExpConfig {
       ])
     ],
     [
-      //* 不允許 SELECT INTO 以外的 SELECT 語法、其他 DML 語法、DDL語法、GRANT語法、REVOKE語法
+      //* 不允許 SELECT INTO #TEMP_TABLE (或 ##TEMP_TABLE) 以外的 SELECT 語法、其他 DML 語法
+      //* 不允許 CREATE TABLE #TEMP_TABLE (或 ##TEMP_TABLE) 以外的 DDL語法
+      //* 不允許 GRANT、REVOKE 語法
       GroupType.PreProdSQL, new TSMap<string, RegExp>([
         //* DML
         [
@@ -246,7 +250,7 @@ export class RegExpConig implements IRegExpConfig {
         ],
         //* DDL
         [
-          'CREATE', /^[\s\t]*CREATE\s+/
+          'CREATE', /^[\s\t]*CREATE\s+(?!TABLE\s+(#|##)[A-Za-z0-9]+)/
         ],
         [
           'ALTER', /^[\s\t]*ALTER\s+/
@@ -307,7 +311,9 @@ export class RegExpConig implements IRegExpConfig {
 
   public invalidRegExpMapDML = new TSMap<GroupType, TSMap<string, RegExp>>([
     [
-      //* 不允許 SELECT INTO 以外的 SELECT 語法、其他 DML 語法、DDL語法、GRANT語法、REVOKE語法
+      //* 不允許 SELECT INTO #TEMP_TABLE (或 ##TEMP_TABLE) 以外的 SELECT 語法、其他 DML 語法
+      //* 不允許 CREATE TABLE #TEMP_TABLE (或 ##TEMP_TABLE) 以外的 DDL語法
+      //* 不允許 GRANT、REVOKE 語法
       GroupType.PreSQL, new TSMap<string, RegExp>([
         //* DML
         [
@@ -324,7 +330,7 @@ export class RegExpConig implements IRegExpConfig {
         ],
         //* DDL
         [
-          'CREATE', /^[\s\t]*CREATE\s+/
+          'CREATE', /^[\s\t]*CREATE\s+(?!TABLE\s+(#|##)[A-Za-z0-9]+)/
         ],
         [
           'ALTER', /^[\s\t]*ALTER\s+/
@@ -345,7 +351,9 @@ export class RegExpConig implements IRegExpConfig {
       ])
     ],
     [
-      //* 不允許 SELECT INTO 以外的 SELECT 語法、其他 DML 語法、DDL語法、GRANT語法、REVOKE語法
+      //* 不允許 SELECT INTO #TEMP_TABLE (或 ##TEMP_TABLE) 以外的 SELECT 語法、其他 DML 語法
+      //* 不允許 CREATE TABLE #TEMP_TABLE (或 ##TEMP_TABLE) 以外的 DDL語法
+      //* 不允許 GRANT、REVOKE 語法
       GroupType.PreProdSQL, new TSMap<string, RegExp>([
         //* DML
         [
@@ -362,7 +370,7 @@ export class RegExpConig implements IRegExpConfig {
         ],
         //* DDL
         [
-          'CREATE', /^[\s\t]*CREATE\s+/
+          'CREATE', /^[\s\t]*CREATE\s+(?!TABLE\s+(#|##)[A-Za-z0-9]+)/
         ],
         [
           'ALTER', /^[\s\t]*ALTER\s+/
