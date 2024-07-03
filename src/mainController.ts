@@ -88,7 +88,7 @@ export class MainController {
 
         //* 偵測文字編碼
         const { binaryString } = data
-        const detectedInfo: jschardet.IDetectedMap = jschardet.detect(binaryString)
+        const encoding: string = jschardet.detect(binaryString).encoding
 
         const textReader = new FileReader()
         textReader.onload = (event) => {
@@ -99,11 +99,12 @@ export class MainController {
           this.onReadFileComplete(text, commandType, file)
         }
         //* 以偵測到的編碼讀取文字檔
-        textReader.readAsText(file, detectedInfo.encoding)
+        console.log('encoding : ' + encoding)
+        textReader.readAsText(file, encoding)
       }
     }
 
-    worker.postMessage(file)
+    worker.postMessage(file.slice(0, 1024 * 1024))
 
     fileInput.files = null
     fileInput.value = ''

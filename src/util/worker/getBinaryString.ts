@@ -1,7 +1,7 @@
 const workerFunction = function () {
   // we perform every operation we want in this function right here
   self.onmessage = (event: MessageEvent) => {
-    const file = event.data
+    const file: File = event.data
     const arrayBufferReader: FileReader = new FileReader()
     arrayBufferReader.onload = (event) => {
       if (event.target == null) {
