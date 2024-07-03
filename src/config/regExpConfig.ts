@@ -204,7 +204,45 @@ export class RegExpConig implements IRegExpConfig {
           'INSERT', /^[\s\t]*INSERT\s+/
         ],
         [
-          'SELECT', /^[\s\t]*SELECT\s+(?!INTO\s+(#|##)[A-Za-z0-9]+)/
+          'SELECT', /^[\s\t]*SELECT\s+(?!.*\s+INTO\s+(#|##)[A-Za-z0-9]+)/
+        ],
+        //* DDL
+        [
+          'CREATE', /^[\s\t]*CREATE\s+/
+        ],
+        [
+          'ALTER', /^[\s\t]*ALTER\s+/
+        ],
+        [
+          'DROP', /^[\s\t]*DROP\s+/
+        ],
+        [
+          'TRUNCATE', /^[\s\t]*TRUNCATE\s+/
+        ],
+        //* GRANT & REVOKE
+        [
+          'GRANT', /^[\s\t]*GRANT\s+/
+        ],
+        [
+          'REVOKE', /^[\s\t]*REVOKE\s+/
+        ]
+      ])
+    ],
+    [
+      //* 不允許 SELECT INTO 以外的 SELECT 語法、其他 DML 語法、DDL語法、GRANT語法、REVOKE語法
+      GroupType.PreProdSQL, new TSMap<string, RegExp>([
+        //* DML
+        [
+          'UPDATE', /^[\s\t]*UPDATE\s+/
+        ],
+        [
+          'DELETE', /^[\s\t]*DELETE\s+/
+        ],
+        [
+          'INSERT', /^[\s\t]*INSERT\s+/
+        ],
+        [
+          'SELECT', /^[\s\t]*SELECT\s+(?!.*\s+INTO\s+(#|##)[A-Za-z0-9]+)/
         ],
         //* DDL
         [
@@ -282,7 +320,45 @@ export class RegExpConig implements IRegExpConfig {
           'INSERT', /^[\s\t]*INSERT\s+/
         ],
         [
-          'SELECT', /^[\s\t]*SELECT\s+(?!INTO\s+(#|##)[A-Za-z0-9]+)/
+          'SELECT', /^[\s\t]*SELECT\s+(?!.*\s+INTO\s+(#|##)[A-Za-z0-9]+)/
+        ],
+        //* DDL
+        [
+          'CREATE', /^[\s\t]*CREATE\s+/
+        ],
+        [
+          'ALTER', /^[\s\t]*ALTER\s+/
+        ],
+        [
+          'DROP', /^[\s\t]*DROP\s+/
+        ],
+        [
+          'TRUNCATE', /^[\s\t]*TRUNCATE\s+/
+        ],
+        //* GRANT & REVOKE
+        [
+          'GRANT', /^[\s\t]*GRANT\s+/
+        ],
+        [
+          'REVOKE', /^[\s\t]*REVOKE\s+/
+        ]
+      ])
+    ],
+    [
+      //* 不允許 SELECT INTO 以外的 SELECT 語法、其他 DML 語法、DDL語法、GRANT語法、REVOKE語法
+      GroupType.PreProdSQL, new TSMap<string, RegExp>([
+        //* DML
+        [
+          'UPDATE', /^[\s\t]*UPDATE\s+/
+        ],
+        [
+          'DELETE', /^[\s\t]*DELETE\s+/
+        ],
+        [
+          'INSERT', /^[\s\t]*INSERT\s+/
+        ],
+        [
+          'SELECT', /^[\s\t]*SELECT\s+(?!.*\s+INTO\s+(#|##)[A-Za-z0-9]+)/
         ],
         //* DDL
         [
