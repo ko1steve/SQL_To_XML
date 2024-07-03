@@ -191,19 +191,27 @@ export class RegExpConig implements IRegExpConfig {
 
   public invalidRegExpMapDDL = new TSMap<GroupType, TSMap<string, RegExp>>([
     [
-      //* 不允許 SELECT INTO #TEMP_TABLE (或 ##TEMP_TABLE) 以外的 SELECT 語法、其他 DML 語法
-      //* 不允許 CREATE TABLE #TEMP_TABLE (或 ##TEMP_TABLE) 以外的 DDL語法
+      //* 不允許 DML 語法
+      //* 不允許 DDL 語法
       //* 不允許 GRANT、REVOKE 語法
+      //* 例外 : CREATE TABLE #TEMP_TABLE|##TEMP_TABLE
+      //* 例外 : ALTER TABLE #TEMP_TABLE|##TEMP_TABLE
+      //* 例外 : TRUNCATE TABLE #TEMP_TABLE|##TEMP_TABLE
+      //* 例外 : INSERT INTO #TEMP_TABLE|##TEMP_TABLE
+      //* 例外 : UPDATE (TOP (N) (PERCENT)) #TEMP_TABLE|##TEMP_TABLE
+      //* 例外 : SELECT INTO #TEMP_TABLE|##TEMP_TABLE
+      //* 例外 : DELETE (TOP (N) (PERCENT))  FROM #TEMP_TABLE|##TEMP_TABLE
+      //* 例外 : DROP TABLE #TEMP_TABLE|##TEMP_TABLE
       GroupType.PreSQL, new TSMap<string, RegExp>([
         //* DML
         [
-          'UPDATE', /^[\s\t]*UPDATE\s+/
+          'UPDATE', /^[\s\t]*UPDATE\s+(?!(TOP\s+\(\s*[0-9]+\s*\)\s+(PERCENT\s+)?)?(#|##)[A-Za-z0-9]+)/
         ],
         [
-          'DELETE', /^[\s\t]*DELETE\s+/
+          'DELETE', /^[\s\t]*DELETE\s+(?!(TOP\s+\(\s*[0-9]+\s*\)\s+(PERCENT\s+)?)?FROM\s+(#|##)[A-Za-z0-9]+)/
         ],
         [
-          'INSERT', /^[\s\t]*INSERT\s+/
+          'INSERT INTO', /^[\s\t]*INSERT\s+INTO\s+(?!(#|##)[A-Za-z0-9]+)/
         ],
         [
           'SELECT', /^[\s\t]*SELECT\s+(?!.*\s+INTO\s+(#|##)[A-Za-z0-9]+)/
@@ -213,13 +221,13 @@ export class RegExpConig implements IRegExpConfig {
           'CREATE', /^[\s\t]*CREATE\s+(?!TABLE\s+(#|##)[A-Za-z0-9]+)/
         ],
         [
-          'ALTER', /^[\s\t]*ALTER\s+/
+          'ALTER', /^[\s\t]*ALTER\s+(?!TABLE\s+(#|##)[A-Za-z0-9]+)/
         ],
         [
-          'DROP', /^[\s\t]*DROP\s+/
+          'DROP', /^[\s\t]*DROP\s+(?!TABLE\s+(#|##)[A-Za-z0-9]+)/
         ],
         [
-          'TRUNCATE', /^[\s\t]*TRUNCATE\s+/
+          'TRUNCATE', /^[\s\t]*TRUNCATE\s+(?!TABLE\s+(#|##)[A-Za-z0-9]+)/
         ],
         //* GRANT & REVOKE
         [
@@ -231,19 +239,27 @@ export class RegExpConig implements IRegExpConfig {
       ])
     ],
     [
-      //* 不允許 SELECT INTO #TEMP_TABLE (或 ##TEMP_TABLE) 以外的 SELECT 語法、其他 DML 語法
-      //* 不允許 CREATE TABLE #TEMP_TABLE (或 ##TEMP_TABLE) 以外的 DDL語法
+      //* 不允許 DML 語法
+      //* 不允許 DDL 語法
       //* 不允許 GRANT、REVOKE 語法
+      //* 例外 : CREATE TABLE #TEMP_TABLE|##TEMP_TABLE
+      //* 例外 : ALTER TABLE #TEMP_TABLE|##TEMP_TABLE
+      //* 例外 : TRUNCATE TABLE #TEMP_TABLE|##TEMP_TABLE
+      //* 例外 : INSERT INTO #TEMP_TABLE|##TEMP_TABLE
+      //* 例外 : UPDATE (TOP (N) (PERCENT)) #TEMP_TABLE|##TEMP_TABLE
+      //* 例外 : SELECT INTO #TEMP_TABLE|##TEMP_TABLE
+      //* 例外 : DELETE (TOP (N) (PERCENT))  FROM #TEMP_TABLE|##TEMP_TABLE
+      //* 例外 : DROP TABLE #TEMP_TABLE|##TEMP_TABLE
       GroupType.PreProdSQL, new TSMap<string, RegExp>([
         //* DML
         [
-          'UPDATE', /^[\s\t]*UPDATE\s+/
+          'UPDATE', /^[\s\t]*UPDATE\s+(?!(TOP\s+\(\s*[0-9]+\s*\)\s+(PERCENT\s+)?)?(#|##)[A-Za-z0-9]+)/
         ],
         [
-          'DELETE', /^[\s\t]*DELETE\s+/
+          'DELETE', /^[\s\t]*DELETE\s+(?!(TOP\s+\(\s*[0-9]+\s*\)\s+(PERCENT\s+)?)?FROM\s+(#|##)[A-Za-z0-9]+)/
         ],
         [
-          'INSERT', /^[\s\t]*INSERT\s+/
+          'INSERT INTO', /^[\s\t]*INSERT\s+INTO\s+(?!(#|##)[A-Za-z0-9]+)/
         ],
         [
           'SELECT', /^[\s\t]*SELECT\s+(?!.*\s+INTO\s+(#|##)[A-Za-z0-9]+)/
@@ -253,13 +269,13 @@ export class RegExpConig implements IRegExpConfig {
           'CREATE', /^[\s\t]*CREATE\s+(?!TABLE\s+(#|##)[A-Za-z0-9]+)/
         ],
         [
-          'ALTER', /^[\s\t]*ALTER\s+/
+          'ALTER', /^[\s\t]*ALTER\s+(?!TABLE\s+(#|##)[A-Za-z0-9]+)/
         ],
         [
-          'DROP', /^[\s\t]*DROP\s+/
+          'DROP', /^[\s\t]*DROP\s+(?!TABLE\s+(#|##)[A-Za-z0-9]+)/
         ],
         [
-          'TRUNCATE', /^[\s\t]*TRUNCATE\s+/
+          'TRUNCATE', /^[\s\t]*TRUNCATE\s+(?!TABLE\s+(#|##)[A-Za-z0-9]+)/
         ],
         //* GRANT & REVOKE
         [
@@ -271,32 +287,43 @@ export class RegExpConig implements IRegExpConfig {
       ])
     ],
     [
+      //* 不允許 DML 語法
+      //* 不允許 DDL 語法
+      //* 不允許 GRANT、REVOKE 語法
+      //* 例外 : CREATE TABLE #TEMP_TABLE|##TEMP_TABLE
+      //* 例外 : ALTER TABLE #TEMP_TABLE|##TEMP_TABLE
+      //* 例外 : TRUNCATE TABLE #TEMP_TABLE|##TEMP_TABLE
+      //* 例外 : INSERT INTO #TEMP_TABLE|##TEMP_TABLE
+      //* 例外 : UPDATE (TOP (N) (PERCENT)) #TEMP_TABLE|##TEMP_TABLE
+      //* 例外 : SELECT INTO #TEMP_TABLE|##TEMP_TABLE
+      //* 例外 : DELETE (TOP (N) (PERCENT))  FROM #TEMP_TABLE|##TEMP_TABLE
+      //* 例外 : DROP TABLE #TEMP_TABLE|##TEMP_TABLE
       GroupType.PostSQL, new TSMap<string, RegExp>([
         //* DML
         [
-          'UPDATE', /^[\s\t]*UPDATE\s+/
+          'UPDATE', /^[\s\t]*UPDATE\s+(?!(TOP\s+\(\s*[0-9]+\s*\)\s+(PERCENT\s+)?)?(#|##)[A-Za-z0-9]+)/
         ],
         [
-          'DELETE', /^[\s\t]*DELETE\s+/
+          'DELETE', /^[\s\t]*DELETE\s+(?!(TOP\s+\(\s*[0-9]+\s*\)\s+(PERCENT\s+)?)?FROM\s+(#|##)[A-Za-z0-9]+)/
         ],
         [
-          'INSERT', /^[\s\t]*INSERT\s+/
+          'INSERT INTO', /^[\s\t]*INSERT\s+INTO\s+(?!(#|##)[A-Za-z0-9]+)/
         ],
         [
-          'SELECT', /^[\s\t]*SELECT\s+/
+          'SELECT', /^[\s\t]*SELECT\s+(?!.*\s+INTO\s+(#|##)[A-Za-z0-9]+)/
         ],
         //* DDL
         [
-          'CREATE', /^[\s\t]*CREATE\s+/
+          'CREATE', /^[\s\t]*CREATE\s+(?!TABLE\s+(#|##)[A-Za-z0-9]+)/
         ],
         [
-          'ALTER', /^[\s\t]*ALTER\s+/
+          'ALTER', /^[\s\t]*ALTER\s+(?!TABLE\s+(#|##)[A-Za-z0-9]+)/
         ],
         [
-          'DROP', /^[\s\t]*DROP\s+/
+          'DROP', /^[\s\t]*DROP\s+(?!TABLE\s+(#|##)[A-Za-z0-9]+)/
         ],
         [
-          'TRUNCATE', /^[\s\t]*TRUNCATE\s+/
+          'TRUNCATE', /^[\s\t]*TRUNCATE\s+(?!TABLE\s+(#|##)[A-Za-z0-9]+)/
         ],
         //* GRANT & REVOKE
         [
@@ -311,19 +338,27 @@ export class RegExpConig implements IRegExpConfig {
 
   public invalidRegExpMapDML = new TSMap<GroupType, TSMap<string, RegExp>>([
     [
-      //* 不允許 SELECT INTO #TEMP_TABLE (或 ##TEMP_TABLE) 以外的 SELECT 語法、其他 DML 語法
-      //* 不允許 CREATE TABLE #TEMP_TABLE (或 ##TEMP_TABLE) 以外的 DDL語法
+      //* 不允許 DML 語法
+      //* 不允許 DDL 語法
       //* 不允許 GRANT、REVOKE 語法
+      //* 例外 : CREATE TABLE #TEMP_TABLE|##TEMP_TABLE
+      //* 例外 : ALTER TABLE #TEMP_TABLE|##TEMP_TABLE
+      //* 例外 : TRUNCATE TABLE #TEMP_TABLE|##TEMP_TABLE
+      //* 例外 : INSERT INTO #TEMP_TABLE|##TEMP_TABLE
+      //* 例外 : UPDATE (TOP (N) (PERCENT)) #TEMP_TABLE|##TEMP_TABLE
+      //* 例外 : SELECT INTO #TEMP_TABLE|##TEMP_TABLE
+      //* 例外 : DELETE (TOP (N) (PERCENT))  FROM #TEMP_TABLE|##TEMP_TABLE
+      //* 例外 : DROP TABLE #TEMP_TABLE|##TEMP_TABLE
       GroupType.PreSQL, new TSMap<string, RegExp>([
         //* DML
         [
-          'UPDATE', /^[\s\t]*UPDATE\s+/
+          'UPDATE', /^[\s\t]*UPDATE\s+(?!(TOP\s+\(\s*[0-9]+\s*\)\s+(PERCENT\s+)?)?(#|##)[A-Za-z0-9]+)/
         ],
         [
-          'DELETE', /^[\s\t]*DELETE\s+/
+          'DELETE', /^[\s\t]*DELETE\s+(?!(TOP\s+\(\s*[0-9]+\s*\)\s+(PERCENT\s+)?)?FROM\s+(#|##)[A-Za-z0-9]+)/
         ],
         [
-          'INSERT', /^[\s\t]*INSERT\s+/
+          'INSERT INTO', /^[\s\t]*INSERT\s+INTO\s+(?!(#|##)[A-Za-z0-9]+)/
         ],
         [
           'SELECT', /^[\s\t]*SELECT\s+(?!.*\s+INTO\s+(#|##)[A-Za-z0-9]+)/
@@ -333,13 +368,13 @@ export class RegExpConig implements IRegExpConfig {
           'CREATE', /^[\s\t]*CREATE\s+(?!TABLE\s+(#|##)[A-Za-z0-9]+)/
         ],
         [
-          'ALTER', /^[\s\t]*ALTER\s+/
+          'ALTER', /^[\s\t]*ALTER\s+(?!TABLE\s+(#|##)[A-Za-z0-9]+)/
         ],
         [
-          'DROP', /^[\s\t]*DROP\s+/
+          'DROP', /^[\s\t]*DROP\s+(?!TABLE\s+(#|##)[A-Za-z0-9]+)/
         ],
         [
-          'TRUNCATE', /^[\s\t]*TRUNCATE\s+/
+          'TRUNCATE', /^[\s\t]*TRUNCATE\s+(?!TABLE\s+(#|##)[A-Za-z0-9]+)/
         ],
         //* GRANT & REVOKE
         [
@@ -351,19 +386,27 @@ export class RegExpConig implements IRegExpConfig {
       ])
     ],
     [
-      //* 不允許 SELECT INTO #TEMP_TABLE (或 ##TEMP_TABLE) 以外的 SELECT 語法、其他 DML 語法
-      //* 不允許 CREATE TABLE #TEMP_TABLE (或 ##TEMP_TABLE) 以外的 DDL語法
+      //* 不允許 DML 語法
+      //* 不允許 DDL 語法
       //* 不允許 GRANT、REVOKE 語法
+      //* 例外 : CREATE TABLE #TEMP_TABLE|##TEMP_TABLE
+      //* 例外 : ALTER TABLE #TEMP_TABLE|##TEMP_TABLE
+      //* 例外 : TRUNCATE TABLE #TEMP_TABLE|##TEMP_TABLE
+      //* 例外 : INSERT INTO #TEMP_TABLE|##TEMP_TABLE
+      //* 例外 : UPDATE (TOP (N) (PERCENT)) #TEMP_TABLE|##TEMP_TABLE
+      //* 例外 : SELECT INTO #TEMP_TABLE|##TEMP_TABLE
+      //* 例外 : DELETE (TOP (N) (PERCENT))  FROM #TEMP_TABLE|##TEMP_TABLE
+      //* 例外 : DROP TABLE #TEMP_TABLE|##TEMP_TABLE
       GroupType.PreProdSQL, new TSMap<string, RegExp>([
         //* DML
         [
-          'UPDATE', /^[\s\t]*UPDATE\s+/
+          'UPDATE', /^[\s\t]*UPDATE\s+(?!(TOP\s+\(\s*[0-9]+\s*\)\s+(PERCENT\s+)?)?(#|##)[A-Za-z0-9]+)/
         ],
         [
-          'DELETE', /^[\s\t]*DELETE\s+/
+          'DELETE', /^[\s\t]*DELETE\s+(?!(TOP\s+\(\s*[0-9]+\s*\)\s+(PERCENT\s+)?)?FROM\s+(#|##)[A-Za-z0-9]+)/
         ],
         [
-          'INSERT', /^[\s\t]*INSERT\s+/
+          'INSERT INTO', /^[\s\t]*INSERT\s+INTO\s+(?!(#|##)[A-Za-z0-9]+)/
         ],
         [
           'SELECT', /^[\s\t]*SELECT\s+(?!.*\s+INTO\s+(#|##)[A-Za-z0-9]+)/
@@ -373,13 +416,13 @@ export class RegExpConig implements IRegExpConfig {
           'CREATE', /^[\s\t]*CREATE\s+(?!TABLE\s+(#|##)[A-Za-z0-9]+)/
         ],
         [
-          'ALTER', /^[\s\t]*ALTER\s+/
+          'ALTER', /^[\s\t]*ALTER\s+(?!TABLE\s+(#|##)[A-Za-z0-9]+)/
         ],
         [
-          'DROP', /^[\s\t]*DROP\s+/
+          'DROP', /^[\s\t]*DROP\s+(?!TABLE\s+(#|##)[A-Za-z0-9]+)/
         ],
         [
-          'TRUNCATE', /^[\s\t]*TRUNCATE\s+/
+          'TRUNCATE', /^[\s\t]*TRUNCATE\s+(?!TABLE\s+(#|##)[A-Za-z0-9]+)/
         ],
         //* GRANT & REVOKE
         [
@@ -391,32 +434,43 @@ export class RegExpConig implements IRegExpConfig {
       ])
     ],
     [
+      //* 不允許 DML 語法
+      //* 不允許 DDL 語法
+      //* 不允許 GRANT、REVOKE 語法
+      //* 例外 : CREATE TABLE #TEMP_TABLE|##TEMP_TABLE
+      //* 例外 : ALTER TABLE #TEMP_TABLE|##TEMP_TABLE
+      //* 例外 : TRUNCATE TABLE #TEMP_TABLE|##TEMP_TABLE
+      //* 例外 : INSERT INTO #TEMP_TABLE|##TEMP_TABLE
+      //* 例外 : UPDATE (TOP (N) (PERCENT)) #TEMP_TABLE|##TEMP_TABLE
+      //* 例外 : SELECT INTO #TEMP_TABLE|##TEMP_TABLE
+      //* 例外 : DELETE (TOP (N) (PERCENT))  FROM #TEMP_TABLE|##TEMP_TABLE
+      //* 例外 : DROP TABLE #TEMP_TABLE|##TEMP_TABLE
       GroupType.PostSQL, new TSMap<string, RegExp>([
         //* DML
         [
-          'UPDATE', /^[\s\t]*UPDATE\s+/
+          'UPDATE', /^[\s\t]*UPDATE\s+(?!(TOP\s+\(\s*[0-9]+\s*\)\s+(PERCENT\s+)?)?(#|##)[A-Za-z0-9]+)/
         ],
         [
-          'DELETE', /^[\s\t]*DELETE\s+/
+          'DELETE', /^[\s\t]*DELETE\s+(?!(TOP\s+\(\s*[0-9]+\s*\)\s+(PERCENT\s+)?)?FROM\s+(#|##)[A-Za-z0-9]+)/
         ],
         [
-          'INSERT', /^[\s\t]*INSERT\s+/
+          'INSERT INTO', /^[\s\t]*INSERT\s+INTO\s+(?!(#|##)[A-Za-z0-9]+)/
         ],
         [
-          'SELECT', /^[\s\t]*SELECT\s+/
+          'SELECT', /^[\s\t]*SELECT\s+(?!.*\s+INTO\s+(#|##)[A-Za-z0-9]+)/
         ],
         //* DDL
         [
-          'CREATE', /^[\s\t]*CREATE\s+/
+          'CREATE', /^[\s\t]*CREATE\s+(?!TABLE\s+(#|##)[A-Za-z0-9]+)/
         ],
         [
-          'ALTER', /^[\s\t]*ALTER\s+/
+          'ALTER', /^[\s\t]*ALTER\s+(?!TABLE\s+(#|##)[A-Za-z0-9]+)/
         ],
         [
-          'DROP', /^[\s\t]*DROP\s+/
+          'DROP', /^[\s\t]*DROP\s+(?!TABLE\s+(#|##)[A-Za-z0-9]+)/
         ],
         [
-          'TRUNCATE', /^[\s\t]*TRUNCATE\s+/
+          'TRUNCATE', /^[\s\t]*TRUNCATE\s+(?!TABLE\s+(#|##)[A-Za-z0-9]+)/
         ],
         //* GRANT & REVOKE
         [
