@@ -76,6 +76,8 @@ export class MainController {
     if (commandType === CommandType.NONE) {
       return
     }
+    const overlay = document.getElementById('overlay') as HTMLDivElement
+    overlay.style.display = 'flex'
 
     const worker = new Worker(getBinaryString)
 
@@ -103,7 +105,6 @@ export class MainController {
         textReader.readAsText(file, encoding)
       }
     }
-
     worker.postMessage(file.slice(0, 1024))
 
     fileInput.files = null
