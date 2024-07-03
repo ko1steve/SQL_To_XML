@@ -5,6 +5,8 @@ import { CommandType } from './mainConfig'
 import { TabContentController } from './component/tabContent/tabContentController'
 import TopButtonImage from './image/top-button.png'
 import jschardet from 'jschardet'
+import { StringBuilder } from './element/CommandData'
+import getBinaryString from './util/worker/getBinaryString'
 
 export class MainController {
   protected tabContentControllerMap: Map<CommandType, TabContentController> = new Map()
@@ -61,11 +63,10 @@ export class MainController {
   }
 
   protected onFileInput (fileInput: HTMLInputElement): void {
-    if (!fileInput || !fileInput.files || fileInput?.files?.length === 0) {
+    if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
       return
     }
     const file: File = fileInput.files[0]
-    const fileName = file.name
     let commandType: CommandType = CommandType.NONE
     Object.values(CommandType).forEach(e => {
       if (e.toString() === fileInput.dataset.sqlType) {
@@ -75,44 +76,49 @@ export class MainController {
     if (commandType === CommandType.NONE) {
       return
     }
-    const arrayBufferReader: FileReader = new FileReader()
-    arrayBufferReader.onload = (event) => {
-      if (event.target == null) {
-        return
-      }
-      const arrayBuffer: ArrayBuffer = event.target.result as ArrayBuffer
+    const overlay = document.getElementById('overlay') as HTMLDivElement
+    overlay.style.display = 'flex'
 
-      //* 將 ArrayBuffer 轉成 String Type
-      const uint8Array: Uint8Array = new Uint8Array(arrayBuffer)
-      const binaryString: string = Array.from(uint8Array, byte => String.fromCharCode(byte)).join('')
+    // 创建并启动 Web Worker
+    const worker = new Worker(getBinaryString)
 
-      //* 偵測文字編碼
-      const detectedInfo: jschardet.IDetectedMap = jschardet.detect(binaryString)
+    // 监听来自 Web Worker 的消息
+    worker.onmessage = (event: any) => {
+      const { type, data } = event.data
+      if (type === 'complete') {
+        setTimeout(() => {
+          const { binaryString } = data
+          const detectedInfo = jschardet.detect(binaryString)
 
-      const textReader = new FileReader()
-      textReader.onload = (event) => {
-        if (event.target == null) {
-          return
-        }
-        const text = event.target.result as string
-        if (this.tabContentControllerMap.has(commandType)) {
-          const tabContentController = this.tabContentControllerMap.get(commandType) as TabContentController
-          tabContentController.resetPageContent(text, fileName)
-        } else {
-          const tabContentController = new TabContentController(commandType, text, fileName)
-          this.tabContentControllerMap.set(commandType, tabContentController)
-        }
+          const textReader = new FileReader()
+          textReader.onload = (event) => {
+            if (event.target == null) {
+              return
+            }
+            const text = event.target.result as string
+            this.onReadFileComplete(text, commandType, file)
+          }
+          //* 以偵測到的編碼讀取文字檔
+          textReader.readAsText(file, detectedInfo.encoding)
+        }, 1)
+        worker.terminate() // 在不再需要时终止 Web Worker
       }
-      //* 以偵測到的編碼讀取文字檔
-      if (fileInput.files != null) {
-        textReader.readAsText(file, detectedInfo.encoding)
-      }
-      fileInput.files = null
-      fileInput.value = ''
     }
-    //* 將文字檔讀取為 ArrayBuffer Type
-    if (fileInput.files != null) {
-      arrayBufferReader.readAsArrayBuffer(file)
+
+    // 向 Web Worker 发送文件和相关信息
+    worker.postMessage({ file })
+
+    fileInput.files = null
+    fileInput.value = ''
+  }
+
+  protected onReadFileComplete (text: string, commandType: CommandType, file: File): void {
+    if (this.tabContentControllerMap.has(commandType)) {
+      const tabContentController = this.tabContentControllerMap.get(commandType) as TabContentController
+      tabContentController.resetPageContent(text, file.name)
+    } else {
+      const tabContentController = new TabContentController(commandType, text, file.name)
+      this.tabContentControllerMap.set(commandType, tabContentController)
     }
   }
 
