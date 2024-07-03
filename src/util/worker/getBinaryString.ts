@@ -1,21 +1,56 @@
 const workerFunction = function () {
-  // we perform every operation we want in this function right here
   self.onmessage = (event: MessageEvent) => {
-    const file = event.data
-    const arrayBufferReader: FileReader = new FileReader()
+    const { file } = event.data
+    const chunkSize: number = 1024 * 1024
+    readFileInChunks(file, chunkSize, (offset: number, totalSize: number) => {
+      const progress: number = offset + chunkSize > totalSize ? totalSize : offset + chunkSize
+      console.log(progress + '/' + totalSize)
+    })
+  }
+
+  function readFileInChunks (file: File, chunkSize: number, callback: Function): void {
+    const arrayBufferReader = new FileReader()
+    let offset: number = 0
+    let binaryString = ''
+
     arrayBufferReader.onload = (event) => {
-      if (event.target == null) {
+      if (!event.target || event.target.readyState !== FileReader.DONE) {
         return
       }
-      const arrayBuffer: ArrayBuffer = event.target.result as ArrayBuffer
+      const chunkArrayBuffer: ArrayBuffer = event.target.result as ArrayBuffer
 
       //* 將 ArrayBuffer 轉成 String Type
-      const uint8Array: Uint8Array = new Uint8Array(arrayBuffer)
-      const binaryString: string = Array.from(uint8Array, byte => String.fromCharCode(byte)).join('')
-      self.postMessage({ type: 'complete', data: { binaryString } })
+      let uint8Arrays = splitArrayBuffer(chunkArrayBuffer, chunkSize)
+      uint8Arrays.forEach(uint8Arr => {
+        binaryString += Array.from(uint8Arr, byte => String.fromCharCode(byte)).join('')
+      })
+      uint8Arrays = []
+
+      callback(offset, file.size)
+
+      offset += chunkSize
+      if (+offset < +file.size) {
+        readNextChunk()
+      } else {
+        self.postMessage({ type: 'complete', data: { binaryString } })
+      }
     }
-    //* 將文字檔讀取為 ArrayBuffer Type
-    arrayBufferReader.readAsArrayBuffer(file)
+
+    function readNextChunk () {
+      const slice = file.slice(offset, offset + chunkSize)
+      arrayBufferReader.readAsArrayBuffer(slice)
+    }
+
+    readNextChunk()
+  }
+
+  function splitArrayBuffer (buffer: ArrayBuffer, chunkSize: number): Uint8Array[] {
+    const result: Uint8Array[] = []
+    for (let i: number = 0; i < buffer.byteLength; i += chunkSize) {
+      const chunk: ArrayBuffer = buffer.slice(i, i + chunkSize)
+      result.push(new Uint8Array(chunk))
+    }
+    return result
   }
 }
 

@@ -11,13 +11,11 @@ export class TabContentController {
   protected textFromFileLoaded: string
   protected commandValid: boolean = true
   protected commandGroupMap: TSMap<GroupType, CommandData[]> = new TSMap<GroupType, CommandData[]>()
-  protected progressText: HTMLDivElement
 
   constructor (commandType: CommandType, textFromFileLoaded: string, fileName: string) {
     this.fileName = fileName
     this.commandType = commandType
     this.textFromFileLoaded = textFromFileLoaded
-    this.progressText = document.getElementById('progress-text') as HTMLDivElement
     this.initialize()
   }
 
@@ -25,6 +23,8 @@ export class TabContentController {
     this.getCommandGroup()
     this.createContent()
     this.updateDownloadButtonStatus()
+    const overlay = document.getElementById('overlay') as HTMLDivElement
+    overlay.style.display = 'none'
   }
 
   protected getCommandGroup (): void {
@@ -151,6 +151,7 @@ export class TabContentController {
             if (!this.mainConfig.enableTrimCommand || commandText.length > 0) {
               commandDataDetail = this.getCommandDataDetail(commandText, groupName!)
               commands.push(new CommandData(commandText, commandDataDetail))
+              console.log('[' + groupName + '] :' + commands.length)
             }
             i = j - 1 // Continue from next line
             break
@@ -167,6 +168,7 @@ export class TabContentController {
           if (commandText.length > 0) {
             commandDataDetail = this.getCommandDataDetail(commandText, groupName!)
             commands.push(new CommandData(commandText, commandDataDetail))
+            console.log('[' + groupName + '] :' + commands.length)
           }
           break
         }

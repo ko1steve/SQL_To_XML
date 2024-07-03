@@ -76,6 +76,8 @@ export class MainController {
     if (commandType === CommandType.NONE) {
       return
     }
+    const overlay = document.getElementById('overlay') as HTMLDivElement
+    overlay.style.display = 'flex'
 
     // 创建并启动 Web Worker
     const worker = new Worker(getBinaryString)
@@ -83,14 +85,10 @@ export class MainController {
     // 监听来自 Web Worker 的消息
     worker.onmessage = (event: any) => {
       const { type, data } = event.data
-      if (type === 'progress') {
-        //
-      } else if (type === 'complete') {
+      if (type === 'complete') {
         setTimeout(() => {
           const { binaryString } = data
-
-          //* 偵測文字編碼
-          const detectedInfo: jschardet.IDetectedMap = jschardet.detect(binaryString)
+          const detectedInfo = jschardet.detect(binaryString)
 
           const textReader = new FileReader()
           textReader.onload = (event) => {
@@ -108,7 +106,7 @@ export class MainController {
     }
 
     // 向 Web Worker 发送文件和相关信息
-    worker.postMessage(file)
+    worker.postMessage({ file })
 
     fileInput.files = null
     fileInput.value = ''
