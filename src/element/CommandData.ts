@@ -17,24 +17,12 @@ export interface ICommandDataDetail {
 }
 
 export class CommandData implements ICommandData {
-  protected _content: string
-  protected _detail: ICommandDataDetail
+  public content: string
+  public detail: ICommandDataDetail
 
   constructor (content: string, detail: ICommandDataDetail) {
-    this._content = content
-    this._detail = detail
-  }
-
-  public get content (): string {
-    return this._content
-  }
-
-  public set content (content: string) {
-    this._content = content
-  }
-
-  public get detail (): ICommandDataDetail {
-    return this._detail
+    this.content = content
+    this.detail = detail
   }
 }
 

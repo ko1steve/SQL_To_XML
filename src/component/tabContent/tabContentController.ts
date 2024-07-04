@@ -11,7 +11,6 @@ export class TabContentController {
   protected fileName: string
   protected textFromFileLoaded: string
   protected commandValid: boolean = true
-  protected commandGroupMap: TSMap<GroupType, CommandData[]> = new TSMap<GroupType, CommandData[]>()
 
   constructor (commandType: CommandType, textFromFileLoaded: string, fileName: string) {
     this.fileName = fileName
@@ -31,28 +30,22 @@ export class TabContentController {
 
   protected initialize (): void {
     this.getCommandGroup().then(() => {
-      this.createContent()
-      this.updateDownloadButtonStatus()
-      const overlay = document.getElementById('overlay') as HTMLDivElement
-      overlay.style.display = 'none'
+      this.createPageContent().then(() => {
+        this.updateDownloadButtonStatus()
+        const overlay = document.getElementById('overlay') as HTMLDivElement
+        overlay.style.display = 'none'
+      })
     })
   }
 
   protected getCommandGroup (): Promise<void> {
     return new Promise(resolve => {
       this.storageTextGroup().then(() => {
-        this.getCommandGroupMap().then((map) => {
-          this.commandGroupMap = map
+        this.getCommandGroupMap().then(() => {
           resolve()
         })
       })
     })
-  }
-
-  protected createContent (): void {
-    const mainContainer: HTMLDivElement = document.getElementById('main-container-' + this.commandType) as HTMLDivElement
-    const elementConfig: ITabContentConfig = this.mainConfig.tabContentConfigMap.get(this.commandType) as ITabContentConfig
-    this.createPageContent(mainContainer, this.commandGroupMap, elementConfig)
   }
 
   public resetPageContent (textFromFileLoaded: string, fileName: string): void {
@@ -153,20 +146,23 @@ export class TabContentController {
    * @param textLinesGroupMap
    * @returns TSMap<GroupType, CommandData[]>
    */
-  protected getCommandGroupMap (): Promise<TSMap<GroupType, CommandData[]>> {
+  protected getCommandGroupMap (): Promise<void> {
     return new Promise(resolve => {
-      const commandGroupMap = new TSMap<GroupType, CommandData[]>()
       const promiselist: Promise<void>[] = []
 
       Object.values(GroupType).forEach((groupName) => {
-        const promise = new Promise<void>(resolve => {
+        const promise: Promise<void> = new Promise<void>((resolve, reject) => {
           localforage.getItem(groupName).then((value) => {
-            const text: string = value as string
+            const commands: CommandData[] = []
+            let text: string = value as string
             if (!text) {
+              // localforage.setItem(groupName + '-command', commands).then(() => {
+              //   resolve()
+              // })
               return resolve()
             }
             const textLines = text.split('\r\n')
-            const commands: CommandData[] = []
+            text = ''
             let commadTextSB: StringBuilder | null = null
             let commandDataDetail: ICommandDataDetail | null = null
 
@@ -212,17 +208,22 @@ export class TabContentController {
                 break
               }
             }
-
             if (commands.length > 0) {
-              commandGroupMap.set(groupName!, commands)
+              localforage.setItem(groupName + '-command', commands).then(() => {
+                // textLines = []
+                resolve()
+              })
+            } else {
+              resolve()
             }
-            resolve()
+          }).catch((error) => {
+            reject(error)
           })
         })
         promiselist.push(promise)
       })
       Promise.all(promiselist).then(() => {
-        resolve(commandGroupMap)
+        resolve()
       })
     })
   }
@@ -238,17 +239,29 @@ export class TabContentController {
     return null
   }
 
-  protected createPageContent (mainContainer: HTMLDivElement, commandGroupMap: TSMap<GroupType, CommandData[]>, elementConfig: ITabContentConfig): void {
-    const contentContainer: HTMLDivElement = document.createElement('div') as HTMLDivElement
-    contentContainer.id = elementConfig.mainContainer.contentContainer.id
-    mainContainer.appendChild(contentContainer)
-
-    this.mainConfig.groupSettingMap.keys().forEach(groupType => {
-      let commands: CommandData[] = []
-      if (commandGroupMap.has(groupType!)) {
-        commands = commandGroupMap.get(groupType!)
-      }
-      this.createGroupContainer(groupType!, commands, contentContainer, elementConfig)
+  protected createPageContent (): Promise<void> {
+    return new Promise<void>(resolve => {
+      const mainContainer: HTMLDivElement = document.getElementById('main-container-' + this.commandType) as HTMLDivElement
+      const elementConfig: ITabContentConfig = this.mainConfig.tabContentConfigMap.get(this.commandType) as ITabContentConfig
+      const contentContainer: HTMLDivElement = document.createElement('div') as HTMLDivElement
+      contentContainer.id = elementConfig.mainContainer.contentContainer.id
+      mainContainer.appendChild(contentContainer)
+      const promistList: Promise<void>[] = []
+      this.mainConfig.groupSettingMap.keys().forEach(groupName => {
+        const promise = new Promise<void>(resolve => {
+          localforage.getItem(groupName + '-command').then((commands) => {
+            if (!commands) {
+              commands = []
+            }
+            this.createGroupContainer(groupName!, commands as CommandData[], contentContainer, elementConfig)
+            resolve()
+          })
+        })
+        promistList.push(promise)
+      })
+      Promise.all(promistList).then(() => {
+        resolve()
+      })
     })
   }
 
@@ -394,14 +407,15 @@ export class TabContentController {
     xmlContent += '<SQLBodys>\r\n'
     Object.values(GroupType).forEach(groupType => {
       xmlContent += '  <' + groupType + '>\r\n'
-      if (this.commandGroupMap.has(groupType)) {
-        this.commandGroupMap.get(groupType).forEach((command, index) => {
-          let sqlCommandStr = '    <SQL sql_idx="' + (index + 1) + '">'
-          //* 需透過編碼轉換 XML 跳脫字元
-          sqlCommandStr += He.encode(command.content) + '</SQL>'
-          xmlContent += sqlCommandStr + '\r\n'
-        })
-      }
+
+      // if (this.commandGroupMap.has(groupType)) {
+      //   this.commandGroupMap.get(groupType).forEach((command, index) => {
+      //     let sqlCommandStr = '    <SQL sql_idx="' + (index + 1) + '">'
+      //     //* 需透過編碼轉換 XML 跳脫字元
+      //     sqlCommandStr += He.encode(command.content) + '</SQL>'
+      //     xmlContent += sqlCommandStr + '\r\n'
+      //   })
+      // }
       xmlContent += '  </' + groupType + '>\r\n'
     })
     xmlContent += '</SQLBodys>'
