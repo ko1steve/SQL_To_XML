@@ -13,6 +13,7 @@ export interface IMainConfig {
   messageMap: TSMap<MessageType, string>
   enableTrimCommand: boolean
   ddlComplexCommandStart: RegExp
+  maxGroupCommandAmount: number
 }
 
 export interface IGroupSetting {
@@ -154,4 +155,5 @@ export class MainConfig implements IMainConfig {
 
   public enableTrimCommand: boolean = true
   public ddlComplexCommandStart: RegExp = /^\s*(CREATE|ALTER|DROP)(\s+OR\s+REPLACE)?\s+(.*\s+)?(PROCEDURE|FUNCTION|TRIGGER|PACKAGE|VIEW)/
+  public maxGroupCommandAmount: number = 20000
 }
