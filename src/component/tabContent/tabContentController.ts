@@ -3,6 +3,7 @@ import { IGroupContainerConfig, ITabContentConfig } from './tabContentConfig'
 import { CommandData, MessageType, ICommandDataDetail, StringBuilder } from 'src/element/CommandData'
 import { TSMap } from 'typescript-map'
 import * as He from 'he'
+import localforage from 'localforage'
 
 export class TabContentController {
   protected mainConfig: MainConfig = new MainConfig()
@@ -10,32 +11,41 @@ export class TabContentController {
   protected fileName: string
   protected textFromFileLoaded: string
   protected commandValid: boolean = true
-  protected commandGroupMap: TSMap<GroupType, CommandData[]> = new TSMap<GroupType, CommandData[]>()
 
   constructor (commandType: CommandType, textFromFileLoaded: string, fileName: string) {
     this.fileName = fileName
     this.commandType = commandType
     this.textFromFileLoaded = textFromFileLoaded
+    this.initLocalForge()
     this.initialize()
   }
 
+  protected initLocalForge (): void {
+    localforage.config({
+      driver: localforage.INDEXEDDB,
+      name: 'SqlConverter',
+      storeName: 'SqlConverter'
+    })
+  }
+
   protected initialize (): void {
-    this.getCommandGroup()
-    this.createContent()
-    this.updateDownloadButtonStatus()
-    const overlay = document.getElementById('overlay') as HTMLDivElement
-    overlay.style.display = 'none'
+    this.getCommandGroup().then(() => {
+      this.createPageContent().then(() => {
+        this.updateDownloadButtonStatus()
+        const overlay = document.getElementById('overlay') as HTMLDivElement
+        overlay.style.display = 'none'
+      })
+    })
   }
 
-  protected getCommandGroup (): void {
-    const textLinesGroupMap: TSMap<GroupType, string> = this.getTextGroupMap()
-    this.commandGroupMap = this.getCommandGroupMap(textLinesGroupMap)
-  }
-
-  protected createContent (): void {
-    const mainContainer: HTMLDivElement = document.getElementById('main-container-' + this.commandType) as HTMLDivElement
-    const elementConfig: ITabContentConfig = this.mainConfig.tabContentConfigMap.get(this.commandType) as ITabContentConfig
-    this.createPageContent(mainContainer, this.commandGroupMap, elementConfig)
+  protected getCommandGroup (): Promise<void> {
+    return new Promise(resolve => {
+      this.storageTextGroup().then(() => {
+        this.getCommandGroupMap().then(() => {
+          resolve()
+        })
+      })
+    })
   }
 
   public resetPageContent (textFromFileLoaded: string, fileName: string): void {
@@ -48,39 +58,53 @@ export class TabContentController {
     this.initialize()
   }
 
-  protected getTextGroupMap (): TSMap<GroupType, string> {
-    const textLinesGroupMap: TSMap<GroupType, string> = new TSMap<GroupType, string>()
-    const textLines: string[] = this.textFromFileLoaded.split('\r\n')
-    this.textFromFileLoaded = ''
-    let groupName: GroupType | null
-    for (let i = 0; i < textLines.length; i++) {
-      groupName = this.getGroupName(textLines[i])
+  protected storageTextGroup (): Promise<void> {
+    return new Promise(resolve => {
+      const promiseList: Promise<void>[] = []
+      const textLines: string[] = this.textFromFileLoaded.split('\r\n')
+      this.textFromFileLoaded = ''
+      let groupName: GroupType | null
+      for (let i = 0; i < textLines.length; i++) {
+        groupName = this.getGroupName(textLines[i])
 
-      //* 若找不到區塊分割的判斷字串，則略過換下一行
-      if (groupName === null) {
-        continue
-      }
-      const searchEndArr: string[] = this.mainConfig.groupSettingMap.get(groupName).searchEndPattern
-      let text = ''
+        //* 若找不到區塊分割的判斷字串，則略過換下一行
+        if (groupName === null) {
+          continue
+        }
+        const searchEndArr: string[] = this.mainConfig.groupSettingMap.get(groupName).searchEndPattern
+        let text = ''
 
-      //* 找到區塊分割的判斷字串後，尋找區塊的結束點
-      let j: number
-      for (j = i + 1; j < textLines.length; j++) {
-        i = j - 1
-        if (searchEndArr.some(pattern => textLines[j].trim().startsWith(pattern))) {
-          textLinesGroupMap.set(groupName, text)
+        //* 找到區塊分割的判斷字串後，尋找區塊的結束點
+        let j: number
+        for (j = i + 1; j < textLines.length; j++) {
+          i = j - 1
+          if (searchEndArr.some(pattern => textLines[j].trim().startsWith(pattern))) {
+            const promise = localforage.setItem(groupName, text).then(() => {
+              console.log('Data saved to IndexedDB')
+            }).catch(err => {
+              console.error('Error saving data:', err)
+            })
+            promiseList.push(promise)
+            break
+          }
+          //* 找到結束點之前，不斷累加該行的指令文字
+          text += textLines[j] + '\r\n'
+        }
+        //* 如果直到最後都沒有出現結束點文字，則判斷結束點為最後一行文字
+        if (j === textLines.length) {
+          const promise = localforage.setItem(groupName, text).then(() => {
+            console.log('Data saved to IndexedDB')
+          }).catch(err => {
+            console.error('Error saving data:', err)
+          })
+          promiseList.push(promise)
           break
         }
-        //* 找到結束點之前，不斷累加該行的指令文字
-        text += textLines[j] + '\r\n'
       }
-      //* 如果直到最後都沒有出現結束點文字，則判斷結束點為最後一行文字
-      if (j === textLines.length) {
-        textLinesGroupMap.set(groupName, text)
-        break
-      }
-    }
-    return textLinesGroupMap
+      Promise.all(promiseList).then(() => {
+        resolve()
+      })
+    })
   }
 
   protected getCommandDataDetail (commandText: string, groupName: GroupType): ICommandDataDetail {
@@ -122,64 +146,86 @@ export class TabContentController {
    * @param textLinesGroupMap
    * @returns TSMap<GroupType, CommandData[]>
    */
-  protected getCommandGroupMap (textLinesGroupMap: TSMap<GroupType, string>): TSMap<GroupType, CommandData[]> {
-    const commandGroupMap = new TSMap<GroupType, CommandData[]>()
+  protected getCommandGroupMap (): Promise<void> {
+    return new Promise(resolve => {
+      const promiselist: Promise<void>[] = []
 
-    textLinesGroupMap.forEach((text, groupName) => {
-      const textLines = text.split('\r\n')
-      const commands: CommandData[] = []
-      let commadTextSB: StringBuilder | null = null
-      let commandDataDetail: ICommandDataDetail | null = null
-
-      for (let i = 0; i < textLines.length; i++) {
-        if (!textLines[i].trim().startsWith(this.mainConfig.singleCommandIndicator)) {
-          continue
-        }
-
-        commadTextSB = new StringBuilder()
-        commandDataDetail = { messageType: MessageType.NONE, commands: [] }
-
-        const newTextLine = textLines[i].replace(this.mainConfig.singleCommandIndicator, '').trim()
-        if (newTextLine.length !== 0) {
-          commadTextSB.append(newTextLine)
-        }
-
-        let j: number
-        for (j = i + 1; j < textLines.length; j++) {
-          if (textLines[j].trim().startsWith(this.mainConfig.singleCommandIndicator)) {
-            const commandText = commadTextSB.toString('\r\n')
-            if (!this.mainConfig.enableTrimCommand || commandText.length > 0) {
-              commandDataDetail = this.getCommandDataDetail(commandText, groupName!)
-              commands.push(new CommandData(commandText, commandDataDetail))
-              console.log('[' + groupName + '] :' + commands.length)
+      Object.values(GroupType).forEach((groupName) => {
+        const promise: Promise<void> = new Promise<void>((resolve, reject) => {
+          localforage.getItem(groupName).then((value) => {
+            const commands: CommandData[] = []
+            let text: string = value as string
+            if (!text) {
+              // localforage.setItem(groupName + '-command', commands).then(() => {
+              //   resolve()
+              // })
+              return resolve()
             }
-            i = j - 1 // Continue from next line
-            break
-          } else {
-            textLines[j] = textLines[j].replace(this.mainConfig.singleCommandIndicator, '')
-            if (!this.mainConfig.enableTrimCommand || textLines[j].trim().length > 0) {
-              commadTextSB.append(textLines[j])
+            const textLines = text.split('\r\n')
+            text = ''
+            let commadTextSB: StringBuilder | null = null
+            let commandDataDetail: ICommandDataDetail | null = null
+
+            for (let i = 0; i < textLines.length; i++) {
+              if (!textLines[i].trim().startsWith(this.mainConfig.singleCommandIndicator)) {
+                continue
+              }
+
+              commadTextSB = new StringBuilder()
+              commandDataDetail = { messageType: MessageType.NONE, commands: [] }
+
+              const newTextLine = textLines[i].replace(this.mainConfig.singleCommandIndicator, '').trim()
+              if (newTextLine.length !== 0) {
+                commadTextSB.append(newTextLine)
+              }
+
+              let j: number
+              for (j = i + 1; j < textLines.length; j++) {
+                if (textLines[j].trim().startsWith(this.mainConfig.singleCommandIndicator)) {
+                  const commandText = commadTextSB.toString('\r\n')
+                  if (!this.mainConfig.enableTrimCommand || commandText.length > 0) {
+                    commandDataDetail = this.getCommandDataDetail(commandText, groupName!)
+                    commands.push(new CommandData(commandText, commandDataDetail))
+                    console.log('[' + groupName + '] :' + commands.length)
+                  }
+                  i = j - 1 // Continue from next line
+                  break
+                } else {
+                  textLines[j] = textLines[j].replace(this.mainConfig.singleCommandIndicator, '')
+                  if (!this.mainConfig.enableTrimCommand || textLines[j].trim().length > 0) {
+                    commadTextSB.append(textLines[j])
+                  }
+                }
+              }
+
+              if (j === textLines.length) {
+                const commandText = commadTextSB.toString('\r\n')
+                if (commandText.length > 0) {
+                  commandDataDetail = this.getCommandDataDetail(commandText, groupName!)
+                  commands.push(new CommandData(commandText, commandDataDetail))
+                  console.log('[' + groupName + '] :' + commands.length)
+                }
+                break
+              }
             }
-          }
-        }
-
-        if (j === textLines.length) {
-          const commandText = commadTextSB.toString('\r\n')
-          if (commandText.length > 0) {
-            commandDataDetail = this.getCommandDataDetail(commandText, groupName!)
-            commands.push(new CommandData(commandText, commandDataDetail))
-            console.log('[' + groupName + '] :' + commands.length)
-          }
-          break
-        }
-      }
-
-      if (commands.length > 0) {
-        commandGroupMap.set(groupName!, commands)
-      }
+            if (commands.length > 0) {
+              localforage.setItem(groupName + '-command', commands).then(() => {
+                // textLines = []
+                resolve()
+              })
+            } else {
+              resolve()
+            }
+          }).catch((error) => {
+            reject(error)
+          })
+        })
+        promiselist.push(promise)
+      })
+      Promise.all(promiselist).then(() => {
+        resolve()
+      })
     })
-
-    return commandGroupMap
   }
 
   protected getGroupName (textLine: string): GroupType | null {
@@ -193,17 +239,29 @@ export class TabContentController {
     return null
   }
 
-  protected createPageContent (mainContainer: HTMLDivElement, commandGroupMap: TSMap<GroupType, CommandData[]>, elementConfig: ITabContentConfig): void {
-    const contentContainer: HTMLDivElement = document.createElement('div') as HTMLDivElement
-    contentContainer.id = elementConfig.mainContainer.contentContainer.id
-    mainContainer.appendChild(contentContainer)
-
-    this.mainConfig.groupSettingMap.keys().forEach(groupType => {
-      let commands: CommandData[] = []
-      if (commandGroupMap.has(groupType!)) {
-        commands = commandGroupMap.get(groupType!)
-      }
-      this.createGroupContainer(groupType!, commands, contentContainer, elementConfig)
+  protected createPageContent (): Promise<void> {
+    return new Promise<void>(resolve => {
+      const mainContainer: HTMLDivElement = document.getElementById('main-container-' + this.commandType) as HTMLDivElement
+      const elementConfig: ITabContentConfig = this.mainConfig.tabContentConfigMap.get(this.commandType) as ITabContentConfig
+      const contentContainer: HTMLDivElement = document.createElement('div') as HTMLDivElement
+      contentContainer.id = elementConfig.mainContainer.contentContainer.id
+      mainContainer.appendChild(contentContainer)
+      const promistList: Promise<void>[] = []
+      this.mainConfig.groupSettingMap.keys().forEach(groupName => {
+        const promise = new Promise<void>(resolve => {
+          localforage.getItem(groupName + '-command').then((commands) => {
+            if (!commands) {
+              commands = []
+            }
+            this.createGroupContainer(groupName!, commands as CommandData[], contentContainer, elementConfig)
+            resolve()
+          })
+        })
+        promistList.push(promise)
+      })
+      Promise.all(promistList).then(() => {
+        resolve()
+      })
     })
   }
 
@@ -349,14 +407,15 @@ export class TabContentController {
     xmlContent += '<SQLBodys>\r\n'
     Object.values(GroupType).forEach(groupType => {
       xmlContent += '  <' + groupType + '>\r\n'
-      if (this.commandGroupMap.has(groupType)) {
-        this.commandGroupMap.get(groupType).forEach((command, index) => {
-          let sqlCommandStr = '    <SQL sql_idx="' + (index + 1) + '">'
-          //* 需透過編碼轉換 XML 跳脫字元
-          sqlCommandStr += He.encode(command.content) + '</SQL>'
-          xmlContent += sqlCommandStr + '\r\n'
-        })
-      }
+
+      // if (this.commandGroupMap.has(groupType)) {
+      //   this.commandGroupMap.get(groupType).forEach((command, index) => {
+      //     let sqlCommandStr = '    <SQL sql_idx="' + (index + 1) + '">'
+      //     //* 需透過編碼轉換 XML 跳脫字元
+      //     sqlCommandStr += He.encode(command.content) + '</SQL>'
+      //     xmlContent += sqlCommandStr + '\r\n'
+      //   })
+      // }
       xmlContent += '  </' + groupType + '>\r\n'
     })
     xmlContent += '</SQLBodys>'
