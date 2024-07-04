@@ -415,28 +415,39 @@ export class TabContentController {
     }
     let xmlContent = '<?xml version="1.0" encoding="UTF-8"?>\r\n'
     xmlContent += '<SQLBodys>\r\n'
-    Object.values(GroupType).forEach(groupType => {
-      xmlContent += '  <' + groupType + '>\r\n'
-
-      // if (this.commandGroupMap.has(groupType)) {
-      //   this.commandGroupMap.get(groupType).forEach((command, index) => {
-      //     let sqlCommandStr = '    <SQL sql_idx="' + (index + 1) + '">'
-      //     //* 需透過編碼轉換 XML 跳脫字元
-      //     sqlCommandStr += He.encode(command.content) + '</SQL>'
-      //     xmlContent += sqlCommandStr + '\r\n'
-      //   })
-      // }
-      xmlContent += '  </' + groupType + '>\r\n'
+    const promiseList: Promise<void>[] = []
+    Object.values(GroupType).forEach(groupName => {
+      const promise = new Promise<void>(resolve => {
+        localforage.getItem(groupName + '-command').then((data) => {
+          xmlContent += '  <' + groupName + '>\r\n'
+          if (!data) {
+            xmlContent += '  </' + groupName + '>\r\n'
+            return resolve()
+          }
+          const commands = data as CommandData[]
+          commands.forEach((command, index) => {
+            let sqlCommandStr = '    <SQL sql_idx="' + (index + 1) + '">'
+            //* 需透過編碼轉換 XML 跳脫字元
+            sqlCommandStr += He.encode(command.content) + '</SQL>'
+            xmlContent += sqlCommandStr + '\r\n'
+          })
+          xmlContent += '  </' + groupName + '>\r\n'
+          resolve()
+        })
+      })
+      promiseList.push(promise)
     })
-    xmlContent += '</SQLBodys>'
+    Promise.all(promiseList).then(() => {
+      xmlContent += '</SQLBodys>'
 
-    const blob = new Blob([xmlContent], { type: 'text/xml' })
-    const a = document.createElement('a')
-    a.href = URL.createObjectURL(blob)
-    a.download = this.fileName.replace(/.sql$/, '.xml')
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
+      const blob = new Blob([xmlContent], { type: 'text/xml' })
+      const a = document.createElement('a')
+      a.href = URL.createObjectURL(blob)
+      a.download = this.fileName.replace(/.sql$/, '.xml')
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+    })
   }
 
   protected addClassName (element: HTMLElement, ...classNames: string[]): void {
