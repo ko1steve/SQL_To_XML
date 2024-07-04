@@ -49,13 +49,23 @@ export class TabContentController {
   }
 
   public resetPageContent (textFromFileLoaded: string, fileName: string): void {
-    const mainContainer: HTMLDivElement = document.getElementById('main-container-' + this.commandType) as HTMLDivElement
-    const contentContainer: HTMLDivElement = document.getElementById('content-container-' + this.commandType) as HTMLDivElement
-    mainContainer.removeChild(contentContainer)
-    this.commandValid = true
-    this.fileName = fileName
-    this.textFromFileLoaded = textFromFileLoaded
-    this.initialize()
+    this.resetLocalForge().then(() => {
+      const mainContainer: HTMLDivElement = document.getElementById('main-container-' + this.commandType) as HTMLDivElement
+      const contentContainer: HTMLDivElement = document.getElementById('content-container-' + this.commandType) as HTMLDivElement
+      mainContainer.removeChild(contentContainer)
+      this.commandValid = true
+      this.fileName = fileName
+      this.textFromFileLoaded = textFromFileLoaded
+      this.initialize()
+    })
+  }
+
+  protected resetLocalForge (): Promise<void> {
+    return new Promise<void>(resolve => {
+      localforage.clear().then(() => {
+        resolve()
+      })
+    })
   }
 
   protected storageTextGroup (): Promise<void> {
