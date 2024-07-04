@@ -68,7 +68,7 @@ export class TabContentController {
   protected storageTextGroup (): Promise<void> {
     return new Promise(resolve => {
       const promiseList: Promise<void>[] = []
-      const textLines: string[] = this.textFromFileLoaded.split('\n')
+      const textLines: string[] = this.textFromFileLoaded.split('\r\n')
       this.textFromFileLoaded = ''
       let groupName: GroupType | null
       for (let i = 0; i < textLines.length; i++) {
@@ -95,7 +95,7 @@ export class TabContentController {
             break
           }
           //* 找到結束點之前，不斷累加該行的指令文字
-          text += textLines[j] + '\n'
+          text += textLines[j] + '\r\n'
         }
         //* 如果直到最後都沒有出現結束點文字，則判斷結束點為最後一行文字
         if (j === textLines.length) {
@@ -165,7 +165,7 @@ export class TabContentController {
             if (!text) {
               return resolve()
             }
-            const textLines = text.split('\n')
+            const textLines = text.split('\r\n')
             const commands: CommandData[] = []
             let commadTextSB: StringBuilder | null = null
             let commandDataDetail: ICommandDataDetail | null = null
@@ -186,7 +186,7 @@ export class TabContentController {
               let j: number
               for (j = i + 1; j < textLines.length; j++) {
                 if (textLines[j].trim().startsWith(this.mainConfig.singleCommandIndicator)) {
-                  const commandText = commadTextSB.toString('\n')
+                  const commandText = commadTextSB.toString('\r\n')
                   if (!this.mainConfig.enableTrimCommand || commandText.length > 0) {
                     commandDataDetail = this.getCommandDataDetail(commandText, groupName!)
                     commands.push(new CommandData(commandText, commandDataDetail))
@@ -203,7 +203,7 @@ export class TabContentController {
               }
 
               if (j === textLines.length) {
-                const commandText = commadTextSB.toString('\n')
+                const commandText = commadTextSB.toString('\r\n')
                 if (commandText.length > 0) {
                   commandDataDetail = this.getCommandDataDetail(commandText, groupName!)
                   commands.push(new CommandData(commandText, commandDataDetail))
