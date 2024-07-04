@@ -14,6 +14,7 @@
     "bootstrap": "^5.3.3",
     "he": "^1.2.0",
     "jschardet": "^3.1.2",
+    "localforage": "^1.10.0",
     "typescript-ioc": "^3.2.2",
     "typescript-map": "0.0.7"
   },
