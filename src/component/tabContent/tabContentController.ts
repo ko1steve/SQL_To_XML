@@ -423,6 +423,9 @@ export class TabContentController {
     if (!this.commandValid) {
       return
     }
+    const overlay = document.getElementById('overlay') as HTMLDivElement
+    overlay.style.display = 'flex'
+
     let xmlContent = '<?xml version="1.0" encoding="UTF-8"?>\r\n'
     xmlContent += '<SQLBodys>\r\n'
     const promiseList: Promise<void>[] = []
@@ -457,6 +460,7 @@ export class TabContentController {
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
+      overlay.style.display = 'none'
     })
   }
 
