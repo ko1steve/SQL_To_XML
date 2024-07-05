@@ -256,6 +256,7 @@ export class TabContentController {
       const contentContainer: HTMLDivElement = document.createElement('div') as HTMLDivElement
       contentContainer.id = elementConfig.mainContainer.contentContainer.id
       mainContainer.appendChild(contentContainer)
+
       const promistList: Promise<void>[] = []
       this.mainConfig.groupSettingMap.keys().forEach(groupName => {
         const promise = new Promise<void>(resolve => {
@@ -426,15 +427,17 @@ export class TabContentController {
     const overlay = document.getElementById('overlay') as HTMLDivElement
     overlay.style.display = 'flex'
 
-    let xmlContent = '<?xml version="1.0" encoding="UTF-8"?>\r\n'
-    xmlContent += '<SQLBodys>\r\n'
+    const xmlContentSB = new StringBuilder()
+    xmlContentSB.append('<?xml version="1.0" encoding="UTF-8"?>')
+    xmlContentSB.append('<SQLBodys>')
+
     const promiseList: Promise<void>[] = []
     Object.values(GroupType).forEach(groupName => {
       const promise = new Promise<void>(resolve => {
         localforage.getItem(groupName + '-command').then((data) => {
-          xmlContent += '  <' + groupName + '>\r\n'
+          xmlContentSB.append('  <' + groupName + '>')
           if (!data) {
-            xmlContent += '  </' + groupName + '>\r\n'
+            xmlContentSB.append('  </' + groupName + '>')
             return resolve()
           }
           const commands = data as CommandData[]
@@ -442,18 +445,17 @@ export class TabContentController {
             let sqlCommandStr = '    <SQL sql_idx="' + (index + 1) + '">'
             //* 需透過編碼轉換 XML 跳脫字元
             sqlCommandStr += He.encode(command.content) + '</SQL>'
-            xmlContent += sqlCommandStr + '\r\n'
+            xmlContentSB.append(sqlCommandStr)
           })
-          xmlContent += '  </' + groupName + '>\r\n'
+          xmlContentSB.append('  </' + groupName + '>')
           resolve()
         })
       })
       promiseList.push(promise)
     })
     Promise.all(promiseList).then(() => {
-      xmlContent += '</SQLBodys>'
-
-      const blob = new Blob([xmlContent], { type: 'text/xml' })
+      xmlContentSB.append('</SQLBodys>')
+      const blob = new Blob([xmlContentSB.toString('\r\n')], { type: 'text/xml' })
       const a = document.createElement('a')
       a.href = URL.createObjectURL(blob)
       a.download = this.fileName.replace(/.sql$/, '.xml')
