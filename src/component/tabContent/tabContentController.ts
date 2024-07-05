@@ -320,6 +320,10 @@ export class TabContentController {
     }
 
     if (commands.length > 0) {
+      const totalCommandsText = document.createElement('p')
+      totalCommandsText.innerText = '語法數量 : ' + commands.length.toString()
+      commandContainer.appendChild(totalCommandsText)
+
       if (commands.length >= this.mainConfig.maxGroupCommandAmount) {
         const warning = document.createElement('p')
         warning.innerText = '語法數量超過 ' + this.mainConfig.maxGroupCommandAmount.toString() + ' 筆, 以下區塊只顯示錯誤語法'
