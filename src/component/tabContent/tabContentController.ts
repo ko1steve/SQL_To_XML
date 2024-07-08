@@ -371,6 +371,7 @@ export class TabContentController {
             case MessageType.CONTENT_NOT_FOUND_ERROR:
             case MessageType.INVALID_COMMAND_ERROR:
             case MessageType.NO_VALID_COMMAND_ERROR:
+            case MessageType.EXCEENDS_COMMAND_LIMIT_ERROR:
               this.commandValid = false
               this.addClassName(listItem, 'command-error')
               break
@@ -401,6 +402,7 @@ export class TabContentController {
             break
           case MessageType.INVALID_COMMAND_ERROR:
           case MessageType.NO_VALID_COMMAND_ERROR:
+          case MessageType.EXCEENDS_COMMAND_LIMIT_ERROR:
           case MessageType.CONTENT_NOT_FOUND_ERROR:
             paragraph.className = config.messageContainer.errorMessage.className
             container = document.getElementById(config.messageContainer.id.replace('{groupType}', groupType)) as HTMLDivElement
