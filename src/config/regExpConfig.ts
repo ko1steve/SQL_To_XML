@@ -33,7 +33,7 @@ export class RegExpConig implements IRegExpConfig {
       //* 指定每種 DDL 語法
       GroupType.MainSQL, new TSMap<string, RegExp>([
         [
-          'ALL_DDL_VALID_REGEXP', ALL_DDL_VALID_REGEXP
+          'DDL 語法', ALL_DDL_VALID_REGEXP
         ]
       ])
     ]
@@ -60,7 +60,7 @@ export class RegExpConig implements IRegExpConfig {
       //* 指定「Insert into」、「Update set」、「Delete」、「Select into」
       GroupType.MainSQL, new TSMap<string, RegExp>([
         [
-          'ALL_DML_VALID_REGEXP', ALL_DML_VALID_REGEXP
+          'DML 語法', ALL_DML_VALID_REGEXP
         ]
       ])
     ]
@@ -70,10 +70,10 @@ export class RegExpConig implements IRegExpConfig {
     [
       GroupType.PreSQL, new TSMap<string, RegExp>([
         [
-          'ALL_DDL_VALID_REGEXP', ALL_DDL_VALID_REGEXP
+          'DDL 語法', ALL_DDL_VALID_REGEXP
         ],
         [
-          'ALL_DML_VALID_REGEXP', ALL_DML_VALID_REGEXP
+          'DML 語法', ALL_DML_VALID_REGEXP
         ],
         [
           'SELECT', /^(?:Select\s+(?:(?!count\(([0-9]+|\*)\))(?!\s+).+|\*)\s+(?!Into\s+\S+\s+)From\s+(?:\S+\.\S+|\S+)).+$/gmi
@@ -86,10 +86,10 @@ export class RegExpConig implements IRegExpConfig {
     [
       GroupType.PreProdSQL, new TSMap<string, RegExp>([
         [
-          'ALL_DDL_VALID_REGEXP', ALL_DDL_VALID_REGEXP
+          'DDL 語法', ALL_DDL_VALID_REGEXP
         ],
         [
-          'ALL_DML_VALID_REGEXP', ALL_DML_VALID_REGEXP
+          'DML 語法', ALL_DML_VALID_REGEXP
         ],
         [
           'SELECT', /^(?:Select\s+(?:(?!count\(([0-9]+|\*)\))(?!\s+).+|\*)\s+(?!Into\s+\S+\s+)From\s+(?:\S+\.\S+|\S+)).+$/gmi
@@ -102,10 +102,10 @@ export class RegExpConig implements IRegExpConfig {
     [
       GroupType.PostSQL, new TSMap<string, RegExp>([
         [
-          'ALL_DDL_VALID_REGEXP', ALL_DDL_VALID_REGEXP
+          'DDL 語法', ALL_DDL_VALID_REGEXP
         ],
         [
-          'ALL_DML_VALID_REGEXP', ALL_DML_VALID_REGEXP
+          'DML 語法', ALL_DML_VALID_REGEXP
         ],
         [
           'SELECT', /^(?:Select\s+(?:(?!count\(([0-9]+|\*)\))(?!\s+).+|\*)\s+(?!Into\s+\S+\s+)From\s+(?:\S+\.\S+|\S+)).+$/gmi
@@ -121,10 +121,10 @@ export class RegExpConig implements IRegExpConfig {
     [
       GroupType.PreSQL, new TSMap<string, RegExp>([
         [
-          'ALL_DDL_VALID_REGEXP', ALL_DDL_VALID_REGEXP
+          'DDL 語法', ALL_DDL_VALID_REGEXP
         ],
         [
-          'ALL_DML_VALID_REGEXP', ALL_DML_VALID_REGEXP
+          'DML 語法', ALL_DML_VALID_REGEXP
         ],
         [
           'SELECT', /^(?:Select\s+(?:(?!count\(([0-9]+|\*)\))(?!\s+).+|\*)\s+(?!Into\s+\S+\s+)From\s+(?:\S+\.\S+|\S+)).+$/gmi
@@ -137,10 +137,10 @@ export class RegExpConig implements IRegExpConfig {
     [
       GroupType.PreProdSQL, new TSMap<string, RegExp>([
         [
-          'ALL_DDL_VALID_REGEXP', ALL_DDL_VALID_REGEXP
+          'DDL 語法', ALL_DDL_VALID_REGEXP
         ],
         [
-          'ALL_DML_VALID_REGEXP', ALL_DML_VALID_REGEXP
+          'DML 語法', ALL_DML_VALID_REGEXP
         ],
         [
           'SELECT', /^(?:Select\s+(?:(?!count\(([0-9]+|\*)\))(?!\s+).+|\*)\s+(?!Into\s+\S+\s+)From\s+(?:\S+\.\S+|\S+)).+$/gmi
@@ -153,10 +153,10 @@ export class RegExpConig implements IRegExpConfig {
     [
       GroupType.PostSQL, new TSMap<string, RegExp>([
         [
-          'ALL_DDL_VALID_REGEXP', ALL_DDL_VALID_REGEXP
+          'DDL 語法', ALL_DDL_VALID_REGEXP
         ],
         [
-          'ALL_DML_VALID_REGEXP', ALL_DML_VALID_REGEXP
+          'DML 語法', ALL_DML_VALID_REGEXP
         ],
         [
           'SELECT', /^(?:Select\s+(?:(?!count\(([0-9]+|\*)\))(?!\s+).+|\*)\s+(?!Into\s+\S+\s+)From\s+(?:\S+\.\S+|\S+)).+$/gmi
