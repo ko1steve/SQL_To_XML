@@ -149,7 +149,7 @@ export class MainConfig implements IMainConfig {
     ],
     [
       MessageType.NO_VALID_COMMAND_ERROR,
-      '{groupTitle}, index = {index}\n NoValidCommandError: "找不到任何符合語法規則的語法。'
+      '{groupTitle}, index = {index}\n NoValidCommandError: "找不到任何符合語法規則的語法。請檢查是否語法拼錯，或是同時包含兩筆以上的語法。'
     ]
   ])
 
