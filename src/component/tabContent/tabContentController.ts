@@ -132,9 +132,24 @@ export class TabContentController {
     //* 檢查指令是否至少包含任何一個合規的語法
     if (this.mainConfig.validCommandMap.has(this.commandType)) {
       const groupValidCommandMap: TSMap<string, RegExp> = this.mainConfig.validCommandMap.get(this.commandType)?.get(groupName)
-      if (groupValidCommandMap && !Array.from(groupValidCommandMap.values()).some(regExp => upperText.search(regExp) > -1)) {
-        detail.messageType = MessageType.NO_VALID_COMMAND_ERROR
-        detail.commands.push('')
+      if (groupValidCommandMap) {
+        let isMatch: boolean = false
+        groupValidCommandMap.values().forEach(regExp => {
+          const iterable: IterableIterator<RegExpMatchArray> = upperText.matchAll(regExp)
+          const count = Array.from(iterable).length
+          if (count > 0) {
+            isMatch = true
+          }
+          if (count > 1) {
+            detail.messageType = MessageType.EXCEENDS_COMMAND_LIMIT_ERROR
+            detail.commands.push('')
+          }
+        })
+        //* 沒有匹配到任何語法，則視為錯誤
+        if (!isMatch) {
+          detail.messageType = MessageType.NO_VALID_COMMAND_ERROR
+          detail.commands.push('')
+        }
       }
     }
     //* 檢查指令是否包含不合規的語法
