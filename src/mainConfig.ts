@@ -136,10 +136,6 @@ export class MainConfig implements IMainConfig {
 
   public messageMap: TSMap<MessageType, string> = new TSMap<MessageType, string>([
     [
-      MessageType.COMMENT_OUT_COMMAND,
-      '{groupTitle}, index = {index}\n Warning: Command "{command}" has been commented out.'
-    ],
-    [
       MessageType.CONTENT_NOT_FOUND_ERROR,
       '{groupTitle}\n ContentNotFoundError: "{groupTitle}" is not defind. 請檢查 SQL 檔案是否有包含該類別的指令。'
     ],

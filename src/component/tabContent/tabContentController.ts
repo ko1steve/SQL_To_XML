@@ -365,9 +365,6 @@ export class TabContentController {
           listItem.appendChild(paragraph)
 
           switch (command.detail.messageType) {
-            case MessageType.COMMENT_OUT_COMMAND:
-              this.addClassName(listItem, 'command-ignored')
-              break
             case MessageType.CONTENT_NOT_FOUND_ERROR:
             case MessageType.INVALID_COMMAND_ERROR:
             case MessageType.NO_VALID_COMMAND_ERROR:
@@ -396,10 +393,6 @@ export class TabContentController {
         message = message.replace('{command}', e)
         paragraph.innerText = message
         switch (command.detail.messageType) {
-          case MessageType.COMMENT_OUT_COMMAND:
-            paragraph.className = config.messageContainer.warningMessage.className
-            container = document.getElementById(config.messageContainer.id.replace('{groupType}', groupType)) as HTMLDivElement
-            break
           case MessageType.INVALID_COMMAND_ERROR:
           case MessageType.NO_VALID_COMMAND_ERROR:
           case MessageType.EXCEENDS_COMMAND_LIMIT_ERROR:
