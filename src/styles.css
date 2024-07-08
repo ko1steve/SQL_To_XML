@@ -119,10 +119,6 @@
   padding: 10px;
 }
 
-.command-ignored {
-  color: royalblue;
-}
-
 .command-error {
   color: crimson;
 }
@@ -135,10 +131,6 @@
 .pointerover-command {
   border-radius: 5px;
   background-color: rgb(194, 230, 241);
-}
-
-.warning-message {
-  color: royalblue;
 }
 
 .error-message {

@@ -122,15 +122,34 @@ export class TabContentController {
       messageType: MessageType.NONE,
       commands: []
     }
-    const cleanedText = commandText.split('\r\n').filter(line => !line.match(/^[\s\t]*$|^[\s\t]*--/)).join('\r\n')
+    const cleanedText = commandText.split('\r\n')
+      .map(line => line.trim())
+      .filter(line => !line.match(/^[\s\t]*$|^[\s\t]*--/))
+      .join('\r\n')
+
     const upperText = cleanedText.toUpperCase()
 
     //* 檢查指令是否至少包含任何一個合規的語法
     if (this.mainConfig.validCommandMap.has(this.commandType)) {
       const groupValidCommandMap: TSMap<string, RegExp> = this.mainConfig.validCommandMap.get(this.commandType)?.get(groupName)
-      if (groupValidCommandMap && !Array.from(groupValidCommandMap.values()).some(regExp => upperText.search(regExp) > -1)) {
-        detail.messageType = MessageType.NO_VALID_COMMAND_ERROR
-        detail.commands.push('')
+      if (groupValidCommandMap) {
+        let isMatch: boolean = false
+        groupValidCommandMap.values().forEach(regExp => {
+          const iterable: IterableIterator<RegExpMatchArray> = upperText.matchAll(regExp)
+          const count = Array.from(iterable).length
+          if (count > 0) {
+            isMatch = true
+          }
+          if (count > 1) {
+            detail.messageType = MessageType.EXCEENDS_COMMAND_LIMIT_ERROR
+            detail.commands.push('')
+          }
+        })
+        //* 沒有匹配到任何語法，則視為錯誤
+        if (!isMatch) {
+          detail.messageType = MessageType.NO_VALID_COMMAND_ERROR
+          detail.commands.push('')
+        }
       }
     }
     //* 檢查指令是否包含不合規的語法
@@ -365,12 +384,10 @@ export class TabContentController {
           listItem.appendChild(paragraph)
 
           switch (command.detail.messageType) {
-            case MessageType.COMMENT_OUT_COMMAND:
-              this.addClassName(listItem, 'command-ignored')
-              break
             case MessageType.CONTENT_NOT_FOUND_ERROR:
             case MessageType.INVALID_COMMAND_ERROR:
             case MessageType.NO_VALID_COMMAND_ERROR:
+            case MessageType.EXCEENDS_COMMAND_LIMIT_ERROR:
               this.commandValid = false
               this.addClassName(listItem, 'command-error')
               break
@@ -395,12 +412,9 @@ export class TabContentController {
         message = message.replace('{command}', e)
         paragraph.innerText = message
         switch (command.detail.messageType) {
-          case MessageType.COMMENT_OUT_COMMAND:
-            paragraph.className = config.messageContainer.warningMessage.className
-            container = document.getElementById(config.messageContainer.id.replace('{groupType}', groupType)) as HTMLDivElement
-            break
           case MessageType.INVALID_COMMAND_ERROR:
           case MessageType.NO_VALID_COMMAND_ERROR:
+          case MessageType.EXCEENDS_COMMAND_LIMIT_ERROR:
           case MessageType.CONTENT_NOT_FOUND_ERROR:
             paragraph.className = config.messageContainer.errorMessage.className
             container = document.getElementById(config.messageContainer.id.replace('{groupType}', groupType)) as HTMLDivElement
