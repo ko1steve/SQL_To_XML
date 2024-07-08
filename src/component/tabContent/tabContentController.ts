@@ -122,7 +122,11 @@ export class TabContentController {
       messageType: MessageType.NONE,
       commands: []
     }
-    const cleanedText = commandText.split('\r\n').filter(line => !line.match(/^[\s\t]*$|^[\s\t]*--/)).join('\r\n')
+    const cleanedText = commandText.split('\r\n')
+      .map(line => line.trim())
+      .filter(line => !line.match(/^[\s\t]*$|^[\s\t]*--/))
+      .join('\r\n')
+
     const upperText = cleanedText.toUpperCase()
 
     //* 檢查指令是否至少包含任何一個合規的語法
