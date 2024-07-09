@@ -2,7 +2,6 @@ import { CommandType, GroupType, IGroupSetting, MainConfig } from 'src/mainConfi
 import { IGroupContainerConfig, ITabContentConfig } from './tabContentConfig'
 import { CommandData, MessageType, ICommandDataDetail, StringBuilder } from 'src/element/CommandData'
 import { TSMap } from 'typescript-map'
-import * as He from 'he'
 import localforage from 'localforage'
 
 export class TabContentController {
@@ -463,7 +462,7 @@ export class TabContentController {
           commands.forEach((command, index) => {
             let sqlCommandStr = '    <SQL sql_idx="' + (index + 1) + '">'
             //* 需透過編碼轉換 XML 跳脫字元
-            sqlCommandStr += He.encode(command.content) + '</SQL>'
+            sqlCommandStr += this.escapeXml(command.content) + '</SQL>'
             xmlContentSB.append(sqlCommandStr)
           })
           xmlContentSB.append('  </' + groupName + '>')
@@ -482,6 +481,19 @@ export class TabContentController {
       a.click()
       document.body.removeChild(a)
       overlay.style.display = 'none'
+    })
+  }
+
+  protected escapeXml (unsafe: string): string {
+    return unsafe.replace(/[<>&'"]/g, function (c) {
+      switch (c) {
+        case '<': return '&lt;'
+        case '>': return '&gt;'
+        case '&': return '&amp;'
+        case '\'': return '&apos;'
+        case '"': return '&quot;'
+        default: return c
+      }
     })
   }
 
