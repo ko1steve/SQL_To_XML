@@ -1,9 +1,7 @@
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap/dist/js/bootstrap.bundle'
-import 'src/styles.css'
 import { CommandType } from './mainConfig'
 import { TabContentController } from './component/tabContent/tabContentController'
-import TopButtonImage from './image/top-button.png'
 import jschardet from 'jschardet'
 import getBinaryString from './util/worker/getBinaryString'
 
@@ -15,23 +13,7 @@ export class MainController {
   protected topButton: HTMLImageElement | null = null
 
   constructor () {
-    this.createTopButton()
     this.addEventListeners()
-  }
-
-  protected createTopButton (): void {
-    const topButtonContainer = document.getElementById('top-button-container')
-
-    this.topButton = document.createElement('img')
-    this.topButton.id = 'top-button'
-    this.topButton.src = TopButtonImage
-    topButtonContainer?.appendChild(this.topButton)
-
-    this.topButton.onclick = () => {
-      window.scrollTo({
-        top: 0
-      })
-    }
   }
 
   protected addEventListeners (): void {

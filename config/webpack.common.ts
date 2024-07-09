@@ -2,12 +2,13 @@ import * as Path from 'path'
 import HtmlWebpackPlugin from 'html-webpack-plugin'
 import ESLintPlugin from 'eslint-webpack-plugin'
 import TerserWebpackPlugin from 'terser-webpack-plugin'
+import { ProvidePlugin } from 'webpack'
 
 const appDir = Path.dirname(__dirname)
 
 module.exports = {
   context: Path.join(appDir, 'src'),
-  entry: ['./main.ts'],
+  entry: ['./main.tsx'],
   mode: 'none',
   module: {
     rules: [
@@ -61,6 +62,9 @@ module.exports = {
   target: 'web',
 
   plugins: [
+    new ProvidePlugin({
+      process: 'process/browser',
+    }),
     new ESLintPlugin({
       extensions: ['ts', 'tsx']
     }),
@@ -68,9 +72,9 @@ module.exports = {
       file: Path.join(appDir, 'dist', 'index.html'),
       template: './index.html'
     })
-  ],
-  optimization: {
-    minimize: true,
-    minimizer: [new TerserWebpackPlugin()]
-  }
+  ]
+  // optimization: {
+  //   minimize: true,
+  //   minimizer: [new TerserWebpackPlugin()]
+  // }
 }
