@@ -68,9 +68,9 @@ module.exports = {
       file: Path.join(appDir, 'dist', 'index.html'),
       template: './index.html'
     })
-  ]
-  // optimization: {
-  //   minimize: true,
-  //   minimizer: [new TerserWebpackPlugin()]
-  // }
+  ],
+  optimization: {
+    minimize: true,
+    minimizer: [new TerserWebpackPlugin()]
+  }
 }

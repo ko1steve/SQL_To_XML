@@ -5,7 +5,6 @@ import { CommandType } from './mainConfig'
 import { TabContentController } from './component/tabContent/tabContentController'
 import TopButtonImage from './image/top-button.png'
 import jschardet from 'jschardet'
-import { StringBuilder } from './element/CommandData'
 import getBinaryString from './util/worker/getBinaryString'
 
 export class MainController {
