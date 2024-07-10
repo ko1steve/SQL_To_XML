@@ -3,18 +3,22 @@ import { IGroupContainerConfig, ISqlContentConfig } from './sqlContentConfig'
 import { CommandData, MessageType, ICommandDataDetail, StringBuilder } from 'src/config/CommandData'
 import { TSMap } from 'typescript-map'
 import localforage from 'localforage'
+import { Container } from 'typescript-ioc'
+import { DataModel } from 'src/model/dataModel'
 
 export class SqlContentController {
+  protected dataModel: DataModel
   protected mainConfig: MainConfig = new MainConfig()
   protected commandType: CommandType = CommandType.NONE
   protected fileName: string
   protected textFromFileLoaded: string
-  protected commandValid: boolean = true
 
   constructor (commandType: CommandType, textFromFileLoaded: string, fileName: string) {
+    this.dataModel = Container.get(DataModel)
     this.fileName = fileName
     this.commandType = commandType
     this.textFromFileLoaded = textFromFileLoaded
+    this.dataModel.setCommandValid(commandType, true)
     this.initLocalForge()
     this.initialize()
   }
@@ -30,7 +34,6 @@ export class SqlContentController {
   protected initialize (): void {
     this.getCommandGroup().then(() => {
       this.createPageContent().then(() => {
-        this.updateDownloadButtonStatus()
         const overlay = document.getElementById('overlay') as HTMLDivElement
         overlay.style.display = 'none'
       })
@@ -52,7 +55,7 @@ export class SqlContentController {
       const mainContainer: HTMLDivElement = document.getElementById('main-container-' + this.commandType) as HTMLDivElement
       const contentContainer: HTMLDivElement = document.getElementById('content-container-' + this.commandType) as HTMLDivElement
       mainContainer.removeChild(contentContainer)
-      this.commandValid = true
+      this.dataModel.setCommandValid(this.commandType, true)
       this.fileName = fileName
       this.textFromFileLoaded = textFromFileLoaded
       this.initialize()
@@ -325,7 +328,7 @@ export class SqlContentController {
     }
 
     if (commands.length === 0 && isCheckGroup) {
-      this.commandValid = false
+      this.dataModel.setCommandValid(this.commandType, false)
       let errorMessage: string = this.mainConfig.messageMap.get(MessageType.CONTENT_NOT_FOUND_ERROR)
       const groupTitle: string = this.mainConfig.groupSettingMap.get(groupType).title
       errorMessage = errorMessage.replace('{groupTitle}', groupTitle)
@@ -388,7 +391,7 @@ export class SqlContentController {
             case MessageType.INVALID_COMMAND_ERROR:
             case MessageType.NO_VALID_COMMAND_ERROR:
             case MessageType.EXCEENDS_COMMAND_LIMIT_ERROR:
-              this.commandValid = false
+              this.dataModel.setCommandValid(this.commandType, false)
               this.addClassName(listItem, 'command-error')
               break
           }
@@ -425,21 +428,8 @@ export class SqlContentController {
     }
   }
 
-  public updateDownloadButtonStatus (): void {
-    const downloadButton = document.getElementById('download-button')
-    if (downloadButton != null) {
-      if (this.commandValid && this.textFromFileLoaded !== undefined) {
-        this.removeClassName(downloadButton, 'inactive')
-        this.addClassName(downloadButton, 'active')
-      } else {
-        this.removeClassName(downloadButton, 'active')
-        this.addClassName(downloadButton, 'inactive')
-      }
-    }
-  }
-
   public downloadXML (): void {
-    if (!this.commandValid) {
+    if (!this.dataModel.getCommandValid(this.commandType)) {
       return
     }
     const overlay = document.getElementById('overlay') as HTMLDivElement

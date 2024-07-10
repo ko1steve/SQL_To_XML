@@ -15,6 +15,7 @@
     "cross-env": "^7.0.3",
     "jschardet": "^3.1.2",
     "localforage": "^1.10.0",
+    "mini-signals": "^2.0.0",
     "process": "^0.11.10",
     "typescript-ioc": "^3.2.2",
     "typescript-map": "0.0.7"
