@@ -1,7 +1,8 @@
 import React from 'react'
 import ImportSqlButton from 'src/component/importSqlButton/importSqlButton'
+import SqlTypeTab from '../sqlTypeTab/SqlTypeTab'
 
-const TabContent: React.FC = () => {
+const SqlContent: React.FC = () => {
   return (
     <div className='col-8 container position-relative'>
       <div className='d-flex justify-content-right position-absolute end-0'>
@@ -11,14 +12,8 @@ const TabContent: React.FC = () => {
         </div>
       </div>
       <ul className='nav nav-tabs' id='commandTypeTabs' role='tablist'>
-        <li className='nav-item' role='presentation'>
-          <button className='nav-link active' id='dml-tab' data-bs-toggle='tab' data-bs-target='#dml' type='button'
-            role='tab' aria-controls='dml' aria-selected='true'>DML</button>
-        </li>
-        <li className='nav-item' role='presentation'>
-          <button className='nav-link' id='ddl-tab' data-bs-toggle='tab' data-bs-target='#ddl' type='button' role='tab'
-            aria-controls='ddl' aria-selected='false'>DDL</button>
-        </li>
+        <SqlTypeTab sqlType='DML' active={true} />
+        <SqlTypeTab sqlType='DDL' active={false} />
       </ul>
       <div className='tab-content mt-3' id='commandTypeTabsContent'>
         <div className='tab-pane fade show active' id='dml' role='tabpanel' aria-labelledby='dml-tab'>
@@ -33,4 +28,4 @@ const TabContent: React.FC = () => {
     </div>
   )
 }
-export default TabContent
+export default SqlContent

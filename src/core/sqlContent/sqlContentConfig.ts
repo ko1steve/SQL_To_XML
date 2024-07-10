@@ -1,7 +1,7 @@
 import { IHtmlElementConfig } from 'src/element/HtmlConfig'
 import { CommandType } from 'src/mainConfig'
 
-export class TabContentConfig implements ITabContentConfig {
+export class SqlContentConfig implements ISqlContentConfig {
   constructor (commandType: CommandType) {
     this.commandType = commandType
     this.replaceCommandType(this)
@@ -60,7 +60,7 @@ export class TabContentConfig implements ITabContentConfig {
   }
 }
 
-export interface ITabContentConfig {
+export interface ISqlContentConfig {
   commandType: CommandType;
   mainContainer: IMainContainerConfig
   groupContainer: IGroupContainerConfig

@@ -5,7 +5,7 @@ import React from 'react'
 import LoadOverlay from './component/loadOverlay/loadOverlay'
 import TopButton from './component/topButton/topButton'
 import Header from './component/header/header'
-import TabContent from './component/tabContent/tabContent'
+import SqlContent from './component/sqlContent/sqlContent'
 import Description from './component/description/description'
 
 const App: React.FC = () => {
@@ -14,7 +14,7 @@ const App: React.FC = () => {
       <div className='row container-fluid px-5 mt-100'>
         <Header />
         <Description />
-        <TabContent />
+        <SqlContent />
       </div>
       <TopButton />
       <LoadOverlay />

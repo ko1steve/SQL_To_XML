@@ -4,7 +4,7 @@ import getBinaryString from 'src/util/worker/getBinaryString'
 import jschardet from 'jschardet'
 import { Container } from 'typescript-ioc'
 import { DataModel } from 'src/model/dataModel'
-import { TabContentController } from 'src/component/tabContent/tabContentController'
+import { SqlContentController } from 'src/core/sqlContent/sqlContentController'
 
 const ImportSqlButton: React.FC = () => {
   const dataModel = Container.get(DataModel)
@@ -49,7 +49,7 @@ const ImportSqlButton: React.FC = () => {
             const tabContentController = dataModel.tabContentControllerMap.get(commandType)
             tabContentController.resetPageContent(text, file.name)
           } else {
-            const tabContentController = new TabContentController(commandType, text, file.name)
+            const tabContentController = new SqlContentController(commandType, text, file.name)
             dataModel.tabContentControllerMap.set(commandType, tabContentController)
           }
         }

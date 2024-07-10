@@ -1,10 +1,10 @@
 import { CommandType, GroupType, IGroupSetting, MainConfig } from 'src/mainConfig'
-import { IGroupContainerConfig, ITabContentConfig } from './tabContentConfig'
+import { IGroupContainerConfig, ISqlContentConfig } from './sqlContentConfig'
 import { CommandData, MessageType, ICommandDataDetail, StringBuilder } from 'src/element/CommandData'
 import { TSMap } from 'typescript-map'
 import localforage from 'localforage'
 
-export class TabContentController {
+export class SqlContentController {
   protected mainConfig: MainConfig = new MainConfig()
   protected commandType: CommandType = CommandType.NONE
   protected fileName: string
@@ -270,7 +270,7 @@ export class TabContentController {
   protected createPageContent (): Promise<void> {
     return new Promise<void>(resolve => {
       const mainContainer: HTMLDivElement = document.getElementById('main-container-' + this.commandType) as HTMLDivElement
-      const elementConfig: ITabContentConfig = this.mainConfig.tabContentConfigMap.get(this.commandType) as ITabContentConfig
+      const elementConfig: ISqlContentConfig = this.mainConfig.tabContentConfigMap.get(this.commandType) as ISqlContentConfig
       const contentContainer: HTMLDivElement = document.createElement('div') as HTMLDivElement
       contentContainer.id = elementConfig.mainContainer.contentContainer.id
       mainContainer.appendChild(contentContainer)
@@ -294,7 +294,7 @@ export class TabContentController {
     })
   }
 
-  protected createGroupContainer (groupType: GroupType, commands: CommandData[], parent: HTMLElement, elementConfig: ITabContentConfig): void {
+  protected createGroupContainer (groupType: GroupType, commands: CommandData[], parent: HTMLElement, elementConfig: ISqlContentConfig): void {
     const config: IGroupContainerConfig = elementConfig.groupContainer
 
     const groupContainer: HTMLDivElement = document.createElement('div')

@@ -1,4 +1,4 @@
-import { ITabContentConfig, TabContentConfig } from './component/tabContent/tabContentConfig'
+import { ISqlContentConfig, SqlContentConfig } from 'src/core/sqlContent/sqlContentConfig'
 import { MessageType } from 'src/element/CommandData'
 import { TSMap } from 'typescript-map'
 import { RegExpConig } from './config/regExpConfig'
@@ -9,7 +9,7 @@ export interface IMainConfig {
   singleCommandIndicator: string
   validCommandMap: TSMap<CommandType, TSMap<GroupType, TSMap<string, RegExp>>>
   invalidCommandMap: TSMap<CommandType, TSMap<GroupType, TSMap<string, RegExp>>>
-  tabContentConfigMap: TSMap<CommandType, ITabContentConfig>
+  tabContentConfigMap: TSMap<CommandType, ISqlContentConfig>
   messageMap: TSMap<MessageType, string>
   enableTrimCommand: boolean
   ddlComplexCommandStart: RegExp
@@ -112,12 +112,12 @@ export class MainConfig implements IMainConfig {
     ]
   ])
 
-  public tabContentConfigMap: TSMap<CommandType, ITabContentConfig> = new TSMap<CommandType, ITabContentConfig>([
+  public tabContentConfigMap: TSMap<CommandType, ISqlContentConfig> = new TSMap<CommandType, ISqlContentConfig>([
     [
-      CommandType.DML, new TabContentConfig(CommandType.DML)
+      CommandType.DML, new SqlContentConfig(CommandType.DML)
     ],
     [
-      CommandType.DDL, new TabContentConfig(CommandType.DDL)
+      CommandType.DDL, new SqlContentConfig(CommandType.DDL)
     ]
   ])
 
