@@ -1,4 +1,4 @@
-import { IHtmlElementConfig } from 'src/element/HtmlConfig'
+import { IHtmlElementConfig } from 'src/config/HtmlConfig'
 import { CommandType } from 'src/mainConfig'
 
 export class SqlContentConfig implements ISqlContentConfig {

@@ -1,28 +1,16 @@
 import React from 'react'
-import { CommandType } from 'src/mainConfig'
 import getBinaryString from 'src/util/worker/getBinaryString'
 import jschardet from 'jschardet'
 import { Container } from 'typescript-ioc'
 import { DataModel } from 'src/model/dataModel'
 import { SqlContentController } from 'src/core/sqlContent/sqlContentController'
 
-const ImportSqlButton: React.FC = () => {
-  const dataModel = Container.get(DataModel)
-
+export const ImportSqlButton: React.FC = () => {
   const handleOnChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (!event.target || !event.target.files || event.target.files.length === 0) {
       return
     }
     const file: File = event.target.files[0]
-    let commandType: CommandType = CommandType.NONE
-    Object.values(CommandType).forEach(type => {
-      if (type.toString() === event.target.dataset.sqlType) {
-        commandType = type
-      }
-    })
-    if (commandType === CommandType.NONE) {
-      return
-    }
     const overlay = document.getElementById('overlay') as HTMLDivElement
     overlay.style.display = 'flex'
 
@@ -34,6 +22,7 @@ const ImportSqlButton: React.FC = () => {
         //
       } else if (type === 'complete') {
         worker.terminate()
+        const dataModel = Container.get(DataModel)
 
         //* 偵測文字編碼
         const { binaryString } = data
@@ -45,12 +34,12 @@ const ImportSqlButton: React.FC = () => {
             return
           }
           const text = event.target.result as string
-          if (dataModel.tabContentControllerMap.has(commandType)) {
-            const tabContentController = dataModel.tabContentControllerMap.get(commandType)
+          if (dataModel.tabContentControllerMap.has(dataModel.currentTab)) {
+            const tabContentController = dataModel.tabContentControllerMap.get(dataModel.currentTab)
             tabContentController.resetPageContent(text, file.name)
           } else {
-            const tabContentController = new SqlContentController(commandType, text, file.name)
-            dataModel.tabContentControllerMap.set(commandType, tabContentController)
+            const tabContentController = new SqlContentController(dataModel.currentTab, text, file.name)
+            dataModel.tabContentControllerMap.set(dataModel.currentTab, tabContentController)
           }
         }
         //* 以偵測到的編碼讀取文字檔
@@ -71,5 +60,3 @@ const ImportSqlButton: React.FC = () => {
     </div>
   )
 }
-
-export default ImportSqlButton

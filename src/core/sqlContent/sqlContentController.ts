@@ -1,6 +1,6 @@
 import { CommandType, GroupType, IGroupSetting, MainConfig } from 'src/mainConfig'
 import { IGroupContainerConfig, ISqlContentConfig } from './sqlContentConfig'
-import { CommandData, MessageType, ICommandDataDetail, StringBuilder } from 'src/element/CommandData'
+import { CommandData, MessageType, ICommandDataDetail, StringBuilder } from 'src/config/CommandData'
 import { TSMap } from 'typescript-map'
 import localforage from 'localforage'
 

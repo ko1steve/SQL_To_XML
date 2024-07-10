@@ -1,6 +1,6 @@
 import React from 'react'
 
-const Header: React.FC = () => {
+export const Header: React.FC = () => {
   return (
     <div className='navbar navbar-dark bg-dark shadow-sm fixed-top'>
       <div className='container d-flex align-items-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none'>
@@ -17,5 +17,3 @@ const Header: React.FC = () => {
     </div>
   )
 }
-
-export default Header

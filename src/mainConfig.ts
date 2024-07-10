@@ -1,5 +1,5 @@
 import { ISqlContentConfig, SqlContentConfig } from 'src/core/sqlContent/sqlContentConfig'
-import { MessageType } from 'src/element/CommandData'
+import { MessageType } from 'src/config/CommandData'
 import { TSMap } from 'typescript-map'
 import { RegExpConig } from './config/regExpConfig'
 
