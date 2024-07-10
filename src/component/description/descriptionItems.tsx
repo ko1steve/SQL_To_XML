@@ -1,10 +1,10 @@
 import React from 'react'
 
-export interface ItemListProps {
-  items: string[];
+export interface IItemListProps {
+  items: string[]
 }
 
-const DescriptionItems: React.FC<ItemListProps> = ({ items }) => {
+const DescriptionItems: React.FC<IItemListProps> = ({ items }) => {
   return (
     <ul>
       {items.map((item, index) => (

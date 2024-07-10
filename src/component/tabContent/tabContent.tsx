@@ -1,13 +1,11 @@
 import React from 'react'
+import ImportSqlButton from 'src/component/importSqlButton/importSqlButton'
 
 const TabContent: React.FC = () => {
   return (
     <div className='col-8 container position-relative'>
       <div className='d-flex justify-content-right position-absolute end-0'>
-        <div className='upload-button-container'>
-          <label htmlFor='file-input-DML' className='file-input-label' id='file-input-label-DML'>Import SQL File</label>
-          <input type='file' accept='.sql' id='file-input-DML' className='file-input' data-sql-type='DML' />
-        </div>
+        <ImportSqlButton />
         <div className='download-button-container'>
           <button id='download-button'>Export as XML</button>
         </div>

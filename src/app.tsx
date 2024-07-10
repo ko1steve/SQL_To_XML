@@ -1,9 +1,11 @@
+import 'bootstrap/dist/css/bootstrap.css'
+import 'bootstrap/dist/js/bootstrap.bundle'
+import 'src/styles.css'
 import React from 'react'
 import LoadOverlay from './component/loadOverlay/loadOverlay'
 import TopButton from './component/topButton/topButton'
 import Header from './component/header/header'
 import TabContent from './component/tabContent/tabContent'
-import 'src/styles.css'
 import Description from './component/description/description'
 
 const App: React.FC = () => {

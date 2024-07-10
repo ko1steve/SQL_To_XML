@@ -8,7 +8,7 @@ const appDir = Path.dirname(__dirname)
 
 module.exports = {
   context: Path.join(appDir, 'src'),
-  entry: ['./main.tsx'],
+  entry: ['./index.tsx'],
   mode: 'none',
   module: {
     rules: [
@@ -72,9 +72,9 @@ module.exports = {
       file: Path.join(appDir, 'dist', 'index.html'),
       template: './index.html'
     })
-  ]
-  // optimization: {
-  //   minimize: true,
-  //   minimizer: [new TerserWebpackPlugin()]
-  // }
+  ],
+  optimization: {
+    minimize: true,
+    minimizer: [new TerserWebpackPlugin()]
+  }
 }

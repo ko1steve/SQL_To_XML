@@ -2,7 +2,7 @@
   "name": "sqltoxmlonline",
   "version": "1.0.0",
   "description": "The is the web to input .sql file and download as .xml file.",
-  "main": "src/main.ts",
+  "main": "src/index.tsx",
   "scripts": {
     "start": "cross-env NODE_ENV=production webpack-dev-server --open --config ./config/webpack.dev.ts",
     "release-dev": "cross-env NODE_ENV=production ts-node node_modules/webpack/bin/webpack.js --config config/webpack.dev.ts --progress",

@@ -1,4 +1,3 @@
-import { MainController } from './mainController'
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './app'
@@ -11,4 +10,3 @@ root.render(
     <App />
   </React.StrictMode>
 )
-const mainController = new MainController()
