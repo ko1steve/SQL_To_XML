@@ -1,8 +1,8 @@
 import React from 'react'
-import DescriptionItems from './descriptionItems'
+import { DescriptionItems } from './descriptionItems'
 import * as Content from './content.json'
 
-const Description: React.FC = () => {
+export const Description: React.FC = () => {
   const items = Content.items
   return (
     <div className='col-4 container' id='descript-container'>
@@ -15,5 +15,3 @@ const Description: React.FC = () => {
     </div>
   )
 }
-
-export default Description

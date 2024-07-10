@@ -1,6 +1,6 @@
 import React from 'react'
 
-const LoadOverlay: React.FC = () => {
+export const LoadOverlay: React.FC = () => {
   return (
     <div id='overlay'>
       <div id='overlay-text'>Loading...</div>
@@ -8,5 +8,3 @@ const LoadOverlay: React.FC = () => {
     </div>
   )
 }
-
-export default LoadOverlay
