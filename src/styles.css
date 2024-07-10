@@ -160,6 +160,7 @@
 
 .list-text {
   margin-top: 10px;
+  white-space: pre-wrap;
 }
 
 #top-button-container {
