@@ -1,7 +1,7 @@
 import { GroupType } from 'src/mainConfig'
 import { TSMap } from 'typescript-map'
 
-export const ALL_DDL_VALID_REGEXP: RegExp = /^(?:(?:(?:CREATE|DROP|ALTER)\s+(?:TABLE|INDEX|PROCEDURE|CONTEXT|MATERIALIZED\s+VIEW|SEQUENCE|SYNONYM|PUBLIC\s+SYNONYM|TRIGGER|DIRECTORY|VIEW|PUBLIC\s+DATABASE\s+LINK|TYPE|DATABASE\s+LINK)(\s+\S+\.\S+)?(?!\s+#))|(?:CREATE\s+OR\s+(?:REPLACE|ALTER)\s+(?:PROCEDURE|FUNCTION|PACKAGE|VIEW)(\s+\S+\.\S+)?(?!\s+#))|CREATE\s+OR\s+REPLACE.+VIEW\s+|TRUNCATE\s+TABLE\s+|EXEC\s+sys\.sp_addextendedproperty\s+@name=|COMMENT\s+ON\s+).+$/gmi
+export const ALL_DDL_VALID_REGEXP: RegExp = /^(?:(?:(?:CREATE|DROP|ALTER)\s+(?:TABLE|INDEX\s+\S+\s+ON|PROCEDURE|CONTEXT|MATERIALIZED\s+VIEW|SEQUENCE|SYNONYM|PUBLIC\s+SYNONYM|TRIGGER|DIRECTORY|VIEW|PUBLIC\s+DATABASE\s+LINK|TYPE|DATABASE\s+LINK)\s+(?:\S+\.\S+)?(?!(@|#|##)))|(?:CREATE\s+OR\s+(?:REPLACE|ALTER)\s+(?:PROCEDURE|FUNCTION|PACKAGE|VIEW)\s+(?:\S+\.\S+)?(?!(@|#|##)))|CREATE\s+OR\s+REPLACE.+VIEW\s+|TRUNCATE\s+TABLE\s+|EXEC\s+sys\.sp_addextendedproperty\s+@name=|COMMENT\s+ON\s+).+$/gmi
 export const ALL_DML_VALID_REGEXP: RegExp = /^(?:insert\s+into\s+(\S+\.\S+)?(?!(@|#|##))|select\s+(?:\52?|\S+)\s+into\s+(?!(@|#|##))(\s+.+|\S+\.\S+.*)\s+from\s+|update\s+\S+(\.\S+)?\s+set\s+|delete\s+).+$/gmi
 
 export interface IRegExpConfig {

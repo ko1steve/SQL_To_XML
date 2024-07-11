@@ -187,9 +187,6 @@ export class SqlContentController {
             const commands: CommandData[] = []
             let text: string = value as string
             if (!text) {
-              // localforage.setItem(groupName + '-command', commands).then(() => {
-              //   resolve()
-              // })
               return resolve()
             }
             const textLines = text.split('\r\n')
