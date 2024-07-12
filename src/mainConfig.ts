@@ -12,7 +12,8 @@ export interface IMainConfig {
   tabContentConfigMap: TSMap<CommandType, ISqlContentConfig>
   messageMap: TSMap<MessageType, string>
   enableTrimCommand: boolean
-  ddlComplexCommandStart: RegExp
+  ddlComplexCommandStartRegExp: RegExp
+  ddlComplexCommandEnds: string[]
   maxGroupCommandAmount: number
 }
 
@@ -141,7 +142,7 @@ export class MainConfig implements IMainConfig {
     ],
     [
       MessageType.INVALID_COMMAND_ERROR,
-      '{groupTitle}, index = {index}\n InvalidCommandError: 不允許使用"{command}"。請移除相關的語法。'
+      '{groupTitle}, index = {index}\n InvalidCommandError: 不允許使用 "{command}" 語法。請移除相關的語法。'
     ],
     [
       MessageType.NO_VALID_COMMAND_ERROR,
@@ -154,6 +155,7 @@ export class MainConfig implements IMainConfig {
   ])
 
   public enableTrimCommand: boolean = true
-  public ddlComplexCommandStart: RegExp = /^\s*(CREATE|ALTER|DROP)(\s+OR\s+REPLACE)?\s+(.*\s+)?(PROCEDURE|FUNCTION|TRIGGER|PACKAGE|VIEW)/
+  public ddlComplexCommandStartRegExp: RegExp = /^\s*(CREATE|ALTER|DROP)(\s+OR\s+REPLACE)?\s+(.*\s+)?(PROCEDURE|FUNCTION|TRIGGER|PACKAGE|VIEW)/
+  public ddlComplexCommandEnds: string[] = ['/', 'END', 'END;']
   public maxGroupCommandAmount: number = 20000
 }

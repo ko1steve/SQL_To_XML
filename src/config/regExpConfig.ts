@@ -47,7 +47,7 @@ export class RegExpConig implements IRegExpConfig {
       //* 指定每種 DDL 語法
       GroupType.MainSQL, new TSMap<string, RegExp>([
         [
-          'DDL 語法', ALL_DDL_VALID_REGEXP
+          'DDL', ALL_DDL_VALID_REGEXP
         ]
       ])
     ]
@@ -74,7 +74,7 @@ export class RegExpConig implements IRegExpConfig {
       //* 指定「Insert into」、「Update set」、「Delete」、「Select into」
       GroupType.MainSQL, new TSMap<string, RegExp>([
         [
-          'DML 語法', ALL_DML_VALID_REGEXP
+          'DML', ALL_DML_VALID_REGEXP
         ]
       ])
     ]
@@ -84,10 +84,10 @@ export class RegExpConig implements IRegExpConfig {
     [
       GroupType.PreSQL, new TSMap<string, RegExp>([
         [
-          'DDL 語法', ALL_DDL_VALID_REGEXP
+          'DDL', ALL_DDL_VALID_REGEXP
         ],
         [
-          'DML 語法', ALL_DML_VALID_REGEXP
+          'DML', ALL_DML_VALID_REGEXP
         ],
         [
           'SELECT', SELECT_VALID_REGEXP
@@ -100,10 +100,10 @@ export class RegExpConig implements IRegExpConfig {
     [
       GroupType.PreProdSQL, new TSMap<string, RegExp>([
         [
-          'DDL 語法', ALL_DDL_VALID_REGEXP
+          'DDL', ALL_DDL_VALID_REGEXP
         ],
         [
-          'DML 語法', ALL_DML_VALID_REGEXP
+          'DML', ALL_DML_VALID_REGEXP
         ],
         [
           'SELECT', SELECT_VALID_REGEXP
@@ -116,10 +116,10 @@ export class RegExpConig implements IRegExpConfig {
     [
       GroupType.PostSQL, new TSMap<string, RegExp>([
         [
-          'DDL 語法', ALL_DDL_VALID_REGEXP
+          'DDL', ALL_DDL_VALID_REGEXP
         ],
         [
-          'DML 語法', ALL_DML_VALID_REGEXP
+          'DML', ALL_DML_VALID_REGEXP
         ],
         [
           'SELECT', SELECT_VALID_REGEXP
@@ -135,10 +135,10 @@ export class RegExpConig implements IRegExpConfig {
     [
       GroupType.PreSQL, new TSMap<string, RegExp>([
         [
-          'DDL 語法', ALL_DDL_VALID_REGEXP
+          'DDL', ALL_DDL_VALID_REGEXP
         ],
         [
-          'DML 語法', ALL_DML_VALID_REGEXP
+          'DML', ALL_DML_VALID_REGEXP
         ],
         [
           'SELECT', SELECT_VALID_REGEXP
@@ -151,10 +151,10 @@ export class RegExpConig implements IRegExpConfig {
     [
       GroupType.PreProdSQL, new TSMap<string, RegExp>([
         [
-          'DDL 語法', ALL_DDL_VALID_REGEXP
+          'DDL', ALL_DDL_VALID_REGEXP
         ],
         [
-          'DML 語法', ALL_DML_VALID_REGEXP
+          'DML', ALL_DML_VALID_REGEXP
         ],
         [
           'SELECT', SELECT_VALID_REGEXP
@@ -167,10 +167,10 @@ export class RegExpConig implements IRegExpConfig {
     [
       GroupType.PostSQL, new TSMap<string, RegExp>([
         [
-          'DDL 語法', ALL_DDL_VALID_REGEXP
+          'DDL', ALL_DDL_VALID_REGEXP
         ],
         [
-          'DML 語法', ALL_DML_VALID_REGEXP
+          'DML', ALL_DML_VALID_REGEXP
         ],
         [
           'SELECT', SELECT_VALID_REGEXP

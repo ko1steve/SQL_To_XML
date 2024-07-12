@@ -5,6 +5,7 @@
     "SQL檔案內容需至少有以下的內容才視為完整的SQL檔案\n(1) DML須至少有Count語法、異動前/後語法、異動語法\n(2) DDL須至少有異動語法",
     "DML語法結尾的分號(;)將會被 Dimensions 自動註解化",
     "不能使用單行的 GO, COMMIT 語法，也不能使用純註解或只含空白字元的字串",
-    "不得在 DDL 指令內部以外的情境使用 GO, COMMIT 語法。若是有以上語法，則會在 Dimensions 自動被註解化"
+    "若在 DDL 指令內部以外的情境使用 GO, COMMIT 語法,Dimensions 將會把該指令註解化",
+    "不得在 DDL 指令內部以外的情境使用 GRANT, REVOKE 語法"
   ]
 }
