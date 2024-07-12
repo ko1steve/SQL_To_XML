@@ -11,12 +11,11 @@ export class SqlContentController {
   protected dataModel: DataModel
   protected mainConfig: MainConfig = new MainConfig()
   protected commandType: CommandType = CommandType.NONE
-  protected fileName: string
   protected textFromFileLoaded: string
 
   constructor (commandType: CommandType, textFromFileLoaded: string, fileName: string) {
     this.dataModel = Container.get(DataModel)
-    this.fileName = fileName
+    this.dataModel.fileName = fileName
     this.commandType = commandType
     this.textFromFileLoaded = textFromFileLoaded
     this.dataModel.setCommandValid(commandType, true)
@@ -57,7 +56,7 @@ export class SqlContentController {
       const contentContainer: HTMLDivElement = document.getElementById('content-container-' + this.commandType) as HTMLDivElement
       mainContainer.removeChild(contentContainer)
       this.dataModel.setCommandValid(this.commandType, true)
-      this.fileName = fileName
+      this.dataModel.fileName = fileName
       this.textFromFileLoaded = textFromFileLoaded
       this.initialize()
     })
@@ -432,65 +431,6 @@ export class SqlContentController {
         container.appendChild(paragraph)
       })
     }
-  }
-
-  public downloadXML (): void {
-    if (!this.dataModel.getCommandValid(this.commandType)) {
-      return
-    }
-    const overlay = document.getElementById('overlay') as HTMLDivElement
-    overlay.style.display = 'flex'
-
-    const xmlContentSB = new StringBuilder()
-    xmlContentSB.append('<?xml version="1.0" encoding="UTF-8"?>')
-    xmlContentSB.append('<SQLBodys>')
-
-    const promiseList: Promise<void>[] = []
-    Object.values(GroupType).forEach(groupName => {
-      const promise = new Promise<void>(resolve => {
-        localforage.getItem(groupName + '-command').then((data) => {
-          xmlContentSB.append('  <' + groupName + '>')
-          if (!data) {
-            xmlContentSB.append('  </' + groupName + '>')
-            return resolve()
-          }
-          const commands = data as CommandData[]
-          commands.forEach((command, index) => {
-            let sqlCommandStr = '    <SQL sql_idx="' + (index + 1) + '">'
-            //* 需透過編碼轉換 XML 跳脫字元
-            sqlCommandStr += this.escapeXml(command.content) + '</SQL>'
-            xmlContentSB.append(sqlCommandStr)
-          })
-          xmlContentSB.append('  </' + groupName + '>')
-          resolve()
-        })
-      })
-      promiseList.push(promise)
-    })
-    Promise.all(promiseList).then(() => {
-      xmlContentSB.append('</SQLBodys>')
-      const blob = new Blob([xmlContentSB.toString('\r\n')], { type: 'text/xml' })
-      const a = document.createElement('a')
-      a.href = URL.createObjectURL(blob)
-      a.download = this.fileName.replace(/.sql$/, '.xml')
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-      overlay.style.display = 'none'
-    })
-  }
-
-  protected escapeXml (unsafe: string): string {
-    return unsafe.replace(/[<>&'"]/g, function (c) {
-      switch (c) {
-        case '<': return '&lt;'
-        case '>': return '&gt;'
-        case '&': return '&amp;'
-        case '\'': return '&apos;'
-        case '"': return '&quot;'
-        default: return c
-      }
-    })
   }
 
   protected addClassName (element: HTMLElement, ...classNames: string[]): void {
