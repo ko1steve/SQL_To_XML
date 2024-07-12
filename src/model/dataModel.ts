@@ -12,6 +12,16 @@ export class DataModel {
     return this._tabContentControllerMap
   }
 
+  private _fileName: string
+
+  public get fileName (): string {
+    return this._fileName
+  }
+
+  public set fileName (value: string) {
+    this._fileName = value
+  }
+
   private _currentTab: CommandType
 
   public get currentTab (): CommandType {
@@ -37,6 +47,7 @@ export class DataModel {
     ])
     this.onTabChangeSignal = new MiniSignal()
     this.onCommandValidChangeSignal = new MiniSignal()
+    this._fileName = ''
   }
 
   public getCommandValid (commandType: CommandType): boolean {
