@@ -119,11 +119,9 @@ export class SqlContentController {
     })
   }
 
-  protected getCommandDataDetail (commandText: string, groupName: GroupType): ICommandDataDetail {
-    const detail: ICommandDataDetail = {
-      messageType: MessageType.NONE,
-      commands: []
-    }
+  protected getCommandDataDetail (commandText: string, groupName: GroupType): ICommandDataDetail[] {
+    const details: ICommandDataDetail[] = []
+
     const cleanedTextlines = commandText.split('\r\n')
       .map(line => line.trim())
 
@@ -133,8 +131,10 @@ export class SqlContentController {
     const iterable: IterableIterator<RegExpMatchArray> = upperText.matchAll(ALL_VALID_REGEXP)
     const count = Array.from(iterable).length
     if (count > 1) {
-      detail.messageType = MessageType.EXCEENDS_COMMAND_LIMIT_ERROR
-      detail.commands.push('')
+      details.push({
+        messageType: MessageType.EXCEENDS_COMMAND_LIMIT_ERROR,
+        commands: ['']
+      })
     }
 
     //* 檢查指令是否至少包含任何一個合規的語法
@@ -149,14 +149,18 @@ export class SqlContentController {
             isMatch = true
           }
           if (count > 1) {
-            detail.messageType = MessageType.EXCEENDS_COMMAND_LIMIT_ERROR
-            detail.commands.push('')
+            details.push({
+              messageType: MessageType.EXCEENDS_COMMAND_LIMIT_ERROR,
+              commands: ['']
+            })
           }
         })
         //* 沒有匹配到任何語法，則視為錯誤
         if (!isMatch) {
-          detail.messageType = MessageType.NO_VALID_COMMAND_ERROR
-          detail.commands.push('')
+          details.push({
+            messageType: MessageType.NO_VALID_COMMAND_ERROR,
+            commands: ['']
+          })
         }
       }
     }
@@ -169,27 +173,31 @@ export class SqlContentController {
         invalidCommandMap.forEach((regExp, commandType) => {
           //* 若抓到該 Group 禁止的任一非法語法
           if (upperText.search(regExp) > -1) {
-            detail.messageType = MessageType.INVALID_COMMAND_ERROR
-            detail.commands.push(commandType!)
+            details.push({
+              messageType: MessageType.INVALID_COMMAND_ERROR,
+              commands: [commandType!]
+            })
           }
         })
       }
     }
 
     //* 檢查 GRANT、REVOKE 等語法是否出現在 DDL 複雜語法之外
-    if (detail.commands.length === 0) {
+    if (details.length === 0) {
       const commandRegExp: RegExp = /^(?:grant\s+.\S.+to\s+|revoke\s+\S.+from\s+)\S.+$/
       for (let i: number = cleanedTextlines.length - 1; i >= 0; i--) {
         //* 若抓到 DDL 複查語法的結束符號，跳過檢查
         if (this.mainConfig.ddlComplexCommandEnds.includes(cleanedTextlines[i].trim())) {
           break
         } else if (cleanedTextlines[i].search(commandRegExp)) {
-          detail.messageType = MessageType.INVALID_COMMAND_ERROR
-          detail.commands.push('GRANT / REVOKE')
+          details.push({
+            messageType: MessageType.INVALID_COMMAND_ERROR,
+            commands: ['GRANT / REVOKE']
+          })
         }
       }
     }
-    return detail
+    return details
   }
 
   /**
@@ -212,7 +220,7 @@ export class SqlContentController {
             const textLines = text.split('\r\n')
             text = ''
             let commadTextSB: StringBuilder | null = null
-            let commandDataDetail: ICommandDataDetail | null = null
+            let commandDataDetails: ICommandDataDetail[] = []
 
             for (let i = 0; i < textLines.length; i++) {
               if (!textLines[i].trim().startsWith(this.mainConfig.singleCommandIndicator)) {
@@ -220,7 +228,6 @@ export class SqlContentController {
               }
 
               commadTextSB = new StringBuilder()
-              commandDataDetail = { messageType: MessageType.NONE, commands: [] }
 
               const newTextLine = textLines[i].replace(this.mainConfig.singleCommandIndicator, '').trim()
               if (newTextLine.length !== 0) {
@@ -232,7 +239,7 @@ export class SqlContentController {
                 if (textLines[j].trim().startsWith(this.mainConfig.singleCommandIndicator)) {
                   const commandText = commadTextSB.toString('\r\n')
                   if (!this.mainConfig.enableTrimCommand || commandText.length > 0) {
-                    commandDataDetail = this.getCommandDataDetail(commandText, groupName!)
+                    commandDataDetails.concat(this.getCommandDataDetail(commandText, groupName!))
                     commands.push(new CommandData(commandText, commandDataDetail))
                     console.log('[' + groupName + '] :' + commands.length)
                   }
@@ -249,7 +256,7 @@ export class SqlContentController {
               if (j === textLines.length) {
                 const commandText = commadTextSB.toString('\r\n')
                 if (commandText.length > 0) {
-                  commandDataDetail = this.getCommandDataDetail(commandText, groupName!)
+                  commandDataDetails.concat(this.getCommandDataDetail(commandText, groupName!))
                   commands.push(new CommandData(commandText, commandDataDetail))
                   console.log('[' + groupName + '] :' + commands.length)
                 }
