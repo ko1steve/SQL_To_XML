@@ -124,12 +124,10 @@ export class SqlContentController {
       messageType: MessageType.NONE,
       commands: []
     }
-    const cleanedText = commandText.split('\r\n')
+    const cleanedTextlines = commandText.split('\r\n')
       .map(line => line.trim())
-      .filter(line => !line.match(/^[\s\t]*$|^[\s\t]*--/))
-      .join('\r\n')
 
-    const upperText = cleanedText.toUpperCase()
+    const upperText = cleanedTextlines.join('\r\n').toUpperCase()
 
     //* 檢查指令是否超過一個語法
     const iterable: IterableIterator<RegExpMatchArray> = upperText.matchAll(ALL_VALID_REGEXP)
@@ -175,6 +173,20 @@ export class SqlContentController {
             detail.commands.push(commandType!)
           }
         })
+      }
+    }
+
+    //* 檢查 GRANT、REVOKE 等語法是否出現在 DDL 複雜語法之外
+    if (detail.commands.length === 0) {
+      const commandRegExp: RegExp = /^(?:grant\s+.\S.+to\s+|revoke\s+\S.+from\s+)\S.+$/
+      for (let i: number = cleanedTextlines.length - 1; i >= 0; i--) {
+        //* 若抓到 DDL 複查語法的結束符號，跳過檢查
+        if (this.mainConfig.ddlComplexCommandEnds.includes(cleanedTextlines[i].trim())) {
+          break
+        } else if (cleanedTextlines[i].search(commandRegExp)) {
+          detail.messageType = MessageType.INVALID_COMMAND_ERROR
+          detail.commands.push('GRANT / REVOKE')
+        }
       }
     }
     return detail
