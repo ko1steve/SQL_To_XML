@@ -3,6 +3,7 @@ import { IGroupContainerConfig, ITabContentConfig } from './tabContentConfig'
 import { CommandData, MessageType, ICommandDataDetail, StringBuilder } from 'src/element/CommandData'
 import { TSMap } from 'typescript-map'
 import localforage from 'localforage'
+import { ALL_VALID_REGEXP } from 'src/config/regExpConfig'
 
 export class TabContentController {
   protected mainConfig: MainConfig = new MainConfig()
@@ -127,6 +128,14 @@ export class TabContentController {
       .join('\r\n')
 
     const upperText = cleanedText.toUpperCase()
+
+    //* 檢查指令是否超過一個語法
+    const iterable: IterableIterator<RegExpMatchArray> = upperText.matchAll(ALL_VALID_REGEXP)
+    const count = Array.from(iterable).length
+    if (count > 1) {
+      detail.messageType = MessageType.EXCEENDS_COMMAND_LIMIT_ERROR
+      detail.commands.push('')
+    }
 
     //* 檢查指令是否至少包含任何一個合規的語法
     if (this.mainConfig.validCommandMap.has(this.commandType)) {
