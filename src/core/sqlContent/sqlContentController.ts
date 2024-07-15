@@ -127,6 +127,8 @@ export class SqlContentController {
 
     const upperText = cleanedTextlines.join('\r\n').toUpperCase()
 
+    let matchError: boolean = false
+
     //* 檢查指令是否超過一個語法
     const iterable: IterableIterator<RegExpMatchArray> = upperText.matchAll(ALL_VALID_REGEXP)
     const count = Array.from(iterable).length
@@ -135,35 +137,29 @@ export class SqlContentController {
         messageType: MessageType.EXCEENDS_COMMAND_LIMIT_ERROR,
         command: ''
       })
+      matchError = true
+    }
+    if (matchError) {
+      return details
     }
 
-    //* 檢查指令是否至少包含任何一個合規的語法
-    if (this.mainConfig.validCommandMap.has(this.commandType)) {
-      const groupValidCommandMap: TSMap<string, RegExp> = this.mainConfig.validCommandMap.get(this.commandType)?.get(groupName)
-      if (groupValidCommandMap) {
-        let isMatch: boolean = false
-        groupValidCommandMap.values().forEach(regExp => {
-          const iterable: IterableIterator<RegExpMatchArray> = upperText.matchAll(regExp)
-          const count = Array.from(iterable).length
-          if (count > 0) {
-            isMatch = true
-          }
-          if (count > 1) {
-            details.push({
-              messageType: MessageType.EXCEENDS_COMMAND_LIMIT_ERROR,
-              command: ''
-            })
-          }
+    //* 檢查 GRANT、REVOKE 等語法是否出現在 DDL 複雜語法之外
+    for (let i: number = cleanedTextlines.length - 1; i >= 0; i--) {
+      //* 若抓到 DDL 複查語法的結束符號，跳過檢查
+      if (this.mainConfig.ddlComplexCommandEnds.includes(cleanedTextlines[i])) {
+        break
+      } else if (cleanedTextlines[i].search(this.mainConfig.grantRevokeCommand.regExp) > -1) {
+        details.push({
+          messageType: MessageType.INVALID_COMMAND_ERROR,
+          command: this.mainConfig.grantRevokeCommand.command
         })
-        //* 沒有匹配到任何語法，則視為錯誤
-        if (!isMatch) {
-          details.push({
-            messageType: MessageType.NO_VALID_COMMAND_ERROR,
-            command: ''
-          })
-        }
+        matchError = true
       }
     }
+    if (matchError) {
+      return details
+    }
+
     //* 檢查指令是否包含不合規的語法
     if (this.mainConfig.invalidCommandMap.has(this.commandType)) {
       const groupInvalidCommandMap: TSMap<GroupType, TSMap<string, RegExp>> = this.mainConfig.invalidCommandMap.get(this.commandType)
@@ -177,21 +173,34 @@ export class SqlContentController {
               messageType: MessageType.INVALID_COMMAND_ERROR,
               command: commandType!
             })
+            matchError = true
           }
         })
       }
     }
+    if (matchError) {
+      return details
+    }
 
-    //* 檢查 GRANT、REVOKE 等語法是否出現在 DDL 複雜語法之外
-    for (let i: number = cleanedTextlines.length - 1; i >= 0; i--) {
-      //* 若抓到 DDL 複查語法的結束符號，跳過檢查
-      if (this.mainConfig.ddlComplexCommandEnds.includes(cleanedTextlines[i])) {
-        break
-      } else if (cleanedTextlines[i].search(this.mainConfig.grantRevokeCommand.regExp) > -1) {
-        details.push({
-          messageType: MessageType.INVALID_COMMAND_ERROR,
-          command: this.mainConfig.grantRevokeCommand.command
+    //* 檢查指令是否至少包含任何一個合規的語法
+    if (this.mainConfig.validCommandMap.has(this.commandType)) {
+      const groupValidCommandMap: TSMap<string, RegExp> = this.mainConfig.validCommandMap.get(this.commandType)?.get(groupName)
+      if (groupValidCommandMap) {
+        let isMatch: boolean = false
+        groupValidCommandMap.values().forEach(regExp => {
+          const iterable: IterableIterator<RegExpMatchArray> = upperText.matchAll(regExp)
+          const count = Array.from(iterable).length
+          if (count > 0) {
+            isMatch = true
+          }
         })
+        //* 沒有匹配到任何語法，則視為錯誤
+        if (!isMatch) {
+          details.push({
+            messageType: MessageType.NO_VALID_COMMAND_ERROR,
+            command: ''
+          })
+        }
       }
     }
     return details
