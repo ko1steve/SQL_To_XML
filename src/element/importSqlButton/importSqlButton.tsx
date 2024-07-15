@@ -47,7 +47,7 @@ export const ImportSqlButton: React.FC = () => {
         textReader.readAsText(file, encoding)
       }
     }
-    worker.postMessage(file.slice(0, 1024))
+    worker.postMessage(file.slice(0, 4096))
 
     event.target.files = null
     event.target.value = ''
