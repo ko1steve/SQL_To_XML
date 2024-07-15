@@ -133,7 +133,7 @@ export class SqlContentController {
     if (count > 1) {
       details.push({
         messageType: MessageType.EXCEENDS_COMMAND_LIMIT_ERROR,
-        commands: ['']
+        command: ''
       })
     }
 
@@ -151,7 +151,7 @@ export class SqlContentController {
           if (count > 1) {
             details.push({
               messageType: MessageType.EXCEENDS_COMMAND_LIMIT_ERROR,
-              commands: ['']
+              command: ''
             })
           }
         })
@@ -159,7 +159,7 @@ export class SqlContentController {
         if (!isMatch) {
           details.push({
             messageType: MessageType.NO_VALID_COMMAND_ERROR,
-            commands: ['']
+            command: ''
           })
         }
       }
@@ -175,7 +175,7 @@ export class SqlContentController {
           if (upperText.search(regExp) > -1) {
             details.push({
               messageType: MessageType.INVALID_COMMAND_ERROR,
-              commands: [commandType!]
+              command: commandType!
             })
           }
         })
@@ -219,8 +219,8 @@ export class SqlContentController {
             }
             const textLines = text.split('\r\n')
             text = ''
+
             let commadTextSB: StringBuilder | null = null
-            let commandDataDetails: ICommandDataDetail[] = []
 
             for (let i = 0; i < textLines.length; i++) {
               if (!textLines[i].trim().startsWith(this.mainConfig.singleCommandIndicator)) {
@@ -228,6 +228,7 @@ export class SqlContentController {
               }
 
               commadTextSB = new StringBuilder()
+              const commandDataDetails: ICommandDataDetail[] = []
 
               const newTextLine = textLines[i].replace(this.mainConfig.singleCommandIndicator, '').trim()
               if (newTextLine.length !== 0) {
@@ -239,8 +240,8 @@ export class SqlContentController {
                 if (textLines[j].trim().startsWith(this.mainConfig.singleCommandIndicator)) {
                   const commandText = commadTextSB.toString('\r\n')
                   if (!this.mainConfig.enableTrimCommand || commandText.length > 0) {
-                    commandDataDetails.concat(this.getCommandDataDetail(commandText, groupName!))
-                    commands.push(new CommandData(commandText, commandDataDetail))
+                    commandDataDetails.push(...this.getCommandDataDetail(commandText, groupName!))
+                    commands.push(new CommandData(commandText, commandDataDetails))
                     console.log('[' + groupName + '] :' + commands.length)
                   }
                   i = j - 1 // Continue from next line
@@ -256,8 +257,8 @@ export class SqlContentController {
               if (j === textLines.length) {
                 const commandText = commadTextSB.toString('\r\n')
                 if (commandText.length > 0) {
-                  commandDataDetails.concat(this.getCommandDataDetail(commandText, groupName!))
-                  commands.push(new CommandData(commandText, commandDataDetail))
+                  commandDataDetails.push(...this.getCommandDataDetail(commandText, groupName!))
+                  commands.push(new CommandData(commandText, commandDataDetails))
                   console.log('[' + groupName + '] :' + commands.length)
                 }
                 break
@@ -265,7 +266,6 @@ export class SqlContentController {
             }
             if (commands.length > 0) {
               localforage.setItem(groupName + '-command', commands).then(() => {
-                // textLines = []
                 resolve()
               })
             } else {
@@ -381,7 +381,7 @@ export class SqlContentController {
 
       commands.forEach((command: CommandData, index: number) => {
         let showCommand = true
-        if (command.detail.messageType !== MessageType.NONE) {
+        if (command.details.length > 0) {
           this.appendMessage(command, groupType, index, config)
         } else if (commands.length >= this.mainConfig.maxGroupCommandAmount) {
           showCommand = false
@@ -410,14 +410,9 @@ export class SqlContentController {
           })
           listItem.appendChild(paragraph)
 
-          switch (command.detail.messageType) {
-            case MessageType.CONTENT_NOT_FOUND_ERROR:
-            case MessageType.INVALID_COMMAND_ERROR:
-            case MessageType.NO_VALID_COMMAND_ERROR:
-            case MessageType.EXCEENDS_COMMAND_LIMIT_ERROR:
-              this.dataModel.setCommandValid(this.commandType, false)
-              this.addClassName(listItem, 'command-error')
-              break
+          if (command.details.length > 0) {
+            this.dataModel.setCommandValid(this.commandType, false)
+            this.addClassName(listItem, 'command-error')
           }
         }
       })
@@ -428,17 +423,17 @@ export class SqlContentController {
   }
 
   protected appendMessage (command: CommandData, groupType: GroupType, index: number, config: IGroupContainerConfig): void {
-    if (command.detail !== undefined) {
+    if (command.details.length > 0) {
       let container: HTMLDivElement
       const paragraph: HTMLSpanElement = document.createElement('p')
-      command.detail.commands.forEach(e => {
-        let message: string = this.mainConfig.messageMap.get(command.detail.messageType)
+      command.details.forEach(detail => {
+        let message: string = this.mainConfig.messageMap.get(detail.messageType)
         const groupTitle = this.mainConfig.groupSettingMap.get(groupType).title
         message = message.replace('{groupTitle}', groupTitle)
         message = message.replace('{index}', (index + 1).toString())
-        message = message.replace('{command}', e)
+        message = message.replace('{command}', detail.command)
         paragraph.innerText = message
-        switch (command.detail.messageType) {
+        switch (detail.messageType) {
           case MessageType.INVALID_COMMAND_ERROR:
           case MessageType.NO_VALID_COMMAND_ERROR:
           case MessageType.EXCEENDS_COMMAND_LIMIT_ERROR:

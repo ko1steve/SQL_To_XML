@@ -8,21 +8,21 @@ export enum MessageType {
 
 export interface ICommandData {
   content: string
-  detail: ICommandDataDetail
+  details: ICommandDataDetail[]
 }
 
 export interface ICommandDataDetail {
   messageType: MessageType
-  commands: string[]
+  command: string
 }
 
 export class CommandData implements ICommandData {
   public content: string
-  public detail: ICommandDataDetail
+  public details: ICommandDataDetail[]
 
-  constructor (content: string, detail: ICommandDataDetail) {
+  constructor (content: string, details: ICommandDataDetail[]) {
     this.content = content
-    this.detail = detail
+    this.details = details
   }
 }
 
