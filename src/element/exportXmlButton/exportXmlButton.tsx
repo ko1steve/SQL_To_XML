@@ -1,6 +1,6 @@
 import localforage from 'localforage'
 import React, { useEffect, useState } from 'react'
-import { CommandData, StringBuilder } from 'src/config/CommandData'
+import { CommandData, StringBuilder } from 'src/config/commandData'
 import { CommandType, GroupType } from 'src/mainConfig'
 import { DataModel } from 'src/model/dataModel'
 import { Container } from 'typescript-ioc'
