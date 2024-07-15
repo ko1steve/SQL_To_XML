@@ -36,7 +36,7 @@ export const ImportSqlButton: React.FC = () => {
           const text = event.target.result as string
           if (dataModel.tabContentControllerMap.has(dataModel.currentTab)) {
             const tabContentController = dataModel.tabContentControllerMap.get(dataModel.currentTab)
-            tabContentController.resetPageContent(text, file.name)
+            tabContentController.updateNewPageContent(text, file.name)
           } else {
             const tabContentController = new SqlContentController(dataModel.currentTab, text, file.name)
             dataModel.tabContentControllerMap.set(dataModel.currentTab, tabContentController)

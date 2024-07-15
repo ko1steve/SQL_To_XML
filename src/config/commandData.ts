@@ -28,6 +28,11 @@ export class CommandData implements ICommandData {
 
 export class StringBuilder {
   protected _strings: string[]
+
+  public get strings (): string[] {
+    return this._strings
+  }
+
   constructor () {
     this._strings = []
   }
