@@ -14,6 +14,7 @@ export interface IMainConfig {
   enableTrimCommand: boolean
   ddlComplexCommandStartRegExp: RegExp
   ddlComplexCommandEnds: string[]
+  grantRevokeCommand: { regExp: RegExp, command: string }
   maxGroupCommandAmount: number
 }
 
@@ -155,7 +156,15 @@ export class MainConfig implements IMainConfig {
   ])
 
   public enableTrimCommand: boolean = true
+
   public ddlComplexCommandStartRegExp: RegExp = /^\s*(CREATE|ALTER|DROP)(\s+OR\s+REPLACE)?\s+(.*\s+)?(PROCEDURE|FUNCTION|TRIGGER|PACKAGE|VIEW)/
+
   public ddlComplexCommandEnds: string[] = ['/', 'END', 'END;']
+
+  public grantRevokeCommand: { regExp: RegExp, command: string } = {
+    regExp: /^(?:grant\s+.\S.+to\s+|revoke\s+\S.+from\s+)\S.+$/gmi,
+    command: 'GRANT / REVOKE'
+  }
+
   public maxGroupCommandAmount: number = 20000
 }

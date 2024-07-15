@@ -183,18 +183,15 @@ export class SqlContentController {
     }
 
     //* 檢查 GRANT、REVOKE 等語法是否出現在 DDL 複雜語法之外
-    if (details.length === 0) {
-      const commandRegExp: RegExp = /^(?:grant\s+.\S.+to\s+|revoke\s+\S.+from\s+)\S.+$/
-      for (let i: number = cleanedTextlines.length - 1; i >= 0; i--) {
-        //* 若抓到 DDL 複查語法的結束符號，跳過檢查
-        if (this.mainConfig.ddlComplexCommandEnds.includes(cleanedTextlines[i].trim())) {
-          break
-        } else if (cleanedTextlines[i].search(commandRegExp)) {
-          details.push({
-            messageType: MessageType.INVALID_COMMAND_ERROR,
-            commands: ['GRANT / REVOKE']
-          })
-        }
+    for (let i: number = cleanedTextlines.length - 1; i >= 0; i--) {
+      //* 若抓到 DDL 複查語法的結束符號，跳過檢查
+      if (this.mainConfig.ddlComplexCommandEnds.includes(cleanedTextlines[i])) {
+        break
+      } else if (cleanedTextlines[i].search(this.mainConfig.grantRevokeCommand.regExp) > -1) {
+        details.push({
+          messageType: MessageType.INVALID_COMMAND_ERROR,
+          command: this.mainConfig.grantRevokeCommand.command
+        })
       }
     }
     return details
