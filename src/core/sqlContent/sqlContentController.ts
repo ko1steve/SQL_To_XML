@@ -1,6 +1,6 @@
 import { CommandType, GroupType, IGroupSetting, MainConfig } from 'src/mainConfig'
 import { IGroupContainerConfig, ISqlContentConfig } from './sqlContentConfig'
-import { CommandData, MessageType, ICommandDataDetail, StringBuilder } from 'src/config/CommandData'
+import { CommandData, MessageType, ICommandDataDetail, StringBuilder } from 'src/config/commandData'
 import { TSMap } from 'typescript-map'
 import localforage from 'localforage'
 import { Container } from 'typescript-ioc'
@@ -32,25 +32,17 @@ export class SqlContentController {
   }
 
   protected initialize (): void {
-    this.getCommandGroup().then(() => {
+    this.transTextToCommand().then(() => {
       this.createPageContent().then(() => {
-        const overlay = document.getElementById('overlay') as HTMLDivElement
-        overlay.style.display = 'none'
-      })
-    })
-  }
-
-  protected getCommandGroup (): Promise<void> {
-    return new Promise(resolve => {
-      this.storageTextGroup().then(() => {
-        this.getCommandGroupMap().then(() => {
-          resolve()
+        this.resetLocalForge().then(() => {
+          const overlay = document.getElementById('overlay') as HTMLDivElement
+          overlay.style.display = 'none'
         })
       })
     })
   }
 
-  public resetPageContent (textFromFileLoaded: string, fileName: string): void {
+  public updateNewPageContent (textFromFileLoaded: string, fileName: string): void {
     this.resetLocalForge().then(() => {
       const mainContainer: HTMLDivElement = document.getElementById('main-container-' + this.commandType) as HTMLDivElement
       const contentContainer: HTMLDivElement = document.getElementById('content-container-' + this.commandType) as HTMLDivElement
@@ -70,7 +62,7 @@ export class SqlContentController {
     })
   }
 
-  protected storageTextGroup (): Promise<void> {
+  protected transTextToCommand (): Promise<void> {
     return new Promise(resolve => {
       const promiseList: Promise<void>[] = []
       const textLines: string[] = this.textFromFileLoaded.split('\r\n')
@@ -84,45 +76,39 @@ export class SqlContentController {
           continue
         }
         const searchEndArr: string[] = this.mainConfig.groupSettingMap.get(groupName).searchEndPattern
-        let text = ''
+        const textSB = new StringBuilder()
 
         //* 找到區塊分割的判斷字串後，尋找區塊的結束點
         let j: number
         for (j = i + 1; j < textLines.length; j++) {
           i = j - 1
+          //* 若找到下一個區塊，開始將文字拆分為語法
           if (searchEndArr.some(pattern => textLines[j].trim().startsWith(pattern))) {
-            const promise = localforage.setItem(groupName, text).then(() => {
-              console.log('Data saved to IndexedDB')
-            }).catch(err => {
-              console.error('Error saving data:', err)
-            })
+            const promise = this.setCommandGroup(textSB.strings, groupName)
             promiseList.push(promise)
             break
           }
           //* 找到結束點之前，不斷累加該行的指令文字
-          text += textLines[j] + '\r\n'
+          textSB.append(textLines[j])
         }
-        //* 如果直到最後都沒有出現結束點文字，則判斷結束點為最後一行文字
+        //* 若 textlines 已全部判斷過，開始將文字拆分為語法
         if (j === textLines.length) {
-          const promise = localforage.setItem(groupName, text).then(() => {
-            console.log('Data saved to IndexedDB')
-          }).catch(err => {
-            console.error('Error saving data:', err)
-          })
+          const promise = this.setCommandGroup(textSB.strings, groupName)
           promiseList.push(promise)
           break
         }
       }
+      //* 等待所有區塊的純文字拆分成語法
       Promise.all(promiseList).then(() => {
         resolve()
       })
     })
   }
 
-  protected getCommandDataDetail (commandText: string, groupName: GroupType): ICommandDataDetail[] {
+  protected getCommandDataDetail (commadTextSB: StringBuilder, groupName: GroupType): ICommandDataDetail[] {
     const details: ICommandDataDetail[] = []
 
-    const cleanedTextlines = commandText.split('\r\n')
+    const cleanedTextlines = commadTextSB.strings
       .map(line => line.trim())
 
     const upperText = cleanedTextlines.join('\r\n').toUpperCase()
@@ -206,86 +192,61 @@ export class SqlContentController {
     return details
   }
 
-  /**
-   * Split the raw text to five command groups (PreSQL , CountSQL , SelectSQL , MainSQL , PostSQL)
-   * @param textLinesGroupMap
-   * @returns TSMap<GroupType, CommandData[]>
-   */
-  protected getCommandGroupMap (): Promise<void> {
+  protected setCommandGroup (textLines: string[], groupName: GroupType): Promise<void> {
     return new Promise(resolve => {
-      const promiselist: Promise<void>[] = []
+      if (textLines.length === 0) {
+        return resolve()
+      }
+      const commands: CommandData[] = []
 
-      Object.values(GroupType).forEach((groupName) => {
-        const promise: Promise<void> = new Promise<void>((resolve, reject) => {
-          localforage.getItem(groupName).then((value) => {
-            const commands: CommandData[] = []
-            let text: string = value as string
-            if (!text) {
-              return resolve()
+      let commadTextSB: StringBuilder | null = null
+
+      for (let i = 0; i < textLines.length; i++) {
+        if (!textLines[i].trim().startsWith(this.mainConfig.singleCommandIndicator)) {
+          continue
+        }
+
+        commadTextSB = new StringBuilder()
+        const commandDataDetails: ICommandDataDetail[] = []
+
+        const newTextLine = textLines[i].replace(this.mainConfig.singleCommandIndicator, '').trim()
+        if (newTextLine.length !== 0) {
+          commadTextSB.append(newTextLine)
+        }
+
+        let j: number
+        for (j = i + 1; j < textLines.length; j++) {
+          if (textLines[j].trim().startsWith(this.mainConfig.singleCommandIndicator)) {
+            const commandText = commadTextSB.toString('\r\n')
+            if (!this.mainConfig.enableTrimCommand || commadTextSB.size > 0) {
+              commandDataDetails.push(...this.getCommandDataDetail(commadTextSB, groupName!))
+              commands.push(new CommandData(commadTextSB, commandDataDetails))
             }
-            const textLines = text.split('\r\n')
-            text = ''
-
-            let commadTextSB: StringBuilder | null = null
-
-            for (let i = 0; i < textLines.length; i++) {
-              if (!textLines[i].trim().startsWith(this.mainConfig.singleCommandIndicator)) {
-                continue
-              }
-
-              commadTextSB = new StringBuilder()
-              const commandDataDetails: ICommandDataDetail[] = []
-
-              const newTextLine = textLines[i].replace(this.mainConfig.singleCommandIndicator, '').trim()
-              if (newTextLine.length !== 0) {
-                commadTextSB.append(newTextLine)
-              }
-
-              let j: number
-              for (j = i + 1; j < textLines.length; j++) {
-                if (textLines[j].trim().startsWith(this.mainConfig.singleCommandIndicator)) {
-                  const commandText = commadTextSB.toString('\r\n')
-                  if (!this.mainConfig.enableTrimCommand || commandText.length > 0) {
-                    commandDataDetails.push(...this.getCommandDataDetail(commandText, groupName!))
-                    commands.push(new CommandData(commandText, commandDataDetails))
-                    console.log('[' + groupName + '] :' + commands.length)
-                  }
-                  i = j - 1 // Continue from next line
-                  break
-                } else {
-                  textLines[j] = textLines[j].replace(this.mainConfig.singleCommandIndicator, '')
-                  if (!this.mainConfig.enableTrimCommand || textLines[j].trim().length > 0) {
-                    commadTextSB.append(textLines[j])
-                  }
-                }
-              }
-
-              if (j === textLines.length) {
-                const commandText = commadTextSB.toString('\r\n')
-                if (commandText.length > 0) {
-                  commandDataDetails.push(...this.getCommandDataDetail(commandText, groupName!))
-                  commands.push(new CommandData(commandText, commandDataDetails))
-                  console.log('[' + groupName + '] :' + commands.length)
-                }
-                break
-              }
+            i = j - 1
+            break
+          } else {
+            textLines[j] = textLines[j].replace(this.mainConfig.singleCommandIndicator, '')
+            if (!this.mainConfig.enableTrimCommand || textLines[j].trim().length > 0) {
+              commadTextSB.append(textLines[j])
             }
-            if (commands.length > 0) {
-              localforage.setItem(groupName + '-command', commands).then(() => {
-                resolve()
-              })
-            } else {
-              resolve()
-            }
-          }).catch((error) => {
-            reject(error)
-          })
+          }
+        }
+
+        if (j === textLines.length) {
+          if (commadTextSB.size > 0) {
+            commandDataDetails.push(...this.getCommandDataDetail(commadTextSB, groupName!))
+            commands.push(new CommandData(commadTextSB, commandDataDetails))
+          }
+          break
+        }
+      }
+      if (commands.length > 0) {
+        localforage.setItem(groupName + '-command', commands).then(() => {
+          resolve()
         })
-        promiselist.push(promise)
-      })
-      Promise.all(promiselist).then(() => {
+      } else {
         resolve()
-      })
+      }
     })
   }
 
@@ -405,7 +366,7 @@ export class SqlContentController {
           const paragraph = document.createElement('p')
           paragraph.id = config.commandContainer.paragraph.id.replace('{groupType}', groupType).replace('{index}', index.toString())
           paragraph.className = 'command-text pointerout-command'
-          paragraph.innerText = command.content
+          paragraph.innerText = command.content.toString()
           paragraph.addEventListener('pointerover', () => {
             this.addClassName(paragraph, 'pointerover-command')
             this.removeClassName(paragraph, 'pointerout-command')

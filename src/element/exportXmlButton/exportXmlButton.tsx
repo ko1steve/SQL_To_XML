@@ -1,6 +1,6 @@
 import localforage from 'localforage'
 import React, { useEffect, useState } from 'react'
-import { CommandData, StringBuilder } from 'src/config/CommandData'
+import { CommandData, StringBuilder } from 'src/config/commandData'
 import { CommandType, GroupType } from 'src/mainConfig'
 import { DataModel } from 'src/model/dataModel'
 import { Container } from 'typescript-ioc'
@@ -51,7 +51,7 @@ export const ExportXmlButton: React.FC = () => {
           commands.forEach((command, index) => {
             let sqlCommandStr = '    <SQL sql_idx="' + (index + 1) + '">'
             //* 需透過編碼轉換 XML 跳脫字元
-            sqlCommandStr += escapeXml(command.content) + '</SQL>'
+            sqlCommandStr += escapeXml(command.content.toString()) + '</SQL>'
             xmlContentSB.append(sqlCommandStr)
           })
           xmlContentSB.append('  </' + groupName + '>')

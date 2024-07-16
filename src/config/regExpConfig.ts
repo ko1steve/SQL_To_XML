@@ -1,4 +1,4 @@
-import { StringBuilder } from 'src/config/CommandData'
+import { StringBuilder } from 'src/config/commandData'
 import { GroupType } from 'src/mainConfig'
 import { TSMap } from 'typescript-map'
 

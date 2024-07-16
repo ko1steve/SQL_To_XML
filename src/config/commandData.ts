@@ -7,7 +7,7 @@ export enum MessageType {
 }
 
 export interface ICommandData {
-  content: string
+  content: StringBuilder
   details: ICommandDataDetail[]
 }
 
@@ -17,10 +17,10 @@ export interface ICommandDataDetail {
 }
 
 export class CommandData implements ICommandData {
-  public content: string
+  public content: StringBuilder
   public details: ICommandDataDetail[]
 
-  constructor (content: string, details: ICommandDataDetail[]) {
+  constructor (content: StringBuilder, details: ICommandDataDetail[]) {
     this.content = content
     this.details = details
   }
@@ -28,6 +28,15 @@ export class CommandData implements ICommandData {
 
 export class StringBuilder {
   protected _strings: string[]
+
+  public get strings (): string[] {
+    return this._strings
+  }
+
+  public get size (): number {
+    return this._strings.length
+  }
+
   constructor () {
     this._strings = []
   }

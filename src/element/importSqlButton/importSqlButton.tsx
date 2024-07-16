@@ -36,7 +36,7 @@ export const ImportSqlButton: React.FC = () => {
           const text = event.target.result as string
           if (dataModel.tabContentControllerMap.has(dataModel.currentTab)) {
             const tabContentController = dataModel.tabContentControllerMap.get(dataModel.currentTab)
-            tabContentController.resetPageContent(text, file.name)
+            tabContentController.updateNewPageContent(text, file.name)
           } else {
             const tabContentController = new SqlContentController(dataModel.currentTab, text, file.name)
             dataModel.tabContentControllerMap.set(dataModel.currentTab, tabContentController)
@@ -47,7 +47,7 @@ export const ImportSqlButton: React.FC = () => {
         textReader.readAsText(file, encoding)
       }
     }
-    worker.postMessage(file.slice(0, 1024))
+    worker.postMessage(file.slice(0, 4096))
 
     event.target.files = null
     event.target.value = ''
