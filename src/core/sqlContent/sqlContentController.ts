@@ -105,10 +105,10 @@ export class SqlContentController {
     })
   }
 
-  protected getCommandDataDetail (commandText: string, groupName: GroupType): ICommandDataDetail[] {
+  protected getCommandDataDetail (commadTextSB: StringBuilder, groupName: GroupType): ICommandDataDetail[] {
     const details: ICommandDataDetail[] = []
 
-    const cleanedTextlines = commandText.split('\r\n')
+    const cleanedTextlines = commadTextSB.strings
       .map(line => line.trim())
 
     const upperText = cleanedTextlines.join('\r\n').toUpperCase()
@@ -218,9 +218,9 @@ export class SqlContentController {
         for (j = i + 1; j < textLines.length; j++) {
           if (textLines[j].trim().startsWith(this.mainConfig.singleCommandIndicator)) {
             const commandText = commadTextSB.toString('\r\n')
-            if (!this.mainConfig.enableTrimCommand || commandText.length > 0) {
-              commandDataDetails.push(...this.getCommandDataDetail(commandText, groupName!))
-              commands.push(new CommandData(commandText, commandDataDetails))
+            if (!this.mainConfig.enableTrimCommand || commadTextSB.size > 0) {
+              commandDataDetails.push(...this.getCommandDataDetail(commadTextSB, groupName!))
+              commands.push(new CommandData(commadTextSB, commandDataDetails))
             }
             i = j - 1
             break
@@ -233,10 +233,9 @@ export class SqlContentController {
         }
 
         if (j === textLines.length) {
-          const commandText = commadTextSB.toString('\r\n')
-          if (commandText.length > 0) {
-            commandDataDetails.push(...this.getCommandDataDetail(commandText, groupName!))
-            commands.push(new CommandData(commandText, commandDataDetails))
+          if (commadTextSB.size > 0) {
+            commandDataDetails.push(...this.getCommandDataDetail(commadTextSB, groupName!))
+            commands.push(new CommandData(commadTextSB, commandDataDetails))
           }
           break
         }
@@ -367,7 +366,7 @@ export class SqlContentController {
           const paragraph = document.createElement('p')
           paragraph.id = config.commandContainer.paragraph.id.replace('{groupType}', groupType).replace('{index}', index.toString())
           paragraph.className = 'command-text pointerout-command'
-          paragraph.innerText = command.content
+          paragraph.innerText = command.content.toString()
           paragraph.addEventListener('pointerover', () => {
             this.addClassName(paragraph, 'pointerover-command')
             this.removeClassName(paragraph, 'pointerout-command')
