@@ -31,8 +31,10 @@ export const ImportSqlButton: React.FC = () => {
 
         //* 偵測文字編碼
         const { chunkString }: { chunkString: string } = data
-        const encoding: string = jschardet.detect(chunkString).encoding
-
+        let encoding: string = jschardet.detect(chunkString).encoding
+        if (encoding === 'ascii') {
+          encoding = 'Big5'
+        }
         const textReader = new FileReader()
         textReader.onload = (event) => {
           if (event.target == null) {
