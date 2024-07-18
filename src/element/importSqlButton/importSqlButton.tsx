@@ -1,5 +1,5 @@
 import React from 'react'
-import getBinaryString from 'src/util/worker/getBinaryString'
+import getChunkString from 'src/util/worker/getChunkString'
 import jschardet from 'jschardet'
 import { Container } from 'typescript-ioc'
 import { DataModel } from 'src/model/dataModel'
@@ -14,19 +14,24 @@ export const ImportSqlButton: React.FC = () => {
     const overlay = document.getElementById('overlay') as HTMLDivElement
     overlay.style.display = 'flex'
 
-    const worker = new Worker(getBinaryString)
+    const worker = new Worker(getChunkString)
+    let offset: number = 0
+    const chunkSize: number = 1024
 
     worker.onmessage = (event: any) => {
       const { type, data } = event.data
-      if (type === 'progress') {
-        //
+      if (type === 'update') {
+        const { chunkString }: { chunkString: string } = data
+        offset += chunkSize
+        const isAllRead: boolean = (+offset + chunkSize) < file.size
+        worker.postMessage({ chunkFile: file.slice(offset, offset + chunkSize), isAllRead, intactLine: true, prevChunkString: chunkString })
       } else if (type === 'complete') {
         worker.terminate()
         const dataModel = Container.get(DataModel)
 
         //* 偵測文字編碼
-        const { binaryString } = data
-        const encoding: string = jschardet.detect(binaryString).encoding
+        const { chunkString }: { chunkString: string } = data
+        const encoding: string = jschardet.detect(chunkString).encoding
 
         const textReader = new FileReader()
         textReader.onload = (event) => {
@@ -47,7 +52,8 @@ export const ImportSqlButton: React.FC = () => {
         textReader.readAsText(file, encoding)
       }
     }
-    worker.postMessage(file.slice(0, 4096))
+    const isAllRead: boolean = (+chunkSize < +file.size)
+    worker.postMessage({ chunkFile: file.slice(offset, chunkSize), isAllRead, intactLine: true })
 
     event.target.files = null
     event.target.value = ''
