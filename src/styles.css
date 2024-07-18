@@ -113,7 +113,7 @@
 
 .command-text {
   white-space: pre;
-  overflow-x:auto;
+  overflow-x: auto;
   width: 100%;
   border: 2px solid rgb(194, 230, 241);
   padding: 10px;
