@@ -108,9 +108,7 @@ export class SqlContentController {
   protected getCommandDataDetail (commadTextSB: StringBuilder, groupName: GroupType): ICommandDataDetail[] {
     const details: ICommandDataDetail[] = []
 
-    const cleanedTextlines = commadTextSB.strings
-
-    const upperText = cleanedTextlines.join('\r\n').toUpperCase().trim()
+    const upperText = commadTextSB.strings.join('\r\n').toUpperCase().trim()
 
     let matchError: boolean = false
 
@@ -128,6 +126,7 @@ export class SqlContentController {
     }
 
     //* 檢查 GRANT、REVOKE 等語法是否出現在 DDL 複雜語法之外
+    const cleanedTextlines = commadTextSB.strings.map(line => line.trim())
     for (let i: number = cleanedTextlines.length - 1; i >= 0; i--) {
       //* 若抓到 DDL 複查語法的結束符號，跳過檢查
       if (this.mainConfig.ddlComplexCommandEnds.includes(cleanedTextlines[i])) {
