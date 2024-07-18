@@ -23,7 +23,7 @@ export const ImportSqlButton: React.FC = () => {
       if (type === 'update') {
         const { chunkString }: { chunkString: string } = data
         offset += chunkSize
-        const isAllRead: boolean = (offset + chunkSize) >= file.size
+        const isAllRead: boolean = (+offset + chunkSize) < file.size
         worker.postMessage({ chunkFile: file.slice(offset, offset + chunkSize), isAllRead, intactLine: true, prevChunkString: chunkString })
       } else if (type === 'complete') {
         worker.terminate()
@@ -52,7 +52,7 @@ export const ImportSqlButton: React.FC = () => {
         textReader.readAsText(file, encoding)
       }
     }
-    const isAllRead: boolean = chunkSize >= file.size
+    const isAllRead: boolean = (+chunkSize < +file.size)
     worker.postMessage({ chunkFile: file.slice(offset, chunkSize), isAllRead, intactLine: true })
 
     event.target.files = null
