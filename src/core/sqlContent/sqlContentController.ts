@@ -364,7 +364,7 @@ export class SqlContentController {
           paragraph.id = config.commandContainer.paragraph.id.replace('{groupType}', groupType).replace('{index}', index.toString())
           paragraph.className = 'command-text pointerout-command'
           //* 由於存進 localforge 的物件，function 會全被拿掉，member 的存取修飾詞會全部變 public，只能這樣做處理
-          paragraph.innerText = (command.content as any)._strings.toString()
+          paragraph.innerText = (command.content as any)._strings.join('\r\n')
           paragraph.addEventListener('pointerover', () => {
             this.addClassName(paragraph, 'pointerover-command')
             this.removeClassName(paragraph, 'pointerout-command')
