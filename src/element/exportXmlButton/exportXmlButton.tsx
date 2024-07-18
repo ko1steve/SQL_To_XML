@@ -51,7 +51,7 @@ export const ExportXmlButton: React.FC = () => {
           commands.forEach((command, index) => {
             let sqlCommandStr = '    <SQL sql_idx="' + (index + 1) + '">'
             //* 需透過編碼轉換 XML 跳脫字元
-            sqlCommandStr += escapeXml((command.content as any)._strings.toString()) + '</SQL>'
+            sqlCommandStr += escapeXml((command.content as any)._strings.join('\r\n')) + '</SQL>'
             xmlContentSB.append(sqlCommandStr)
           })
           xmlContentSB.append('  </' + groupName + '>')
