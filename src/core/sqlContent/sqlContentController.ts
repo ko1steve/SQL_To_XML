@@ -24,20 +24,20 @@ export class SqlContentController {
   }
 
   protected initLocalForge (): void {
-    localforage.config({
-      driver: localforage.INDEXEDDB,
-      name: 'SqlConverter',
-      storeName: 'SqlConverter'
+    this.resetLocalForge().then(() => {
+      localforage.config({
+        driver: localforage.INDEXEDDB,
+        name: 'SqlConverter',
+        storeName: 'SqlConverter'
+      })
     })
   }
 
   protected initialize (): void {
     this.transTextToCommand().then(() => {
       this.createPageContent().then(() => {
-        this.resetLocalForge().then(() => {
-          const overlay = document.getElementById('overlay') as HTMLDivElement
-          overlay.style.display = 'none'
-        })
+        const overlay = document.getElementById('overlay') as HTMLDivElement
+        overlay.style.display = 'none'
       })
     })
   }
