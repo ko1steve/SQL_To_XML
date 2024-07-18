@@ -109,16 +109,14 @@ export class SqlContentController {
     const details: ICommandDataDetail[] = []
 
     const cleanedTextlines = commadTextSB.strings
-      .map(line => line.trim())
 
-    const upperText = cleanedTextlines.join('\r\n').toUpperCase()
+    const upperText = cleanedTextlines.join('\r\n').toUpperCase().trim()
 
     let matchError: boolean = false
 
     //* 檢查指令是否超過一個語法
-    const iterable: IterableIterator<RegExpMatchArray> = upperText.matchAll(ALL_VALID_REGEXP)
-    const count = Array.from(iterable).length
-    if (count > 1) {
+    const regExpArr: RegExpMatchArray | null = upperText.match(ALL_VALID_REGEXP)
+    if (regExpArr && regExpArr!.length > 1) {
       details.push({
         messageType: MessageType.EXCEENDS_COMMAND_LIMIT_ERROR,
         command: ''
@@ -217,7 +215,6 @@ export class SqlContentController {
         let j: number
         for (j = i + 1; j < textLines.length; j++) {
           if (textLines[j].trim().startsWith(this.mainConfig.singleCommandIndicator)) {
-            const commandText = commadTextSB.toString('\r\n')
             if (!this.mainConfig.enableTrimCommand || commadTextSB.size > 0) {
               commandDataDetails.push(...this.getCommandDataDetail(commadTextSB, groupName!))
               commands.push(new CommandData(commadTextSB, commandDataDetails))
