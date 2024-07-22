@@ -1,7 +1,7 @@
 import { ISqlContentConfig, SqlContentConfig } from 'src/core/sqlContent/sqlContentConfig'
 import { MessageType } from 'src/config/commandData'
 import { TSMap } from 'typescript-map'
-import { RegExpConig } from './config/regExpConfig'
+import { RegExpConig, GRANT_REVOKE_REGEXP } from './config/regExpConfig'
 
 export interface IMainConfig {
   checkCommandGroup: TSMap<CommandType, GroupType[]>
@@ -162,7 +162,7 @@ export class MainConfig implements IMainConfig {
   public ddlComplexCommandEnds: string[] = ['/', 'END', 'END;']
 
   public grantRevokeCommand: { regExp: RegExp, command: string } = {
-    regExp: /^(?:grant\s+.\S.+to\s+|revoke\s+\S.+from\s+)\S.+$/gmi,
+    regExp: GRANT_REVOKE_REGEXP,
     command: 'GRANT / REVOKE'
   }
 
