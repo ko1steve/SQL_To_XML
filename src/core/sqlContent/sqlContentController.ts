@@ -5,7 +5,7 @@ import { TSMap } from 'typescript-map'
 import localforage from 'localforage'
 import { Container } from 'typescript-ioc'
 import { DataModel } from 'src/model/dataModel'
-import { ALL_VALID_REGEXP } from 'src/config/regExpConfig'
+import { ALL_VALID_REGEXP, Command } from 'src/config/regExpConfig'
 
 export class SqlContentController {
   protected dataModel: DataModel
@@ -151,12 +151,12 @@ export class SqlContentController {
       if (groupInvalidCommandMap.has(groupName)) {
         const invalidCommandMap: TSMap<string, RegExp> = groupInvalidCommandMap.get(groupName)
         //* 取得該 GroupName 所有非法語法
-        invalidCommandMap.forEach((regExp, commandType) => {
+        invalidCommandMap.forEach((regExp, commandName) => {
           //* 若抓到該 Group 禁止的任一非法語法
           if (upperText.search(regExp) > -1) {
             details.push({
               messageType: MessageType.INVALID_COMMAND_ERROR,
-              command: commandType!
+              command: commandName!
             })
             matchError = true
           }
@@ -403,9 +403,14 @@ export class SqlContentController {
         message = message.replace('{groupTitle}', groupTitle)
         message = message.replace('{index}', (index + 1).toString())
         message = message.replace('{command}', detail.command)
-        paragraph.innerText = message
         switch (detail.messageType) {
           case MessageType.INVALID_COMMAND_ERROR:
+            if (detail.command === Command.ANY_COMMAND) {
+              message = this.mainConfig.messageMap.get(detail.messageType).replace(' "{command}" ', '任何')
+            }
+            paragraph.className = config.messageContainer.errorMessage.className
+            container = document.getElementById(config.messageContainer.id.replace('{groupType}', groupType)) as HTMLDivElement
+            break
           case MessageType.NO_VALID_COMMAND_ERROR:
           case MessageType.EXCEENDS_COMMAND_LIMIT_ERROR:
           case MessageType.CONTENT_NOT_FOUND_ERROR:
@@ -413,6 +418,7 @@ export class SqlContentController {
             container = document.getElementById(config.messageContainer.id.replace('{groupType}', groupType)) as HTMLDivElement
             break
         }
+        paragraph.innerText = message
         container.appendChild(paragraph)
       })
     }
