@@ -38,7 +38,7 @@ export class RegExpConig implements IRegExpConfig {
     [
       GroupType.PreProdSQL, new TSMap<string, RegExp>([
         [
-          'DDL', ALL_DDL_VALID_REGEXP
+          Command.DDL, ALL_DDL_VALID_REGEXP
         ]
       ])
     ],
@@ -46,7 +46,7 @@ export class RegExpConig implements IRegExpConfig {
       //* 指定「Select count(1)」或「Select count(*)」
       GroupType.CountSQL, new TSMap<string, RegExp>([
         [
-          'SELECT COUNT', SELECT_COUNT_REGEXP
+          Command.SELECT_COUNT, SELECT_COUNT_REGEXP
         ]
       ])
     ],
@@ -54,7 +54,7 @@ export class RegExpConig implements IRegExpConfig {
       //* 指定「Select *」或「Select欄位」(但不能是 Select Count 和 Select Into)
       GroupType.SelectSQL, new TSMap<string, RegExp>([
         [
-          'SELECT', SELECT_VALID_REGEXP
+          Command.SELECT, SELECT_VALID_REGEXP
         ]
       ])
     ],
@@ -62,7 +62,7 @@ export class RegExpConig implements IRegExpConfig {
       //* 指定每種 DDL 語法
       GroupType.MainSQL, new TSMap<string, RegExp>([
         [
-          'DDL', ALL_DDL_VALID_REGEXP
+          Command.DDL, ALL_DDL_VALID_REGEXP
         ]
       ])
     ]
@@ -73,7 +73,7 @@ export class RegExpConig implements IRegExpConfig {
       //* 指定「Select count(1)」或「Select count(*)」
       GroupType.CountSQL, new TSMap<string, RegExp>([
         [
-          'SELECT COUNT', SELECT_COUNT_REGEXP
+          Command.SELECT_COUNT, SELECT_COUNT_REGEXP
         ]
       ])
     ],
@@ -81,7 +81,7 @@ export class RegExpConig implements IRegExpConfig {
       //* 指定「Select *」或「Select欄位」
       GroupType.SelectSQL, new TSMap<string, RegExp>([
         [
-          'SELECT', SELECT_VALID_REGEXP
+          Command.SELECT, SELECT_VALID_REGEXP
         ]
       ])
     ],
@@ -89,7 +89,7 @@ export class RegExpConig implements IRegExpConfig {
       //* 指定「Insert into」、「Update set」、「Delete」、「Select into」
       GroupType.MainSQL, new TSMap<string, RegExp>([
         [
-          'DML', ALL_DML_VALID_REGEXP
+          Command.DML, ALL_DML_VALID_REGEXP
         ]
       ])
     ]
@@ -99,32 +99,32 @@ export class RegExpConig implements IRegExpConfig {
     [
       GroupType.PreSQL, new TSMap<string, RegExp>([
         [
-          'DDL', ALL_DDL_VALID_REGEXP
+          Command.DDL, ALL_DDL_VALID_REGEXP
         ],
         [
-          'DML', ALL_DML_VALID_REGEXP
+          Command.DML, ALL_DML_VALID_REGEXP
         ],
         [
-          'SELECT', SELECT_VALID_REGEXP
+          Command.SELECT, SELECT_VALID_REGEXP
         ],
         [
-          'SELECT COUNT', SELECT_COUNT_REGEXP
+          Command.SELECT_COUNT, SELECT_COUNT_REGEXP
         ]
       ])
     ],
     [
       GroupType.PostSQL, new TSMap<string, RegExp>([
         [
-          'DDL', ALL_DDL_VALID_REGEXP
+          Command.DDL, ALL_DDL_VALID_REGEXP
         ],
         [
-          'DML', ALL_DML_VALID_REGEXP
+          Command.DML, ALL_DML_VALID_REGEXP
         ],
         [
-          'SELECT', SELECT_VALID_REGEXP
+          Command.SELECT, SELECT_VALID_REGEXP
         ],
         [
-          'SELECT COUNT', SELECT_COUNT_REGEXP
+          Command.SELECT_COUNT, SELECT_COUNT_REGEXP
         ]
       ])
     ]
@@ -134,41 +134,49 @@ export class RegExpConig implements IRegExpConfig {
     [
       GroupType.PreSQL, new TSMap<string, RegExp>([
         [
-          'DDL', ALL_DDL_VALID_REGEXP
+          Command.DDL, ALL_DDL_VALID_REGEXP
         ],
         [
-          'DML', ALL_DML_VALID_REGEXP
+          Command.DML, ALL_DML_VALID_REGEXP
         ],
         [
-          'SELECT', SELECT_VALID_REGEXP
+          Command.SELECT, SELECT_VALID_REGEXP
         ],
         [
-          'SELECT COUNT', SELECT_COUNT_REGEXP
+          Command.SELECT_COUNT, SELECT_COUNT_REGEXP
         ]
       ])
     ],
     [
       GroupType.PreProdSQL, new TSMap<string, RegExp>([
         [
-          'ANY COMMAND', ANY_COMMAND_REGEXP
+          Command.ANY_COMMAND, ANY_COMMAND_REGEXP
         ]
       ])
     ],
     [
       GroupType.PostSQL, new TSMap<string, RegExp>([
         [
-          'DDL', ALL_DDL_VALID_REGEXP
+          Command.DDL, ALL_DDL_VALID_REGEXP
         ],
         [
-          'DML', ALL_DML_VALID_REGEXP
+          Command.DML, ALL_DML_VALID_REGEXP
         ],
         [
-          'SELECT', SELECT_VALID_REGEXP
+          Command.SELECT, SELECT_VALID_REGEXP
         ],
         [
-          'SELECT COUNT', SELECT_COUNT_REGEXP
+          Command.SELECT_COUNT, SELECT_COUNT_REGEXP
         ]
       ])
     ]
   ])
+}
+
+export enum Command {
+  SELECT = 'SELECT',
+  SELECT_COUNT = 'SELECT COUNT',
+  DDL = 'DDL',
+  DML = 'DML',
+  ANY_COMMAND = 'ANY COMMAND'
 }
