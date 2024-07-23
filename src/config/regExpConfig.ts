@@ -21,6 +21,7 @@ export const SELECT_VALID_REGEXP: RegExp = /^(?:Select\s+(?:(?!count\(([0-9]+|\*
 export const SELECT_COUNT_REGEXP: RegExp = /^(?:Select\s+count\([*|1]\)\s+From\s+(?:\S+\.\S+|\S+)).+$/gmi
 export const GRANT_REVOKE_REGEXP: RegExp = /^(?:grant\s+.\S.+to\s+|revoke\s+\S.+from\s+)\S.+$/gmi
 export const ANY_COMMAND_REGEXP: RegExp = /^.+$/gmi
+export const INSERT_INTO_REGEXP: RegExp = /^Insert\s+into\s+.+$/gmi
 
 export const ALL_VALID_REGEXP: RegExp = getAllValidRegExp([
   ALL_DDL_VALID_REGEXP, ALL_DML_VALID_REGEXP, SELECT_VALID_REGEXP, SELECT_COUNT_REGEXP
