@@ -16,7 +16,7 @@ const getAllValidRegExp = (regExps: RegExp[]) => {
   return new RegExp(regSource, 'gmi')
 }
 export const ALL_DDL_VALID_REGEXP: RegExp = getAllDdlValidRegExp(ALL_MSSQL_DDL_VALID_REGEXP, ALL_ORACLE_DDL_VALID_REGEXP)
-export const ALL_DML_VALID_REGEXP: RegExp = /^(?:insert\s+into\s+(\S+\.\S+)?(?!(@|#|##))|select\s+(?:\52?|\S+)\s+into\s+(?!(@|#|##))(\s+.+|\S+\.\S+.*)\s+from\s+|update\s+\S+(\.\S+)?\s+set\s+|delete\s+).+$/gmi
+export const ALL_DML_VALID_REGEXP: RegExp = /^(?:insert\s+into\s+(\S+\.\S+)?(?!(@|#|##))|select\s+\S+\s+into\s+(?!(@|#|##))(\s+.+|\S+\.\S+.*)\s+from\s+|update\s+\S+(\.\S+)?\s+set\s+|delete\s+).+$/gmi
 export const SELECT_VALID_REGEXP: RegExp = /^(?:Select\s+(?:(?!count\(([0-9]+|\*)\))(?!\s+).+|\*)\s+(?!Into\s+\S+\s+)From\s+(?:\S+\.\S+|\S+)).+$/gmi
 export const SELECT_COUNT_REGEXP: RegExp = /^(?:Select\s+count\([*|1]\)\s+From\s+(?:\S+\.\S+|\S+)).+$/gmi
 export const GRANT_REVOKE_REGEXP: RegExp = /^(?:grant\s+.\S.+to\s+|revoke\s+\S.+from\s+)\S.+$/gmi
