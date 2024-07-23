@@ -16,6 +16,7 @@ export interface IMainConfig {
   ddlComplexCommandEnds: string[]
   grantRevokeCommand: { regExp: RegExp, command: string }
   maxGroupCommandAmount: number
+  useAllRegExpCheckMultiCommand: boolean
 }
 
 export interface IGroupSetting {
@@ -167,4 +168,6 @@ export class MainConfig implements IMainConfig {
   }
 
   public maxGroupCommandAmount: number = 20000
+
+  public useAllRegExpCheckMultiCommand: boolean = false
 }

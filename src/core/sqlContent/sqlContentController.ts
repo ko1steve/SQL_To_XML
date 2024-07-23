@@ -113,16 +113,18 @@ export class SqlContentController {
     let matchError: boolean = false
 
     //* 檢查指令是否超過一個語法
-    const regExpArr: RegExpMatchArray | null = upperText.match(ALL_VALID_REGEXP)
-    if (regExpArr && regExpArr!.length > 1) {
-      details.push({
-        messageType: MessageType.EXCEENDS_COMMAND_LIMIT_ERROR,
-        command: ''
-      })
-      matchError = true
-    }
-    if (matchError) {
-      return details
+    if (this.mainConfig.useAllRegExpCheckMultiCommand) {
+      const regExpArr: RegExpMatchArray | null = upperText.match(ALL_VALID_REGEXP)
+      if (regExpArr && regExpArr.length > 1) {
+        details.push({
+          messageType: MessageType.EXCEENDS_COMMAND_LIMIT_ERROR,
+          command: ''
+        })
+        matchError = true
+      }
+      if (matchError) {
+        return details
+      }
     }
 
     //* 檢查 GRANT、REVOKE 等語法是否出現在 DDL 複雜語法之外
@@ -171,10 +173,15 @@ export class SqlContentController {
       if (groupValidCommandMap) {
         let isMatch: boolean = false
         groupValidCommandMap.values().forEach(regExp => {
-          const iterable: IterableIterator<RegExpMatchArray> = upperText.matchAll(regExp)
-          const count = Array.from(iterable).length
-          if (count > 0) {
+          const regExpArr: RegExpMatchArray | null = upperText.match(regExp)
+          if (regExpArr && regExpArr.length > 0) {
             isMatch = true
+            if (!this.mainConfig.useAllRegExpCheckMultiCommand && regExpArr.length > 1) {
+              details.push({
+                messageType: MessageType.EXCEENDS_COMMAND_LIMIT_ERROR,
+                command: ''
+              })
+            }
           }
         })
         //* 沒有匹配到任何語法，則視為錯誤
