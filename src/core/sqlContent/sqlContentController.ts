@@ -173,10 +173,10 @@ export class SqlContentController {
       if (groupValidCommandMap) {
         let isMatch: boolean = false
         groupValidCommandMap.values().forEach(regExp => {
-          const regExpArr: RegExpMatchArray | null = upperText.match(regExp)
-          if (regExpArr && regExpArr.length > 0) {
+          const matches: RegExpMatchArray | null = upperText.match(regExp)
+          if (matches && matches.length > 0) {
             isMatch = true
-            if (!this.mainConfig.useAllRegExpCheckMultiCommand && regExpArr.length > 1) {
+            if (!this.mainConfig.useAllRegExpCheckMultiCommand && matches.length > 1) {
               details.push({
                 messageType: MessageType.EXCEENDS_COMMAND_LIMIT_ERROR,
                 command: ''
