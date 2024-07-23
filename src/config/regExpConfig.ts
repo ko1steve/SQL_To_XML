@@ -20,6 +20,7 @@ export const ALL_DML_VALID_REGEXP: RegExp = /^(?:insert\s+into\s+(\S+\.\S+)?(?!(
 export const SELECT_VALID_REGEXP: RegExp = /^(?:Select\s+(?:(?!count\(([0-9]+|\*)\))(?!\s+).+|\*)\s+(?!Into\s+\S+\s+)From\s+(?:\S+\.\S+|\S+)).+$/gmi
 export const SELECT_COUNT_REGEXP: RegExp = /^(?:Select\s+count\([*|1]\)\s+From\s+(?:\S+\.\S+|\S+)).+$/gmi
 export const GRANT_REVOKE_REGEXP: RegExp = /^(?:grant\s+.\S.+to\s+|revoke\s+\S.+from\s+)\S.+$/gmi
+export const ANY_COMMAND_REGEXP: RegExp = /^.+$/gmi
 
 export const ALL_VALID_REGEXP: RegExp = getAllValidRegExp([
   ALL_DDL_VALID_REGEXP, ALL_DML_VALID_REGEXP, SELECT_VALID_REGEXP, SELECT_COUNT_REGEXP
@@ -34,6 +35,13 @@ export interface IRegExpConfig {
 
 export class RegExpConig implements IRegExpConfig {
   public validRegExpMapDDL = new TSMap<GroupType, TSMap<string, RegExp>>([
+    [
+      GroupType.PreProdSQL, new TSMap<string, RegExp>([
+        [
+          'DDL', ALL_DDL_VALID_REGEXP
+        ]
+      ])
+    ],
     [
       //* 指定「Select count(1)」或「Select count(*)」
       GroupType.CountSQL, new TSMap<string, RegExp>([
@@ -105,22 +113,6 @@ export class RegExpConig implements IRegExpConfig {
       ])
     ],
     [
-      GroupType.PreProdSQL, new TSMap<string, RegExp>([
-        [
-          'DDL', ALL_DDL_VALID_REGEXP
-        ],
-        [
-          'DML', ALL_DML_VALID_REGEXP
-        ],
-        [
-          'SELECT', SELECT_VALID_REGEXP
-        ],
-        [
-          'SELECT COUNT', SELECT_COUNT_REGEXP
-        ]
-      ])
-    ],
-    [
       GroupType.PostSQL, new TSMap<string, RegExp>([
         [
           'DDL', ALL_DDL_VALID_REGEXP
@@ -158,16 +150,7 @@ export class RegExpConig implements IRegExpConfig {
     [
       GroupType.PreProdSQL, new TSMap<string, RegExp>([
         [
-          'DDL', ALL_DDL_VALID_REGEXP
-        ],
-        [
-          'DML', ALL_DML_VALID_REGEXP
-        ],
-        [
-          'SELECT', SELECT_VALID_REGEXP
-        ],
-        [
-          'SELECT COUNT', SELECT_COUNT_REGEXP
+          'ANY COMMAND', ANY_COMMAND_REGEXP
         ]
       ])
     ],
