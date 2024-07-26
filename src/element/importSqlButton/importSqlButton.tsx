@@ -40,8 +40,11 @@ export const ImportSqlButton: React.FC = () => {
               dataModel.tabContentControllerMap.set(dataModel.currentTab, tabContentController)
             }
           }
-          //* 以偵測到的編碼讀取文字檔
           console.log('encoding : ' + detectMap.encoding)
+          if (!['Big5', 'ascii', 'UTF-8'].includes(detectMap.encoding)) {
+            detectMap.encoding = 'Big5'
+            console.log('(fixed) encoding : ' + detectMap.encoding)
+          }
           console.log('confidence : ' + detectMap.confidence)
           textReader.readAsText(file, detectMap.encoding)
         }
