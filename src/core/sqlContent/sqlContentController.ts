@@ -5,7 +5,7 @@ import { TSMap } from 'typescript-map'
 import localforage from 'localforage'
 import { Container } from 'typescript-ioc'
 import { DataModel } from 'src/model/dataModel'
-import { ALL_VALID_REGEXP, Command, INSERT_INTO_REGEXP } from 'src/config/regExpConfig'
+import { ALL_DDL_VALID_REGEXP_WITHOUT_CHECK_TEMP_TABLE, ALL_DML_VALID_REGEXP_WITHOUT_CHECK_TEMP_TABLE, ALL_VALID_REGEXP, Command, INSERT_INTO_REGEXP, SELECT_COUNT_REGEXP, SELECT_VALID_REGEXP } from 'src/config/regExpConfig'
 
 export class SqlContentController {
   protected dataModel: DataModel
@@ -112,18 +112,38 @@ export class SqlContentController {
 
     let matchError: boolean = false
 
-    //* 檢查指令是否超過一個語法
-    if (this.mainConfig.useAllRegExpCheckMultiCommand) {
-      const regExpArr: RegExpMatchArray | null = upperText.match(ALL_VALID_REGEXP)
-      if (regExpArr && regExpArr.length > 1) {
-        details.push({
-          messageType: MessageType.EXCEENDS_COMMAND_LIMIT_ERROR,
-          command: ''
-        })
-        matchError = true
-      }
-      if (matchError) {
-        return details
+    //* 反向表列的部分 (不包含 PreProdSQL)，檢查指令是否超過一個語法
+    if ([GroupType.PreSQL, GroupType.PostSQL].includes(groupName)) {
+      if (this.mainConfig.useAllRegExpCheckMultiCommand) {
+        const matches: RegExpMatchArray | null = upperText.match(ALL_VALID_REGEXP)
+        if (matches && matches.length > 1) {
+          details.push({
+            messageType: MessageType.EXCEENDS_COMMAND_LIMIT_ERROR,
+            command: ''
+          })
+          matchError = true
+        }
+        if (matchError) {
+          return details
+        }
+      } else {
+        const regExpArr: RegExp[] = [
+          ALL_DDL_VALID_REGEXP_WITHOUT_CHECK_TEMP_TABLE,
+          ALL_DML_VALID_REGEXP_WITHOUT_CHECK_TEMP_TABLE
+        ]
+        for (const regExp of regExpArr) {
+          const matches: RegExpMatchArray | null = upperText.match(regExp)
+          if (matches && matches.length > 1) {
+            details.push({
+              messageType: MessageType.EXCEENDS_COMMAND_LIMIT_ERROR,
+              command: ''
+            })
+            matchError = true
+          }
+          if (matchError) {
+            return details
+          }
+        }
       }
     }
 
@@ -151,17 +171,13 @@ export class SqlContentController {
       if (groupInvalidCommandMap.has(groupName)) {
         const invalidCommandMap: TSMap<string, RegExp> = groupInvalidCommandMap.get(groupName)
         //* 取得該 GroupName 所有非法語法
+        let count = 0
         invalidCommandMap.forEach((regExp, commandName) => {
           //* 若抓到該 Group 禁止的任一非法語法
-          const matches = upperText.match(regExp)
+          const matches: RegExpMatchArray | null = upperText.match(regExp)
           if (matches) {
-            //* 判斷多筆語法錯誤 (若這邊不擋，同時出現 Insert-Into-Select 和 Select 語法時會有問題)
-            if (!this.mainConfig.useAllRegExpCheckMultiCommand && matches.length > 1) {
-              details.push({
-                messageType: MessageType.EXCEENDS_COMMAND_LIMIT_ERROR,
-                command: ''
-              })
-            } else if (matches.length > 0) {
+            if (matches.length > 0) {
+              count += matches.length
               if (commandName !== Command.SELECT) {
                 details.push({
                   messageType: MessageType.INVALID_COMMAND_ERROR,
@@ -181,6 +197,23 @@ export class SqlContentController {
             }
           }
         })
+        //* 判斷多筆語法錯誤 (若這邊不擋，同時出現 Insert-Into-Select 和 Select 語法時會有問題)
+        if (!this.mainConfig.useAllRegExpCheckMultiCommand) {
+          if (count > 1) {
+            details.push({
+              messageType: MessageType.EXCEENDS_COMMAND_LIMIT_ERROR,
+              command: ''
+            })
+          }
+        } else {
+          const matches: RegExpMatchArray | null = upperText.match(ALL_VALID_REGEXP)
+          if (matches && matches.length > 1) {
+            details.push({
+              messageType: MessageType.EXCEENDS_COMMAND_LIMIT_ERROR,
+              command: ''
+            })
+          }
+        }
       }
     }
     if (matchError) {
@@ -189,31 +222,34 @@ export class SqlContentController {
 
     //* 檢查指令是否至少包含任何一個合規的語法
     if (this.mainConfig.validCommandMap.has(this.commandType)) {
-      const groupValidCommandMap: TSMap<string, RegExp> = this.mainConfig.validCommandMap.get(this.commandType)?.get(groupName)
-      if (groupValidCommandMap) {
+      const validCommandMap: TSMap<string, RegExp> = this.mainConfig.validCommandMap.get(this.commandType)?.get(groupName)
+      if (validCommandMap) {
         let isMatch: boolean = false
-        groupValidCommandMap.forEach((regExp, commandName) => {
+        let count: number = 0
+        validCommandMap.forEach((regExp, commandName) => {
           const matches: RegExpMatchArray | null = upperText.match(regExp)
           if (matches) {
-            //* 判斷多筆語法錯誤
-            if (!this.mainConfig.useAllRegExpCheckMultiCommand && matches.length > 1) {
-              isMatch = true
-              details.push({
-                messageType: MessageType.EXCEENDS_COMMAND_LIMIT_ERROR,
-                command: ''
-              })
-            } else if (matches.length > 0) {
+            if (matches.length > 0) {
               if (commandName !== Command.SELECT) {
+                count += matches.length
                 isMatch = true
               } else {
                 //* 判斷是否為 Insert Into 語法
                 if (upperText.search(INSERT_INTO_REGEXP) < 0) {
+                  count += matches.length
                   isMatch = true
                 }
               }
             }
           }
         })
+        //* 判斷多筆語法錯誤
+        if (!this.mainConfig.useAllRegExpCheckMultiCommand && count > 1) {
+          details.push({
+            messageType: MessageType.EXCEENDS_COMMAND_LIMIT_ERROR,
+            command: ''
+          })
+        }
         //* 沒有匹配到任何語法，則視為錯誤
         if (!isMatch) {
           details.push({
