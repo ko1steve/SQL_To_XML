@@ -11,7 +11,6 @@ export interface IMainConfig {
   invalidCommandMap: TSMap<CommandType, TSMap<GroupType, TSMap<string, RegExp>>>
   tabContentConfigMap: TSMap<CommandType, ISqlContentConfig>
   messageMap: TSMap<MessageType, string>
-  enableTrimCommand: boolean
   ddlComplexCommandStartRegExp: RegExp
   ddlComplexCommandEnds: string[]
   grantRevokeCommand: { regExp: RegExp, command: string }
@@ -153,10 +152,12 @@ export class MainConfig implements IMainConfig {
     [
       MessageType.EXCEENDS_COMMAND_LIMIT_ERROR,
       '{groupTitle}, index = {index}\n ExceedsCommandLimitError: "不能在一個語法標記(/*--!*/)底下放置兩筆以上的語法。'
+    ],
+    [
+      MessageType.EMPTY_OR_COMMENT_ONLY_ERROR,
+      '{groupTitle}, index = {index}\n EmptyOrCommentOnlyError: "不能空白字串或純註解。'
     ]
   ])
-
-  public enableTrimCommand: boolean = true
 
   public ddlComplexCommandStartRegExp: RegExp = /^\s*(CREATE|ALTER|DROP)(\s+OR\s+REPLACE)?\s+(.*\s+)?(PROCEDURE|FUNCTION|TRIGGER|PACKAGE|VIEW)/
 

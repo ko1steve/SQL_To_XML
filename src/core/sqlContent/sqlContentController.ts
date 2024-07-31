@@ -108,7 +108,14 @@ export class SqlContentController {
   protected getCommandDataDetail (commadTextSB: StringBuilder, groupName: GroupType): ICommandDataDetail[] {
     const details: ICommandDataDetail[] = []
 
-    const upperText = commadTextSB.strings.join('\r\n').toUpperCase().trim()
+    const upperText = commadTextSB.strings.filter(e => !e.trim().startsWith('--')).join('\r\n').toUpperCase().trim()
+    if (upperText === '') {
+      details.push({
+        messageType: MessageType.EMPTY_OR_COMMENT_ONLY_ERROR,
+        command: ''
+      })
+      return details
+    }
 
     let matchError: boolean = false
 
@@ -287,25 +294,19 @@ export class SqlContentController {
         let j: number
         for (j = i + 1; j < textLines.length; j++) {
           if (textLines[j].trim().startsWith(this.mainConfig.singleCommandIndicator)) {
-            if (!this.mainConfig.enableTrimCommand || commadTextSB.size > 0) {
-              commandDataDetails.push(...this.getCommandDataDetail(commadTextSB, groupName!))
-              commands.push(new CommandData(commadTextSB, commandDataDetails))
-            }
+            commandDataDetails.push(...this.getCommandDataDetail(commadTextSB, groupName!))
+            commands.push(new CommandData(commadTextSB, commandDataDetails))
             i = j - 1
             break
           } else {
             textLines[j] = textLines[j].replace(this.mainConfig.singleCommandIndicator, '')
-            if (!this.mainConfig.enableTrimCommand || textLines[j].trim().length > 0) {
-              commadTextSB.append(textLines[j])
-            }
+            commadTextSB.append(textLines[j])
           }
         }
 
         if (j === textLines.length) {
-          if (commadTextSB.size > 0) {
-            commandDataDetails.push(...this.getCommandDataDetail(commadTextSB, groupName!))
-            commands.push(new CommandData(commadTextSB, commandDataDetails))
-          }
+          commandDataDetails.push(...this.getCommandDataDetail(commadTextSB, groupName!))
+          commands.push(new CommandData(commadTextSB, commandDataDetails))
           break
         }
       }
@@ -477,9 +478,7 @@ export class SqlContentController {
             paragraph.className = config.messageContainer.errorMessage.className
             container = document.getElementById(config.messageContainer.id.replace('{groupType}', groupType)) as HTMLDivElement
             break
-          case MessageType.NO_VALID_COMMAND_ERROR:
-          case MessageType.EXCEENDS_COMMAND_LIMIT_ERROR:
-          case MessageType.CONTENT_NOT_FOUND_ERROR:
+          default:
             paragraph.className = config.messageContainer.errorMessage.className
             container = document.getElementById(config.messageContainer.id.replace('{groupType}', groupType)) as HTMLDivElement
             break
