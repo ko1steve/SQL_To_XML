@@ -9,21 +9,21 @@ export enum MessageType {
 
 export interface ICommandData {
   content: StringBuilder
-  details: ICommandDataDetail[]
+  messages: ICommandDataMessage[]
 }
 
-export interface ICommandDataDetail {
+export interface ICommandDataMessage {
   messageType: MessageType
   command: string
 }
 
 export class CommandData implements ICommandData {
   public content: StringBuilder
-  public details: ICommandDataDetail[]
+  public messages: ICommandDataMessage[]
 
-  constructor (content: StringBuilder, details: ICommandDataDetail[]) {
+  constructor (content: StringBuilder, messages: ICommandDataMessage[]) {
     this.content = content
-    this.details = details
+    this.messages = messages
   }
 }
 

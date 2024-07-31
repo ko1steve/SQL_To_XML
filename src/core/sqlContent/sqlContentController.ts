@@ -1,6 +1,6 @@
 import { CommandType, GroupType, IGroupSetting, MainConfig } from 'src/mainConfig'
 import { IGroupContainerConfig, ISqlContentConfig } from './sqlContentConfig'
-import { CommandData, MessageType, ICommandDataDetail, StringBuilder } from 'src/config/commandData'
+import { CommandData, MessageType, ICommandDataMessage, StringBuilder } from 'src/config/commandData'
 import { TSMap } from 'typescript-map'
 import localforage from 'localforage'
 import { Container } from 'typescript-ioc'
@@ -105,8 +105,8 @@ export class SqlContentController {
     })
   }
 
-  protected getCommandDataDetail (commadTextSB: StringBuilder, groupName: GroupType): ICommandDataDetail[] {
-    const details: ICommandDataDetail[] = []
+  protected getCommandDataDetail (commadTextSB: StringBuilder, groupName: GroupType): ICommandDataMessage[] {
+    const details: ICommandDataMessage[] = []
 
     const upperText = commadTextSB.strings.filter(e => !e.trim().startsWith('--')).join('\r\n').toUpperCase().trim()
     if (upperText === '') {
@@ -282,9 +282,8 @@ export class SqlContentController {
         if (!textLines[i].trim().startsWith(this.mainConfig.singleCommandIndicator)) {
           continue
         }
-
         commadTextSB = new StringBuilder()
-        const commandDataDetails: ICommandDataDetail[] = []
+        const commandDataDetails: ICommandDataMessage[] = []
 
         const newTextLine = textLines[i].replace(this.mainConfig.singleCommandIndicator, '').trim()
         if (newTextLine.length !== 0) {
@@ -418,7 +417,7 @@ export class SqlContentController {
 
       commands.forEach((command: CommandData, index: number) => {
         let showCommand = true
-        if (command.details.length > 0) {
+        if (command.messages.length > 0) {
           this.appendMessage(command, groupType, index, config)
         } else if (commands.length >= this.mainConfig.maxGroupCommandAmount) {
           showCommand = false
@@ -448,7 +447,7 @@ export class SqlContentController {
           })
           listItem.appendChild(paragraph)
 
-          if (command.details.length > 0) {
+          if (command.messages.length > 0) {
             this.dataModel.setCommandValid(this.commandType, false)
             this.addClassName(listItem, 'command-error')
           }
@@ -461,10 +460,10 @@ export class SqlContentController {
   }
 
   protected appendMessage (command: CommandData, groupType: GroupType, index: number, config: IGroupContainerConfig): void {
-    if (command.details.length > 0) {
+    if (command.messages.length > 0) {
       let container: HTMLDivElement
       const paragraph: HTMLSpanElement = document.createElement('p')
-      command.details.forEach(detail => {
+      command.messages.forEach(detail => {
         let message: string = this.mainConfig.messageMap.get(detail.messageType)
         const groupTitle = this.mainConfig.groupSettingMap.get(groupType).title
         message = message.replace('{groupTitle}', groupTitle)
