@@ -283,7 +283,7 @@ export class SqlContentController {
           continue
         }
         commadTextSB = new StringBuilder()
-        const commandDataDetails: ICommandDataMessage[] = []
+        const commandDataMessages: ICommandDataMessage[] = []
 
         const newTextLine = textLines[i].replace(this.mainConfig.singleCommandIndicator, '').trim()
         if (newTextLine.length !== 0) {
@@ -293,8 +293,8 @@ export class SqlContentController {
         let j: number
         for (j = i + 1; j < textLines.length; j++) {
           if (textLines[j].trim().startsWith(this.mainConfig.singleCommandIndicator)) {
-            commandDataDetails.push(...this.getCommandDataDetail(commadTextSB, groupName!))
-            commands.push(new CommandData(commadTextSB, commandDataDetails))
+            commandDataMessages.push(...this.getCommandDataDetail(commadTextSB, groupName!))
+            commands.push(new CommandData(commadTextSB, commandDataMessages))
             i = j - 1
             break
           } else {
@@ -304,8 +304,8 @@ export class SqlContentController {
         }
 
         if (j === textLines.length) {
-          commandDataDetails.push(...this.getCommandDataDetail(commadTextSB, groupName!))
-          commands.push(new CommandData(commadTextSB, commandDataDetails))
+          commandDataMessages.push(...this.getCommandDataDetail(commadTextSB, groupName!))
+          commands.push(new CommandData(commadTextSB, commandDataMessages))
           break
         }
       }
