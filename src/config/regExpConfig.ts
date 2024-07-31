@@ -14,8 +14,8 @@ const ALL_ORACLE_DDL_VALID_REGEXP: RegExp = /^(?:(?:CREATE\s+(?:(?:TABLE|VIEW|PR
 export const ALL_DDL_VALID_REGEXP: RegExp = combineRegExps([ALL_MSSQL_DDL_VALID_REGEXP, ALL_ORACLE_DDL_VALID_REGEXP])
 export const ALL_DDL_VALID_REGEXP_WITHOUT_CHECK_TEMP_TABLE = new RegExp(ALL_DDL_VALID_REGEXP.source.replaceAll('(?!@|#|##)', ''), 'gmi')
 
-const ALL_MSSQL_DML_VALID_REGEXP: RegExp = /^(?:insert\s+into\s+(?!@|#|##)|select\s+(?:\52?|.+)\s+into\s+(?!@|#|##).+\s+from\s+|update\s+\S+\s+set\s+|delete\s+).+$/gmi
-const ALL_ORACLE_DML_VALID_REGEXP: RegExp = /^(?:insert\s+into\s+\S+\.\S+(?!@|#|##)|select\s+(?:\52?|.+)\s+into\s+(?!@|#|##)\S+\.\S+\s+from\s+|update\s+\S+\.\S+\s+set\s+|delete\s+).+$/gmi
+const ALL_MSSQL_DML_VALID_REGEXP: RegExp = /^(?:insert\s+into\s+(?!@|#|##)|select\s+(?:\52|.+)\s+into\s+(?!@|#|##).+\s+from\s+|update\s+\S+\s+set\s+|delete\s+).+$/gmi
+const ALL_ORACLE_DML_VALID_REGEXP: RegExp = /^(?:insert\s+into\s+\S+\.\S+(?!@|#|##)|select\s+(?:\52|.+)\s+into\s+(?!@|#|##)\S+\.\S+\s+from\s+|update\s+\S+\.\S+\s+set\s+|delete\s+).+$/gmi
 export const ALL_DML_VALID_REGEXP: RegExp = combineRegExps([ALL_MSSQL_DML_VALID_REGEXP, ALL_ORACLE_DML_VALID_REGEXP])
 export const ALL_DML_VALID_REGEXP_WITHOUT_CHECK_TEMP_TABLE = new RegExp(ALL_DML_VALID_REGEXP.source.replaceAll('(?!@|#|##)', ''), 'gmi')
 
