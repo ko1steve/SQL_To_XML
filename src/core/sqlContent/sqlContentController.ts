@@ -1,6 +1,6 @@
 import { CommandType, GroupType, IGroupSetting, MainConfig } from 'src/mainConfig'
 import { IGroupContainerConfig, ISqlContentConfig } from './sqlContentConfig'
-import { CommandData, MessageType, ICommandDataMessage, StringBuilder } from 'src/config/commandData'
+import { CommandData, MessageType, ICommandDataMessage, StringBuilder, IGroupCommandDetail, ICommandDataDetail } from 'src/config/commandData'
 import { TSMap } from 'typescript-map'
 import localforage from 'localforage'
 import { Container } from 'typescript-ioc'
@@ -77,14 +77,17 @@ export class SqlContentController {
         }
         const searchEndArr: string[] = this.mainConfig.groupSettingMap.get(groupName).searchEndPattern
         const textSB = new StringBuilder()
-
+        const startIndex = i
         //* 找到區塊分割的判斷字串後，尋找區塊的結束點
         let j: number
         for (j = i + 1; j < textLines.length; j++) {
           i = j - 1
           //* 若找到下一個區塊，開始將文字拆分為語法
           if (searchEndArr.some(pattern => textLines[j].trim().startsWith(pattern))) {
-            const promise = this.setCommandGroup(textSB.strings, groupName)
+            const promise = this.setCommandGroup(textSB.strings, groupName, {
+              startIndex,
+              lines: j - startIndex
+            })
             promiseList.push(promise)
             break
           }
@@ -93,7 +96,10 @@ export class SqlContentController {
         }
         //* 若 textlines 已全部判斷過，開始將文字拆分為語法
         if (j === textLines.length) {
-          const promise = this.setCommandGroup(textSB.strings, groupName)
+          const promise = this.setCommandGroup(textSB.strings, groupName, {
+            startIndex,
+            lines: j - 1 - startIndex
+          })
           promiseList.push(promise)
           break
         }
@@ -105,16 +111,18 @@ export class SqlContentController {
     })
   }
 
-  protected getCommandDataDetail (commadTextSB: StringBuilder, groupName: GroupType): ICommandDataMessage[] {
-    const details: ICommandDataMessage[] = []
+  protected getCommandDataDetail (commadTextSB: StringBuilder, groupName: GroupType, detail: ICommandDataDetail): ICommandDataMessage[] {
+    const messages: ICommandDataMessage[] = []
 
     const upperText = commadTextSB.strings.filter(e => !e.trim().startsWith('--')).join('\r\n').toUpperCase().trim()
     if (upperText === '') {
-      details.push({
+      messages.push({
         messageType: MessageType.EMPTY_OR_COMMENT_ONLY_ERROR,
-        command: ''
+        command: '',
+        globalTextLineIndex: detail.groupTextLineIndex,
+        commandIndex: detail.commandIndex
       })
-      return details
+      return messages
     }
 
     let matchError: boolean = false
@@ -124,14 +132,16 @@ export class SqlContentController {
       if (this.mainConfig.useAllRegExpCheckMultiCommand) {
         const matches: RegExpMatchArray | null = upperText.match(ALL_VALID_REGEXP)
         if (matches && matches.length > 1) {
-          details.push({
+          messages.push({
             messageType: MessageType.EXCEENDS_COMMAND_LIMIT_ERROR,
-            command: ''
+            command: '',
+            globalTextLineIndex: detail.groupTextLineIndex,
+            commandIndex: detail.commandIndex
           })
           matchError = true
         }
         if (matchError) {
-          return details
+          return messages
         }
       } else {
         const regExpArr: RegExp[] = [
@@ -141,14 +151,16 @@ export class SqlContentController {
         for (const regExp of regExpArr) {
           const matches: RegExpMatchArray | null = upperText.match(regExp)
           if (matches && matches.length > 1) {
-            details.push({
+            messages.push({
               messageType: MessageType.EXCEENDS_COMMAND_LIMIT_ERROR,
-              command: ''
+              command: '',
+              globalTextLineIndex: detail.groupTextLineIndex,
+              commandIndex: detail.commandIndex
             })
             matchError = true
           }
           if (matchError) {
-            return details
+            return messages
           }
         }
       }
@@ -161,15 +173,17 @@ export class SqlContentController {
       if (this.mainConfig.ddlComplexCommandEnds.includes(cleanedTextlines[i])) {
         break
       } else if (cleanedTextlines[i].search(this.mainConfig.grantRevokeCommand.regExp) > -1) {
-        details.push({
+        messages.push({
           messageType: MessageType.INVALID_COMMAND_ERROR,
-          command: this.mainConfig.grantRevokeCommand.command
+          command: this.mainConfig.grantRevokeCommand.command,
+          globalTextLineIndex: detail.groupTextLineIndex,
+          commandIndex: detail.commandIndex
         })
         matchError = true
       }
     }
     if (matchError) {
-      return details
+      return messages
     }
 
     //* 檢查指令是否包含不合規的語法
@@ -186,17 +200,21 @@ export class SqlContentController {
             if (matches.length > 0) {
               count += matches.length
               if (commandName !== Command.SELECT) {
-                details.push({
+                messages.push({
                   messageType: MessageType.INVALID_COMMAND_ERROR,
-                  command: commandName!
+                  command: commandName!,
+                  globalTextLineIndex: detail.groupTextLineIndex,
+                  commandIndex: detail.commandIndex
                 })
                 matchError = true
               } else {
                 //* 判斷是否為 Insert Into 語法
                 if (upperText.search(INSERT_INTO_REGEXP) < 0) {
-                  details.push({
+                  messages.push({
                     messageType: MessageType.INVALID_COMMAND_ERROR,
-                    command: commandName!
+                    command: commandName!,
+                    globalTextLineIndex: detail.groupTextLineIndex,
+                    commandIndex: detail.commandIndex
                   })
                   matchError = true
                 }
@@ -207,24 +225,30 @@ export class SqlContentController {
         //* 判斷多筆語法錯誤 (若這邊不擋，同時出現 Insert-Into-Select 和 Select 語法時會有問題)
         if (!this.mainConfig.useAllRegExpCheckMultiCommand) {
           if (count > 1) {
-            details.push({
+            messages.push({
               messageType: MessageType.EXCEENDS_COMMAND_LIMIT_ERROR,
-              command: ''
+              command: '',
+              globalTextLineIndex: detail.groupTextLineIndex,
+              commandIndex: detail.commandIndex
             })
+            matchError = true
           }
         } else {
           const matches: RegExpMatchArray | null = upperText.match(ALL_VALID_REGEXP)
           if (matches && matches.length > 1) {
-            details.push({
+            messages.push({
               messageType: MessageType.EXCEENDS_COMMAND_LIMIT_ERROR,
-              command: ''
+              command: '',
+              globalTextLineIndex: detail.groupTextLineIndex,
+              commandIndex: detail.commandIndex
             })
+            matchError = true
           }
         }
       }
     }
     if (matchError) {
-      return details
+      return messages
     }
 
     //* 檢查指令是否至少包含任何一個合規的語法
@@ -252,24 +276,28 @@ export class SqlContentController {
         })
         //* 判斷多筆語法錯誤
         if (!this.mainConfig.useAllRegExpCheckMultiCommand && count > 1) {
-          details.push({
+          messages.push({
             messageType: MessageType.EXCEENDS_COMMAND_LIMIT_ERROR,
-            command: ''
+            command: '',
+            globalTextLineIndex: detail.groupTextLineIndex,
+            commandIndex: detail.commandIndex
           })
         }
         //* 沒有匹配到任何語法，則視為錯誤
         if (!isMatch) {
-          details.push({
+          messages.push({
             messageType: MessageType.NO_VALID_COMMAND_ERROR,
-            command: ''
+            command: '',
+            globalTextLineIndex: detail.groupTextLineIndex,
+            commandIndex: detail.commandIndex
           })
         }
       }
     }
-    return details
+    return messages
   }
 
-  protected setCommandGroup (textLines: string[], groupName: GroupType): Promise<void> {
+  protected setCommandGroup (textLines: string[], groupName: GroupType, detail: IGroupCommandDetail): Promise<void> {
     return new Promise(resolve => {
       if (textLines.length === 0) {
         return resolve()
@@ -282,6 +310,7 @@ export class SqlContentController {
         if (!textLines[i].trim().startsWith(this.mainConfig.singleCommandIndicator)) {
           continue
         }
+        const startIndex = i
         commadTextSB = new StringBuilder()
         const commandDataMessages: ICommandDataMessage[] = []
 
@@ -293,7 +322,10 @@ export class SqlContentController {
         let j: number
         for (j = i + 1; j < textLines.length; j++) {
           if (textLines[j].trim().startsWith(this.mainConfig.singleCommandIndicator)) {
-            commandDataMessages.push(...this.getCommandDataDetail(commadTextSB, groupName!))
+            commandDataMessages.push(...this.getCommandDataDetail(commadTextSB, groupName!, {
+              groupTextLineIndex: detail.startIndex + 1 + startIndex,
+              commandIndex: commands.length
+            }))
             commands.push(new CommandData(commadTextSB, commandDataMessages))
             i = j - 1
             break
@@ -304,7 +336,10 @@ export class SqlContentController {
         }
 
         if (j === textLines.length) {
-          commandDataMessages.push(...this.getCommandDataDetail(commadTextSB, groupName!))
+          commandDataMessages.push(...this.getCommandDataDetail(commadTextSB, groupName!, {
+            groupTextLineIndex: detail.startIndex + 1 + startIndex,
+            commandIndex: commands.length
+          }))
           commands.push(new CommandData(commadTextSB, commandDataMessages))
           break
         }
@@ -464,10 +499,12 @@ export class SqlContentController {
       let container: HTMLDivElement
       const paragraph: HTMLSpanElement = document.createElement('p')
       command.messages.forEach(detail => {
+        console.error(detail)
         let message: string = this.mainConfig.messageMap.get(detail.messageType)
         const groupTitle = this.mainConfig.groupSettingMap.get(groupType).title
         message = message.replace('{groupTitle}', groupTitle)
-        message = message.replace('{index}', (index + 1).toString())
+        message = message.replace('{sql_index}', (detail.commandIndex + 1).toString())
+        message = message.replace('{textLineIndex}', (detail.globalTextLineIndex + 1).toString())
         message = message.replace('{command}', detail.command)
         switch (detail.messageType) {
           case MessageType.INVALID_COMMAND_ERROR:

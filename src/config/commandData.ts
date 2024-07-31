@@ -15,6 +15,18 @@ export interface ICommandData {
 export interface ICommandDataMessage {
   messageType: MessageType
   command: string
+  globalTextLineIndex: number
+  commandIndex: number
+}
+
+export interface IGroupCommandDetail {
+  startIndex: number
+  lines: number
+}
+
+export interface ICommandDataDetail {
+  groupTextLineIndex: number
+  commandIndex: number
 }
 
 export class CommandData implements ICommandData {
