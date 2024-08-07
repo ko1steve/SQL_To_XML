@@ -1,7 +1,7 @@
 import { ISqlContentConfig, SqlContentConfig } from 'src/core/sqlContent/sqlContentConfig'
 import { MessageType } from 'src/config/commandData'
 import { TSMap } from 'typescript-map'
-import { RegExpConig, GRANT_REVOKE_REGEXP } from './config/regExpConfig'
+import { RegExpMapConfig, RegExpConfig } from './config/regExpConfig'
 
 export interface IMainConfig {
   checkCommandGroup: TSMap<CommandType, GroupType[]>
@@ -40,7 +40,7 @@ export enum CommandType {
 }
 
 export class MainConfig implements IMainConfig {
-  protected regExpConig = new RegExpConig()
+  protected regExpConig = new RegExpMapConfig()
   public groupSettingMap: TSMap<GroupType, IGroupSetting> = new TSMap<GroupType, IGroupSetting>([
     [
       GroupType.PreSQL, {
@@ -164,7 +164,7 @@ export class MainConfig implements IMainConfig {
   public ddlComplexCommandEnds: string[] = ['/', 'END', 'END;']
 
   public grantRevokeCommand: { regExp: RegExp, command: string } = {
-    regExp: GRANT_REVOKE_REGEXP,
+    regExp: RegExpConfig.GRANT_REVOKE_REGEXP,
     command: 'GRANT / REVOKE'
   }
 
