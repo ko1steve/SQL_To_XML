@@ -5,7 +5,7 @@ import { TSMap } from 'typescript-map'
 import localforage from 'localforage'
 import { Container } from 'typescript-ioc'
 import { DataModel } from 'src/model/dataModel'
-import { ALL_DDL_VALID_REGEXP_WITHOUT_CHECK_TEMP_TABLE, ALL_DML_VALID_REGEXP_WITHOUT_CHECK_TEMP_TABLE, ALL_VALID_REGEXP, Command, INSERT_INTO_REGEXP, SELECT_COUNT_REGEXP, SELECT_VALID_REGEXP } from 'src/config/regExpConfig'
+import { RegExpConfig, Command } from 'src/config/regExpConfig'
 
 export class SqlContentController {
   protected dataModel: DataModel
@@ -130,7 +130,7 @@ export class SqlContentController {
     //* 反向表列的部分 (不包含 PreProdSQL)，檢查指令是否超過一個語法
     if ([GroupType.PreSQL, GroupType.PostSQL].includes(groupName)) {
       if (this.mainConfig.useAllRegExpCheckMultiCommand) {
-        const matches: RegExpMatchArray | null = upperText.match(ALL_VALID_REGEXP)
+        const matches: RegExpMatchArray | null = upperText.match(RegExpConfig.ALL_VALID_REGEXP)
         if (matches && matches.length > 1) {
           messages.push({
             messageType: MessageType.EXCEENDS_COMMAND_LIMIT_ERROR,
@@ -145,8 +145,8 @@ export class SqlContentController {
         }
       } else {
         const regExpArr: RegExp[] = [
-          ALL_DDL_VALID_REGEXP_WITHOUT_CHECK_TEMP_TABLE,
-          ALL_DML_VALID_REGEXP_WITHOUT_CHECK_TEMP_TABLE
+          RegExpConfig.ALL_DDL_VALID_REGEXP_WITHOUT_CHECK_TEMP_TABLE,
+          RegExpConfig.ALL_DML_VALID_REGEXP_WITHOUT_CHECK_TEMP_TABLE
         ]
         for (const regExp of regExpArr) {
           const matches: RegExpMatchArray | null = upperText.match(regExp)
@@ -209,7 +209,7 @@ export class SqlContentController {
                 matchError = true
               } else {
                 //* 判斷是否為 Insert Into 語法
-                if (upperText.search(INSERT_INTO_REGEXP) < 0) {
+                if (upperText.search(RegExpConfig.INSERT_INTO_REGEXP) < 0) {
                   messages.push({
                     messageType: MessageType.INVALID_COMMAND_ERROR,
                     command: commandName!,
@@ -234,7 +234,7 @@ export class SqlContentController {
             matchError = true
           }
         } else {
-          const matches: RegExpMatchArray | null = upperText.match(ALL_VALID_REGEXP)
+          const matches: RegExpMatchArray | null = upperText.match(RegExpConfig.ALL_VALID_REGEXP)
           if (matches && matches.length > 1) {
             messages.push({
               messageType: MessageType.EXCEENDS_COMMAND_LIMIT_ERROR,
@@ -266,7 +266,7 @@ export class SqlContentController {
                 isMatch = true
               } else {
                 //* 判斷是否為 Insert Into 語法
-                if (upperText.search(INSERT_INTO_REGEXP) < 0) {
+                if (upperText.search(RegExpConfig.INSERT_INTO_REGEXP) < 0) {
                   count += matches.length
                   isMatch = true
                 }
@@ -499,7 +499,6 @@ export class SqlContentController {
       let container: HTMLDivElement
       const paragraph: HTMLSpanElement = document.createElement('p')
       command.messages.forEach(detail => {
-        console.error(detail)
         let message: string = this.mainConfig.messageMap.get(detail.messageType)
         const groupTitle = this.mainConfig.groupSettingMap.get(groupType).title
         message = message.replace('{groupTitle}', groupTitle)
