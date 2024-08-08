@@ -1,6 +1,6 @@
 import { CommandType, GroupType, IGroupSetting, MainConfig } from 'src/mainConfig'
 import { IGroupContainerConfig, ISqlContentConfig } from './sqlContentConfig'
-import { CommandData, MessageType, ICommandDataMessage, StringBuilder, IGroupCommandDetail, ICommandDataDetail } from 'src/config/commandData'
+import { CommandData, MessageType, ICommandDataMessage, StringBuilder, IGroupCommandDetail, ICommandDataDetail, IIndicateCommandErrorData } from 'src/config/commandData'
 import { TSMap } from 'typescript-map'
 import localforage from 'localforage'
 import { Container } from 'typescript-ioc'
@@ -12,6 +12,7 @@ export class SqlContentController {
   protected mainConfig: MainConfig = new MainConfig()
   protected commandType: CommandType = CommandType.NONE
   protected textFromFileLoaded: string
+  protected indicateCommandErrorMap: TSMap<GroupType, IIndicateCommandErrorData> = new TSMap()
 
   constructor (commandType: CommandType, textFromFileLoaded: string, fileName: string) {
     this.dataModel = Container.get(DataModel)
@@ -73,6 +74,10 @@ export class SqlContentController {
 
         //* 若找不到區塊分割的判斷字串，則略過換下一行
         if (groupName === null) {
+          continue
+        }
+        if (!textLines[i + 1].trim().startsWith(this.mainConfig.singleCommandIndicator)) {
+          this.indicateCommandErrorMap.set(groupName, { commandIndex: i + 1 })
           continue
         }
         const searchEndArr: string[] = this.mainConfig.groupSettingMap.get(groupName).searchEndPattern
@@ -427,7 +432,20 @@ export class SqlContentController {
       let errorMessage: string = this.mainConfig.messageMap.get(MessageType.CONTENT_NOT_FOUND_ERROR)
       const groupTitle: string = this.mainConfig.groupSettingMap.get(groupType).title
       errorMessage = errorMessage.replace('{groupTitle}', groupTitle)
-      errorMessage = errorMessage.replace('{groupTitle}', groupTitle)
+      this.addClassName(title, 'command-error')
+      const span: HTMLSpanElement = document.createElement('span')
+      span.className = config.messageContainer.errorMessage.className
+      span.innerText = errorMessage
+      messageContainer.appendChild(span)
+    }
+
+    if (this.indicateCommandErrorMap.has(groupType)) {
+      const commandIndex: number = this.indicateCommandErrorMap.get(groupType).commandIndex
+      this.dataModel.setCommandValid(this.commandType, false)
+      let errorMessage: string = this.mainConfig.messageMap.get(MessageType.COMMAND_INDICATOR_NOT_FOUND)
+      const groupTitle: string = this.mainConfig.groupSettingMap.get(groupType).title
+      errorMessage = errorMessage.replaceAll('{groupTitle}', groupTitle)
+      errorMessage = errorMessage.replaceAll('{textLineIndex}', (commandIndex + 1).toString())
       this.addClassName(title, 'command-error')
       const span: HTMLSpanElement = document.createElement('span')
       span.className = config.messageContainer.errorMessage.className
@@ -501,21 +519,21 @@ export class SqlContentController {
       command.messages.forEach(detail => {
         let message: string = this.mainConfig.messageMap.get(detail.messageType)
         const groupTitle = this.mainConfig.groupSettingMap.get(groupType).title
-        message = message.replace('{groupTitle}', groupTitle)
-        message = message.replace('{sql_index}', (detail.commandIndex + 1).toString())
-        message = message.replace('{textLineIndex}', (detail.globalTextLineIndex + 1).toString())
-        message = message.replace('{command}', detail.command)
+        message = message.replaceAll('{groupTitle}', groupTitle)
+        message = message.replaceAll('{sql_index}', (detail.commandIndex + 1).toString())
+        message = message.replaceAll('{textLineIndex}', (detail.globalTextLineIndex + 1).toString())
+        message = message.replaceAll('{command}', detail.command)
         switch (detail.messageType) {
           case MessageType.INVALID_COMMAND_ERROR:
             if (detail.command === Command.ANY_COMMAND) {
-              message = this.mainConfig.messageMap.get(detail.messageType).replace(' "{command}" ', '任何')
+              message = this.mainConfig.messageMap.get(detail.messageType).replaceAll(' "{command}" ', '任何')
             }
             paragraph.className = config.messageContainer.errorMessage.className
-            container = document.getElementById(config.messageContainer.id.replace('{groupType}', groupType)) as HTMLDivElement
+            container = document.getElementById(config.messageContainer.id.replaceAll('{groupType}', groupType)) as HTMLDivElement
             break
           default:
             paragraph.className = config.messageContainer.errorMessage.className
-            container = document.getElementById(config.messageContainer.id.replace('{groupType}', groupType)) as HTMLDivElement
+            container = document.getElementById(config.messageContainer.id.replaceAll('{groupType}', groupType)) as HTMLDivElement
             break
         }
         paragraph.innerText = message

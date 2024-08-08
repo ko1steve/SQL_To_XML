@@ -4,6 +4,7 @@ export enum MessageType {
   NO_VALID_COMMAND_ERROR = 'NO_VALID_COMMAND_ERROR',
   EXCEENDS_COMMAND_LIMIT_ERROR = 'EXCEENDS_COMMAND_LIMIT_ERROR',
   EMPTY_OR_COMMENT_ONLY_ERROR = 'EMPTY_OR_COMMENT_ONLY_ERROR',
+  COMMAND_INDICATOR_NOT_FOUND = 'COMMAND_INDICATOR_NOT_FOUND',
   NONE = 'NONE'
 }
 
@@ -26,6 +27,10 @@ export interface IGroupCommandDetail {
 
 export interface ICommandDataDetail {
   groupTextLineIndex: number
+  commandIndex: number
+}
+
+export interface IIndicateCommandErrorData {
   commandIndex: number
 }
 
