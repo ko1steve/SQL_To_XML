@@ -139,7 +139,7 @@ export class MainConfig implements IMainConfig {
   public messageMap: TSMap<MessageType, string> = new TSMap<MessageType, string>([
     [
       MessageType.CONTENT_NOT_FOUND_ERROR,
-      '[{groupTitle}]\nContentNotFoundError: "{groupTitle}"尚未在 SQL 文件內定義. 請檢查 SQL 檔案是否有包含該類別的指令。'
+      '[{groupTitle}]\nContentNotFoundError: 此區塊語法尚未在 SQL 文件內定義. 請檢查 SQL 檔案是否有包含該區塊指令。'
     ],
     [
       MessageType.INVALID_COMMAND_ERROR,
@@ -156,6 +156,10 @@ export class MainConfig implements IMainConfig {
     [
       MessageType.EMPTY_OR_COMMENT_ONLY_ERROR,
       '[{groupTitle}, sql_index = {sql_index}, 行數 = {textLineIndex}]\nEmptyOrCommentOnlyError: "不能空白字串或純註解。'
+    ],
+    [
+      MessageType.COMMAND_INDICATOR_NOT_FOUND,
+      '[{groupTitle}, 行數 = {textLineIndex}]\nContentNotFoundError: 語法標註 (/*--!*/) 有誤. 請檢查 SQL 檔案第一筆指令是否有做語法標註。'
     ]
   ])
 

@@ -1,11 +1,13 @@
 {
   "items":[
-    "在五大區塊語法第一行放置下列對應的特殊字串,讓程式做辨識擷取SQL語法。\n(1) 前置語法:--#PreSQL\n(2) PreProd前置語法:--#PreProdSQL\n(3) Count語法:--#CountSQL\n(4) 異動前/後語法:--#SelectSQL\n(5) 異動語法:--#MainSQL\n(6) 後置語法:--#PostSQL",
-    "統一在 SQL 檔每一段 SQL 指令的前一行放置特殊字串「/*--!*/」,讓程式做辨識截取SQL語法。",
-    "SQL檔案內容需至少有以下的內容才視為完整的SQL檔案\n(1) DML須至少有Count語法、異動前/後語法、異動語法\n(2) DDL須至少有異動語法",
-    "DML語法結尾的分號(;)將會被 Dimensions 自動註解化",
-    "不能使用單行的 GO, COMMIT 語法，也不能使用純註解或只含空白字元的字串",
-    "若在 DDL 指令內部以外的情境使用 GO, COMMIT 語法,Dimensions 將會把該指令註解化",
-    "不得在 DDL 指令內部以外的情境使用 GRANT, REVOKE 語法"
+    "下面是五大語法區塊所對應的特殊字串,用於辨識擷取SQL語法 :\n\n(1) 前置語法:--#PreSQL\n(2) PreProd前置語法:--#PreProdSQL\n(3) Count語法:--#CountSQL\n(4) 異動前/後語法:--#SelectSQL\n(5) 異動語法:--#MainSQL\n(6) 後置語法:--#PostSQL\n\n詳細的寫法可點擊頁面右上角的 Example 按鈕下載檔案參考。",
+    "沒用到的語法區塊，其對應的特殊字串必須移除。",
+    "語法區塊內每一筆 SQL 指令的前一行須放置特殊字串「/*--!*/」,讓程式做辨識截取SQL語法。",
+    "每個區塊第一筆指令的「/*--!*/」字串必須接在五大區塊字串的下一行。",
+    "SQL檔案內容需至少有以下的內容才視為完整的SQL檔案\n(1) DML須至少要有Count語法、異動前/後語法、異動語法\n(2) DDL須至少要有異動語法。",
+    "DML語法結尾的分號(;)將會被 Dimensions 自動註解化。",
+    "不能使用單行的 GO, COMMIT 語法，也不能使用純註解或只含空白字元的字串。",
+    "若在 DDL 指令 (如 Procedure) 內部以外的情境使用 GO 或 COMMIT 語法,Dimensions 會將該指令註解化。",
+    "不得在 DDL 指令內部以外的情境使用 GRANT, REVOKE 語法。"
   ]
 }
