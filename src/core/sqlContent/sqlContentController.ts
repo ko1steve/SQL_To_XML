@@ -76,18 +76,43 @@ export class SqlContentController {
         if (groupName === null) {
           continue
         }
-        if (!textLines[i + 1].trim().startsWith(this.mainConfig.singleCommandIndicator)) {
-          this.indicateCommandErrorMap.set(groupName, { commandIndex: i + 1 })
-          continue
+        const startIndex = i
+
+        //* 區塊分割字串下一行是否必須是指令標註字串
+        if (this.mainConfig.firstCommandIsNextToGroupName) {
+          if (i + 1 >= textLines.length || !textLines[i + 1].trim().startsWith(this.mainConfig.singleCommandIndicator)) {
+            this.indicateCommandErrorMap.set(groupName, { commandIndex: i + 1 })
+            continue
+          }
+        } else {
+          //* 支援「區塊分割字串」與「指令標註字串」之間有空白字串或註解
+          let j
+          for (j = i + 1; j < textLines.length; j++) {
+            if (textLines[j].trim().startsWith(this.mainConfig.singleCommandIndicator)) {
+              i = j - 1
+              break
+            } else if (textLines[j].trim() === '' || textLines[j].trim().search(/^--|^\/\*/) < 0) {
+              continue
+            } else {
+              this.indicateCommandErrorMap.set(groupName, { commandIndex: j })
+              break
+            }
+          }
+          if (j === textLines.length) {
+            this.indicateCommandErrorMap.set(groupName, { commandIndex: j - 1 })
+          }
+          if (this.indicateCommandErrorMap.has(groupName)) {
+            continue
+          }
         }
         const searchEndArr: string[] = this.mainConfig.groupSettingMap.get(groupName).searchEndPattern
         const textSB = new StringBuilder()
-        const startIndex = i
+
         //* 找到區塊分割的判斷字串後，尋找區塊的結束點
         let j: number
         for (j = i + 1; j < textLines.length; j++) {
           i = j - 1
-          //* 若找到下一個區塊，開始將文字拆分為語法
+          //* 若找到下一個區塊，開始將文字拆分為指令
           if (searchEndArr.some(pattern => textLines[j].trim().startsWith(pattern))) {
             const promise = this.setCommandGroup(textSB.strings, groupName, {
               startIndex,
