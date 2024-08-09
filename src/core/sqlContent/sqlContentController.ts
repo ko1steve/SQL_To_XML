@@ -456,7 +456,7 @@ export class SqlContentController {
       this.dataModel.setCommandValid(this.commandType, false)
       let errorMessage: string = this.mainConfig.messageMap.get(MessageType.CONTENT_NOT_FOUND_ERROR)
       const groupTitle: string = this.mainConfig.groupSettingMap.get(groupType).title
-      errorMessage = errorMessage.replace('{groupTitle}', groupTitle)
+      errorMessage = errorMessage.replace('{titleInMsg}', groupTitle)
       this.addClassName(title, 'command-error')
       const span: HTMLSpanElement = document.createElement('span')
       span.className = config.messageContainer.errorMessage.className
@@ -469,7 +469,7 @@ export class SqlContentController {
       this.dataModel.setCommandValid(this.commandType, false)
       let errorMessage: string = this.mainConfig.messageMap.get(MessageType.COMMAND_INDICATOR_NOT_FOUND)
       const groupTitle: string = this.mainConfig.groupSettingMap.get(groupType).title
-      errorMessage = errorMessage.replaceAll('{groupTitle}', groupTitle)
+      errorMessage = errorMessage.replaceAll('{titleInMsg}', groupTitle)
       errorMessage = errorMessage.replaceAll('{textLineIndex}', (commandIndex + 1).toString())
       this.addClassName(title, 'command-error')
       const span: HTMLSpanElement = document.createElement('span')
@@ -543,8 +543,8 @@ export class SqlContentController {
       const paragraph: HTMLSpanElement = document.createElement('p')
       command.messages.forEach(detail => {
         let message: string = this.mainConfig.messageMap.get(detail.messageType)
-        const groupTitle = this.mainConfig.groupSettingMap.get(groupType).title
-        message = message.replaceAll('{groupTitle}', groupTitle)
+        const titleInMsg = this.mainConfig.groupSettingMap.get(groupType).titleInMsg
+        message = message.replaceAll('{titleInMsg}', titleInMsg)
         message = message.replaceAll('{sql_index}', (detail.commandIndex + 1).toString())
         message = message.replaceAll('{textLineIndex}', (detail.globalTextLineIndex + 1).toString())
         message = message.replaceAll('{command}', detail.command)
