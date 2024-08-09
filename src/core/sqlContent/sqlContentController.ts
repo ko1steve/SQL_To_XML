@@ -76,7 +76,7 @@ export class SqlContentController {
         if (groupName === null) {
           continue
         }
-        if (!textLines[i + 1].trim().startsWith(this.mainConfig.singleCommandIndicator)) {
+        if (i + 1 >= textLines.length || !textLines[i + 1].trim().startsWith(this.mainConfig.singleCommandIndicator)) {
           this.indicateCommandErrorMap.set(groupName, { commandIndex: i + 1 })
           continue
         }
