@@ -175,4 +175,6 @@ export class MainConfig implements IMainConfig {
   public maxGroupCommandAmount: number = 20000
 
   public useAllRegExpCheckMultiCommand: boolean = false
+
+  public firstCommandIsNextToGroupName: boolean = true
 }
