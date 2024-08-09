@@ -20,6 +20,7 @@ export interface IMainConfig {
 
 export interface IGroupSetting {
   title: string
+  titleInMsg: string
   indicator: string
   searchEndPattern: string[]
 }
@@ -45,6 +46,7 @@ export class MainConfig implements IMainConfig {
     [
       GroupType.PreSQL, {
         title: '前置語法',
+        titleInMsg: '前置語法(PreSQL)',
         indicator: '--#PreSQL',
         searchEndPattern: ['--#PreProdSQL', '--#CountSQL', '--#SelectSQL', '--#MainSQL', '--#PostSQL']
       }
@@ -52,6 +54,7 @@ export class MainConfig implements IMainConfig {
     [
       GroupType.PreProdSQL, {
         title: 'PreProd前置語法',
+        titleInMsg: 'PreProd前置語法(PreProdSQL)',
         indicator: '--#PreProdSQL',
         searchEndPattern: ['--#PreSQL', '--#CountSQL', '--#SelectSQL', '--#MainSQL', '--#PostSQL']
       }
@@ -59,6 +62,7 @@ export class MainConfig implements IMainConfig {
     [
       GroupType.CountSQL, {
         title: 'Count語法',
+        titleInMsg: 'Count語法(CountSQL)',
         indicator: '--#CountSQL',
         searchEndPattern: ['--#PreSQL', '--#PreProdSQL', '--#SelectSQL', '--#MainSQL', '--#PostSQL']
       }
@@ -66,6 +70,7 @@ export class MainConfig implements IMainConfig {
     [
       GroupType.SelectSQL, {
         title: '異動前/後語法',
+        titleInMsg: '異動前/後語法(SelectSQL)',
         indicator: '--#SelectSQL',
         searchEndPattern: ['--#PreSQL', '--#PreProdSQL', '--#CountSQL', '--#MainSQL', '--#PostSQL']
       }
@@ -73,6 +78,7 @@ export class MainConfig implements IMainConfig {
     [
       GroupType.MainSQL, {
         title: '異動語法',
+        titleInMsg: '異動語法(MainSQL)',
         indicator: '--#MainSQL',
         searchEndPattern: ['--#PreSQL', '--#PreProdSQL', '--#CountSQL', '--#SelectSQL', '--#PostSQL']
       }
@@ -80,6 +86,7 @@ export class MainConfig implements IMainConfig {
     [
       GroupType.PostSQL, {
         title: '後置語法',
+        titleInMsg: '後置語法(PostSQL)',
         indicator: '--#PostSQL',
         searchEndPattern: ['--#PreSQL', '--#PreProdSQL', '--#CountSQL', '--#SelectSQL', '--#MainSQL']
       }
@@ -139,27 +146,27 @@ export class MainConfig implements IMainConfig {
   public messageMap: TSMap<MessageType, string> = new TSMap<MessageType, string>([
     [
       MessageType.CONTENT_NOT_FOUND_ERROR,
-      '[{groupTitle}]\nContentNotFoundError: 此區塊語法尚未在 SQL 文件內定義. 請檢查 SQL 檔案是否有包含該區塊指令。'
+      '[ {titleInMsg} ]\n此區塊語法尚未在 SQL 文件內定義. 請檢查 SQL 檔案是否有包含該區塊指令。'
     ],
     [
       MessageType.INVALID_COMMAND_ERROR,
-      '[{groupTitle}, sql_index = {sql_index}, 行數 = {textLineIndex}]\nInvalidCommandError: 不允許使用 "{command}" 語法。請移除相關的語法。'
+      '[ {titleInMsg}, sql_index = {sql_index}, 行數 = {textLineIndex} ]\n此區塊不允許使用 "{command}" 語法。請移除相關的語法。'
     ],
     [
       MessageType.NO_VALID_COMMAND_ERROR,
-      '[{groupTitle}, sql_index = {sql_index}, 行數 = {textLineIndex}]\nNoValidCommandError: "找不到符合語法規則的語法。請檢查語法是否拼錯、或者使用了不合規的語法。'
+      '[ {titleInMsg}, sql_index = {sql_index}, 行數 = {textLineIndex} ]\n"找不到此區塊允許使用的語法。請檢查語法是否拼錯、或者使用了不合規的語法。'
     ],
     [
       MessageType.EXCEENDS_COMMAND_LIMIT_ERROR,
-      '[{groupTitle}, sql_index = {sql_index}, 行數 = {textLineIndex}]\nExceedsCommandLimitError: "不能在一個語法標記(/*--!*/)底下放置兩筆以上的語法。'
+      '[ {titleInMsg}, sql_index = {sql_index}, 行數 = {textLineIndex} ]\n"不得在 SQL 指令標記 (/*--!*/) 底下放置兩筆以上的語法。'
     ],
     [
       MessageType.EMPTY_OR_COMMENT_ONLY_ERROR,
-      '[{groupTitle}, sql_index = {sql_index}, 行數 = {textLineIndex}]\nEmptyOrCommentOnlyError: "不能空白字串或純註解。'
+      '[ {titleInMsg}, sql_index = {sql_index}, 行數 = {textLineIndex} ]\n"不得在 SQL 指令標記下只放置單行的空白字串或註解。'
     ],
     [
       MessageType.COMMAND_INDICATOR_NOT_FOUND,
-      '[{groupTitle}, 行數 = {textLineIndex}]\nContentNotFoundError: 語法標註 (/*--!*/) 有誤. 請檢查 SQL 檔案第一筆指令是否有做語法標註。'
+      '[ {titleInMsg}, 行數 = {textLineIndex} ]\n SQL 指令標記 (/*--!*/) 有誤. 請檢查 SQL 檔案第一筆指令是否有做標註。'
     ]
   ])
 
