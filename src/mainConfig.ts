@@ -46,23 +46,23 @@ export class MainConfig implements IMainConfig {
     [
       GroupType.PreSQL, {
         title: '前置語法',
-        titleInMsg: '前置語法(PreSQL)',
+        titleInMsg: '前置語法 (PreSQL) ',
         indicator: '--#PreSQL',
         searchEndPattern: ['--#PreProdSQL', '--#CountSQL', '--#SelectSQL', '--#MainSQL', '--#PostSQL']
       }
     ],
     [
       GroupType.PreProdSQL, {
-        title: 'PreProd前置語法',
-        titleInMsg: 'PreProd前置語法(PreProdSQL)',
+        title: 'PreProd 前置語法',
+        titleInMsg: 'PreProd前置語法 (PreProdSQL) ',
         indicator: '--#PreProdSQL',
         searchEndPattern: ['--#PreSQL', '--#CountSQL', '--#SelectSQL', '--#MainSQL', '--#PostSQL']
       }
     ],
     [
       GroupType.CountSQL, {
-        title: 'Count語法',
-        titleInMsg: 'Count語法(CountSQL)',
+        title: 'Count 語法',
+        titleInMsg: 'Count 語法 (CountSQL) ',
         indicator: '--#CountSQL',
         searchEndPattern: ['--#PreSQL', '--#PreProdSQL', '--#SelectSQL', '--#MainSQL', '--#PostSQL']
       }
@@ -70,7 +70,7 @@ export class MainConfig implements IMainConfig {
     [
       GroupType.SelectSQL, {
         title: '異動前/後語法',
-        titleInMsg: '異動前/後語法(SelectSQL)',
+        titleInMsg: '異動前/後語法 (SelectSQL) ',
         indicator: '--#SelectSQL',
         searchEndPattern: ['--#PreSQL', '--#PreProdSQL', '--#CountSQL', '--#MainSQL', '--#PostSQL']
       }
@@ -78,7 +78,7 @@ export class MainConfig implements IMainConfig {
     [
       GroupType.MainSQL, {
         title: '異動語法',
-        titleInMsg: '異動語法(MainSQL)',
+        titleInMsg: '異動語法 (MainSQL) ',
         indicator: '--#MainSQL',
         searchEndPattern: ['--#PreSQL', '--#PreProdSQL', '--#CountSQL', '--#SelectSQL', '--#PostSQL']
       }
@@ -86,7 +86,7 @@ export class MainConfig implements IMainConfig {
     [
       GroupType.PostSQL, {
         title: '後置語法',
-        titleInMsg: '後置語法(PostSQL)',
+        titleInMsg: '後置語法 (PostSQL) ',
         indicator: '--#PostSQL',
         searchEndPattern: ['--#PreSQL', '--#PreProdSQL', '--#CountSQL', '--#SelectSQL', '--#MainSQL']
       }
@@ -146,7 +146,7 @@ export class MainConfig implements IMainConfig {
   public messageMap: TSMap<MessageType, string> = new TSMap<MessageType, string>([
     [
       MessageType.CONTENT_NOT_FOUND_ERROR,
-      '[ {titleInMsg} ]\n此區塊語法尚未在 SQL 文件內定義. 請檢查 SQL 檔案是否有包含該區塊指令。'
+      '[ {titleInMsg} ]\n此區塊並未找到任何語法. 請檢查 SQL 檔案是否有包含該區塊指令。'
     ],
     [
       MessageType.INVALID_COMMAND_ERROR,
@@ -165,7 +165,7 @@ export class MainConfig implements IMainConfig {
       '[ {titleInMsg}, sql_index = {sql_index}, 行數 = {textLineIndex} ]\n"不得在 SQL 指令標記下只放置單行的空白字串或註解。'
     ],
     [
-      MessageType.COMMAND_INDICATOR_NOT_FOUND,
+      MessageType.COMMAND_INDICATOR_NOT_FOUND_ERROR,
       '[ {titleInMsg}, 行數 = {textLineIndex} ]\n SQL 指令標記 (/*--!*/) 有誤. 請檢查 SQL 檔案第一筆指令是否有做標註。'
     ]
   ])

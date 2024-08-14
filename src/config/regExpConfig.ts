@@ -160,6 +160,20 @@ export class RegExpMapConfig implements IRegExpMapConfig {
           Command.SELECT_COUNT, RegExpConfig.SELECT_COUNT_REGEXP
         ]
       ])
+    ],
+    [
+      GroupType.CountSQL, new TSMap<string, RegExp>([
+        [
+          Command.ANY_COMMAND, RegExpConfig.ANY_COMMAND_REGEXP
+        ]
+      ])
+    ],
+    [
+      GroupType.SelectSQL, new TSMap<string, RegExp>([
+        [
+          Command.ANY_COMMAND, RegExpConfig.ANY_COMMAND_REGEXP
+        ]
+      ])
     ]
   ])
 

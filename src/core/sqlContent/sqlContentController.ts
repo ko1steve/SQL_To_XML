@@ -51,6 +51,7 @@ export class SqlContentController {
       this.dataModel.setCommandValid(this.commandType, true)
       this.dataModel.fileName = fileName
       this.textFromFileLoaded = textFromFileLoaded
+      this.indicateCommandErrorMap.clear()
       this.initialize()
     })
   }
@@ -82,11 +83,11 @@ export class SqlContentController {
         if (this.mainConfig.firstCommandIsNextToGroupName) {
           if (i + 1 >= textLines.length || !textLines[i + 1].trim().startsWith(this.mainConfig.singleCommandIndicator)) {
             this.indicateCommandErrorMap.set(groupName, { commandIndex: i + 1 })
-            continue
           }
         } else {
           //* 支援「區塊分割字串」與「指令標註字串」之間有空白字串或註解
           let j
+          let isError: boolean = false
           for (j = i + 1; j < textLines.length; j++) {
             if (textLines[j].trim().startsWith(this.mainConfig.singleCommandIndicator)) {
               i = j - 1
@@ -95,14 +96,12 @@ export class SqlContentController {
               continue
             } else {
               this.indicateCommandErrorMap.set(groupName, { commandIndex: j })
-              break
+              isError = true
             }
           }
-          if (j === textLines.length) {
+          if (j === textLines.length && !isError) {
             this.indicateCommandErrorMap.set(groupName, { commandIndex: j - 1 })
-          }
-          if (this.indicateCommandErrorMap.has(groupName)) {
-            continue
+            isError = true
           }
         }
         const searchEndArr: string[] = this.mainConfig.groupSettingMap.get(groupName).searchEndPattern
@@ -374,13 +373,9 @@ export class SqlContentController {
           break
         }
       }
-      if (commands.length > 0) {
-        localforage.setItem(groupName + '-command', commands).then(() => {
-          resolve()
-        })
-      } else {
+      localforage.setItem(groupName + '-command', commands).then(() => {
         resolve()
-      }
+      })
     })
   }
 
@@ -452,23 +447,12 @@ export class SqlContentController {
       isCheckGroup = checkGroupTypes.includes(groupType)
     }
 
-    if (commands.length === 0 && isCheckGroup) {
-      this.dataModel.setCommandValid(this.commandType, false)
-      let errorMessage: string = this.mainConfig.messageMap.get(MessageType.CONTENT_NOT_FOUND_ERROR)
-      const groupTitle: string = this.mainConfig.groupSettingMap.get(groupType).title
-      errorMessage = errorMessage.replace('{titleInMsg}', groupTitle)
-      this.addClassName(title, 'command-error')
-      const span: HTMLSpanElement = document.createElement('span')
-      span.className = config.messageContainer.errorMessage.className
-      span.innerText = errorMessage
-      messageContainer.appendChild(span)
-    }
-
+    //* 顯示「沒有 SQL 命令標註字串錯誤」
     if (this.indicateCommandErrorMap.has(groupType)) {
       const commandIndex: number = this.indicateCommandErrorMap.get(groupType).commandIndex
       this.dataModel.setCommandValid(this.commandType, false)
-      let errorMessage: string = this.mainConfig.messageMap.get(MessageType.COMMAND_INDICATOR_NOT_FOUND)
-      const groupTitle: string = this.mainConfig.groupSettingMap.get(groupType).title
+      let errorMessage: string = this.mainConfig.messageMap.get(MessageType.COMMAND_INDICATOR_NOT_FOUND_ERROR)
+      const groupTitle: string = this.mainConfig.groupSettingMap.get(groupType).titleInMsg
       errorMessage = errorMessage.replaceAll('{titleInMsg}', groupTitle)
       errorMessage = errorMessage.replaceAll('{textLineIndex}', (commandIndex + 1).toString())
       this.addClassName(title, 'command-error')
@@ -476,9 +460,20 @@ export class SqlContentController {
       span.className = config.messageContainer.errorMessage.className
       span.innerText = errorMessage
       messageContainer.appendChild(span)
+      //* 顯示「沒有任何 SQL 命令錯誤」
+    } else if (commands.length === 0 && isCheckGroup) {
+      this.dataModel.setCommandValid(this.commandType, false)
+      let errorMessage: string = this.mainConfig.messageMap.get(MessageType.CONTENT_NOT_FOUND_ERROR)
+      const groupTitle: string = this.mainConfig.groupSettingMap.get(groupType).titleInMsg
+      errorMessage = errorMessage.replaceAll('{titleInMsg}', groupTitle)
+      this.addClassName(title, 'command-error')
+      const span: HTMLSpanElement = document.createElement('span')
+      span.className = config.messageContainer.errorMessage.className
+      span.innerText = errorMessage
+      messageContainer.appendChild(span)
     }
 
-    if (commands.length > 0) {
+    if (commands.length > 0 && !this.indicateCommandErrorMap.has(groupType)) {
       if (groupType === GroupType.MainSQL) {
         const totalCommandsText = document.createElement('p')
         totalCommandsText.innerText = '語法數量 : ' + commands.length.toString()
@@ -531,9 +526,6 @@ export class SqlContentController {
           }
         }
       })
-    }
-    if (messageContainer.children.length === 0) {
-      this.addClassName(messageContainer, 'invisible')
     }
   }
 
