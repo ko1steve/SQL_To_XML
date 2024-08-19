@@ -1,5 +1,11 @@
-export const overlayId: string = 'overlay'
+export const overlay = {
+  id: 'overlay'
+}
 
-export const overlayTextId: string = 'overlay-text'
+export const overlayText = {
+  id: 'overlay-text'
+}
 
-export const progressTextId: string = 'progress-text'
+export const progressText = {
+  id: 'progress-text'
+}

@@ -1,2 +1,7 @@
-export const commandTabIdDml = 'dml-tab'
-export const commandTabIdDdl = 'ddl-tab'
+export const commandTabDml = {
+  id: 'dml-tab'
+}
+
+export const commandTabDdl = {
+  id: 'ddl-tab'
+}

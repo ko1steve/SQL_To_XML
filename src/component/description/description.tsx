@@ -6,12 +6,12 @@ import * as Config from './config'
 export const Description: React.FC = () => {
   const items = Content.items
   return (
-    <div className={Config.descriptionContainerClass} id={Config.descriptionContainerId}>
+    <div className={Config.descriptionContainer.className} id={Config.descriptionContainer.id}>
       <div>
-        <p className={Config.descriptionTitleClass}>格式說明</p>
+        <p className={Config.descriptionTitle.className}>格式說明</p>
       </div>
-      <div className={Config.descriptionContentClass}>
-        <DescriptionItems items={items} />
+      <div className={Config.descriptionContent.className}>
+        <DescriptionItems className={Config.descriptionItem.className} items={items} />
       </div>
     </div>
   )

@@ -1,8 +1,16 @@
-export const descriptionContainerId = 'descript-container'
-export const descriptionContainerClass = 'col-4 container'
+export const descriptionContainer = {
+  id: 'descript-container',
+  className: 'col-4 container'
+}
 
-export const descriptionTitleClass = 'h2 d-flex justify-content-center'
+export const descriptionTitle = {
+  className: 'h2 d-flex justify-content-center'
+}
 
-export const descriptionContentClass = 'd-flex justify-content-center'
+export const descriptionContent = {
+  className: 'd-flex justify-content-center'
+}
 
-export const descriptionItemClass = 'list-text'
+export const descriptionItem = {
+  className: 'list-text'
+}

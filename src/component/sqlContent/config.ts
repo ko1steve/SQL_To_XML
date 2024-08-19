@@ -1,14 +1,50 @@
-export const sqlContentContainerClass = 'col-8 container position-relative'
+export const sqlContentContainer = {
+  className: 'col-8 container position-relative'
+}
 
-export const buttonListContainerClass = 'd-flex justify-content-right position-absolute end-0'
+export const buttonListContainer = {
+  className: 'd-flex justify-content-right position-absolute end-0'
+}
 
-export const commandTypeTabsClass = 'nav nav-tabs'
+export const commandTypeTabs = {
+  className: 'nav nav-tabs'
+}
 
-export const commandTypeTabsContentClass = 'tab-content mt-3'
+export const commandTypeTabsContent = {
+  className: 'tab-content mt-3'
+}
 
-export const commadnTypePanelIdDml = 'dml-panel'
-export const commadnTypePanelIdDdl = 'ddl-panel'
+export const commadnTypePanelDml = {
+  id: 'dml-panel'
+}
+export const commadnTypePanelDdl = {
+  id: 'ddl-panel'
+}
 
-export const commandMainContainerClass = 'text-center container'
-export const commandMainContainerDmlId = 'main-container-dml'
-export const commandMainContainerDdlId = 'main-container-ddl'
+export const commandMainContainerDml = {
+  className: 'text-center container',
+  id: 'main-container-dml'
+}
+
+export const commandMainContainerDdl = {
+  className: 'text-center container',
+  id: 'main-container-ddl'
+}
+
+export const importSqlButton = {
+  className: 'import-sql-button',
+  id: 'import-sql-button',
+  label: {
+    className: 'file-input-label',
+    id: 'file-input-label-DML'
+  },
+  input: {
+    className: 'file-input',
+    id: 'file-input-DML'
+  }
+}
+
+export const exportXmlButton = {
+  className: '',
+  id: 'export-xml-button'
+}

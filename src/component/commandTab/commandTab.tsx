@@ -19,12 +19,12 @@ export const CommandTab: React.FC<ICommamdTabProps> = ({ sqlType, active }) => {
   let targetPanelId: string = ''
   switch (sqlType) {
     case CommandType.DML:
-      commandTabId = Config.commandTabIdDml
-      targetPanelId = SqlContentConfig.commadnTypePanelIdDml
+      commandTabId = Config.commandTabDml.id
+      targetPanelId = SqlContentConfig.commadnTypePanelDml.id
       break
     case CommandType.DDL:
-      commandTabId = Config.commandTabIdDdl
-      targetPanelId = SqlContentConfig.commadnTypePanelIdDdl
+      commandTabId = Config.commandTabDdl.id
+      targetPanelId = SqlContentConfig.commadnTypePanelDdl.id
       break
   }
   return (

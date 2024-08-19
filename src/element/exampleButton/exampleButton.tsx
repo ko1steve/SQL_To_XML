@@ -1,18 +1,23 @@
 import React from 'react'
-import * as Content from './content.json'
 
-export const ExampleButton: React.FC = () => {
+interface IExampleButtonProps {
+  content: string
+  fileName: string
+  className: string
+  id: string
+}
+
+export const ExampleButton: React.FC<IExampleButtonProps> = ({ content, fileName, className, id }) => {
   const handleOnClick = () => {
-    const xmlContent = Content.xmlContentStrings.join('')
-    const blob = new Blob([xmlContent], { type: 'text/xml' })
+    const blob = new Blob([content], { type: 'text/xml' })
     const a = document.createElement('a')
     a.href = URL.createObjectURL(blob)
-    a.download = 'example.sql'
+    a.download = fileName
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
   }
   return (
-    <button className='nav-link py-2 px-0 px-lg-2 header-bar' id='download-example-button' onClick={handleOnClick}>Example</button>
+    <button className={className} id={id} onClick={handleOnClick}>Example</button>
   )
 }

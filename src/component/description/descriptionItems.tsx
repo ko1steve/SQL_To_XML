@@ -1,15 +1,15 @@
 import React from 'react'
-import * as Config from './config'
 
 interface IItemListProps {
+  className: string
   items: string[]
 }
 
-export const DescriptionItems: React.FC<IItemListProps> = ({ items }) => {
+export const DescriptionItems: React.FC<IItemListProps> = ({ className, items }) => {
   return (
     <ul>
       {items.map((item, index) => (
-        <li className={Config.descriptionItemClass} key={index}>{item}</li>
+        <li className={className} key={index}>{item}</li>
       ))}
     </ul>
   )

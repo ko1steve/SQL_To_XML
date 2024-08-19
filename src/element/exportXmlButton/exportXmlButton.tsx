@@ -10,7 +10,12 @@ enum ButtonState {
   Inactive = 'inactive'
 }
 
-export const ExportXmlButton: React.FC = () => {
+interface IExportXmlButtonProps {
+  className: string
+  id: string
+}
+
+export const ExportXmlButton: React.FC<IExportXmlButtonProps> = ({ className, id }) => {
   const dataModel = Container.get(DataModel)
   const [isCommandValid, setCommandValid] = useState<boolean>(dataModel.getCommandValid(dataModel.currentTab))
 
@@ -89,8 +94,6 @@ export const ExportXmlButton: React.FC = () => {
   }, [])
 
   return (
-    <div className='download-button-container'>
-      <button id='download-button' className={`${(isCommandValid ? ButtonState.Active : ButtonState.Inactive)}`} onClick={handleOnClick}>Export as XML</button>
-    </div>
+    <button className={className + ' ' + (isCommandValid ? ButtonState.Active : ButtonState.Inactive)} id={id} onClick={handleOnClick}>Export as XML</button>
   )
 }

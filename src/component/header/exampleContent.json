@@ -1,5 +1,5 @@
 {
-  "xmlContentStrings":[
+  "content":[
     "--#PreSQL\r\n",
     "/*--!*/\r\n",
     "Create table #temp_table\r\n",
