@@ -1,27 +1,29 @@
 import React from 'react'
 import { ImportSqlButton } from 'src/element/importSqlButton/importSqlButton'
-import { CommandTab } from 'src/element/commandTab/commandTab'
+import { CommandTab } from 'src/component/commandTab/commandTab'
 import { CommandType } from 'src/mainConfig'
 import { ExportXmlButton } from 'src/element/exportXmlButton/exportXmlButton'
+import * as Config from './config'
+import * as CommandTabConfig from 'src/component/commandTab/config'
 
 export const SqlContent: React.FC = () => {
   return (
-    <div className='col-8 container position-relative'>
-      <div className='d-flex justify-content-right position-absolute end-0'>
+    <div className={Config.sqlContentContainerClass}>
+      <div className={Config.buttonListContainerClass}>
         <ImportSqlButton />
         <ExportXmlButton />
       </div>
-      <ul className='nav nav-tabs' id='commandTypeTabs' role='tablist'>
+      <ul className={Config.commandTypeTabsClass} role='tablist'>
         <CommandTab sqlType={CommandType.DML} active={true} />
         <CommandTab sqlType={CommandType.DDL} active={false} />
       </ul>
-      <div className='tab-content mt-3' id='commandTypeTabsContent'>
-        <div className='tab-pane fade show active' id='dml' role='tabpanel' aria-labelledby='dml-tab'>
-          <div className='text-center container' id='main-container-DML'>
+      <div className={Config.commandTypeTabsContentClass}>
+        <div className='tab-pane fade show active' id={Config.commadnTypePanelIdDml} role='tabpanel' aria-labelledby={CommandTabConfig.commandTabIdDml}>
+          <div className={Config.commandMainContainerClass} id={Config.commandMainContainerDmlId}>
           </div>
         </div>
-        <div className='tab-pane fade' id='ddl' role='tabpanel' aria-labelledby='ddl-tab'>
-          <div className='text-center container' id='main-container-DDL'>
+        <div className='tab-pane fade' id={Config.commadnTypePanelIdDdl} role='tabpanel' aria-labelledby={CommandTabConfig.commandTabIdDdl}>
+          <div className={Config.commandMainContainerClass} id={Config.commandMainContainerDdlId}>
           </div>
         </div>
       </div>

@@ -12,7 +12,7 @@ export class SqlContentConfig implements ISqlContentConfig {
     Object.getOwnPropertyNames(obj).forEach(k => {
       if (typeof obj[k] === 'object') {
         if (Object.prototype.hasOwnProperty.call(obj[k], 'id')) {
-          obj[k].id = (obj[k].id as string).replace('{commandType}', this.commandType)
+          obj[k].id = (obj[k].id as string).replace('{commandType}', this.commandType.toLowerCase())
           this.replaceCommandType(obj[k])
         }
       }

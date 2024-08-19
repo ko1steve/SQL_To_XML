@@ -1,15 +1,16 @@
 import React from 'react'
 import { DescriptionItems } from './descriptionItems'
 import * as Content from './content.json'
+import * as Config from './config'
 
 export const Description: React.FC = () => {
   const items = Content.items
   return (
-    <div className='col-4 container' id='descript-container'>
+    <div className={Config.descriptionContainerClass} id={Config.descriptionContainerId}>
       <div>
-        <p className='h2 d-flex justify-content-center' id='description-title'>格式說明</p>
+        <p className={Config.descriptionTitleClass}>格式說明</p>
       </div>
-      <div className='d-flex justify-content-center' id='description-content'>
+      <div className={Config.descriptionContentClass}>
         <DescriptionItems items={items} />
       </div>
     </div>
