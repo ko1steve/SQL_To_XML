@@ -70,6 +70,7 @@
 
 .import-sql-button {
   margin-bottom: 15px;
+  height: 42px;
 }
 
 #export-xml-button {
@@ -79,6 +80,7 @@
   font-size: 15px;
   padding: 10px;
   border: none;
+  height: 42px;
   background-color:#dbdbdb;
 }
 

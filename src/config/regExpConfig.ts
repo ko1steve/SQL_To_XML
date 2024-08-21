@@ -225,5 +225,5 @@ export enum Command {
   SELECT_COUNT = 'SELECT COUNT',
   DDL = 'DDL',
   DML = 'DML',
-  ANY_COMMAND = 'ANY COMMAND'
+  ANY_COMMAND = '任何'
 }
