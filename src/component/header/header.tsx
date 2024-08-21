@@ -1,17 +1,19 @@
 import React from 'react'
 import { ExampleButton } from 'src/element/exampleButton/exampleButton'
+import * as Config from './config'
+import * as ExampleContent from './exampleContent.json'
 
 export const Header: React.FC = () => {
+  const content: string = ExampleContent.content.join('')
   return (
-    <div className='navbar navbar-dark bg-dark shadow-sm fixed-top'>
-      <div className='container d-flex align-items-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none'>
-        <span id='header-title'>SQL 產生器</span>
-        <div className='offcanvas-body p-4 pt-0 p-lg-0'>
-          <ul className='navbar-nav flex-row flex-wrap bd-navbar-nav px-5 justify-content-end'>
-            <li className='nav-item col-6 col-lg-auto'>
-              <ExampleButton />
+    <div className={Config.background.className}>
+      <div className={Config.titleContainer.className}>
+        <span id={Config.title.id}>SQL 產生器</span>
+        <div className={Config.buttonListContainer.className}>
+          <ul className={Config.buttonList.className}>
+            <li className={Config.buttonListItem.className}>
+              <ExampleButton content={content} fileName={Config.exampleButton.fileName} className={Config.exampleButton.className} id={Config.exampleButton.id} />
             </li>
-            <li className='nav-item col-6 col-lg-auto'></li>
           </ul>
         </div>
       </div>

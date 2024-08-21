@@ -5,7 +5,20 @@ import { Container } from 'typescript-ioc'
 import { DataModel } from 'src/model/dataModel'
 import { SqlContentController } from 'src/core/sqlContent/sqlContentController'
 
-export const ImportSqlButton: React.FC = () => {
+interface IImportSqlButtonProps {
+  className: string
+  id: string
+  label: {
+    className: string
+    id: string
+  }
+  input: {
+    className: string
+    id: string
+  }
+}
+
+export const ImportSqlButton: React.FC<IImportSqlButtonProps> = ({ className, id, label, input }) => {
   const handleOnChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (!event.target || !event.target.files || event.target.files.length === 0) {
       return
@@ -58,9 +71,9 @@ export const ImportSqlButton: React.FC = () => {
   }
 
   return (
-    <div className='upload-button-container'>
-      <label htmlFor='file-input-DML' className='file-input-label' id='file-input-label-DML'>Import SQL File</label>
-      <input type='file' accept='.sql' id='file-input-DML' className='file-input' data-sql-type='DML' onChange={handleOnChange} />
+    <div className={className} id={id}>
+      <label htmlFor={input.id} className={label.className} id={label.id}>Import SQL File</label>
+      <input type='file' accept='.sql' className={input.className} id={input.id} onChange={handleOnChange} />
     </div>
   )
 }

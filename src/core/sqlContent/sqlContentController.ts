@@ -45,8 +45,8 @@ export class SqlContentController {
 
   public updateNewPageContent (textFromFileLoaded: string, fileName: string): void {
     this.resetLocalForge().then(() => {
-      const mainContainer: HTMLDivElement = document.getElementById('main-container-' + this.commandType) as HTMLDivElement
-      const contentContainer: HTMLDivElement = document.getElementById('content-container-' + this.commandType) as HTMLDivElement
+      const mainContainer: HTMLDivElement = document.getElementById('main-container-' + this.commandType.toLowerCase()) as HTMLDivElement
+      const contentContainer: HTMLDivElement = document.getElementById('content-container-' + this.commandType.toLowerCase()) as HTMLDivElement
       mainContainer.removeChild(contentContainer)
       this.dataModel.setCommandValid(this.commandType, true)
       this.dataModel.fileName = fileName
@@ -392,7 +392,7 @@ export class SqlContentController {
 
   protected createPageContent (): Promise<void> {
     return new Promise<void>(resolve => {
-      const mainContainer: HTMLDivElement = document.getElementById('main-container-' + this.commandType) as HTMLDivElement
+      const mainContainer: HTMLDivElement = document.getElementById('main-container-' + this.commandType.toLowerCase()) as HTMLDivElement
       const elementConfig: ISqlContentConfig = this.mainConfig.tabContentConfigMap.get(this.commandType) as ISqlContentConfig
       const contentContainer: HTMLDivElement = document.createElement('div') as HTMLDivElement
       contentContainer.id = elementConfig.mainContainer.contentContainer.id

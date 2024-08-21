@@ -1,27 +1,30 @@
 import React from 'react'
 import { ImportSqlButton } from 'src/element/importSqlButton/importSqlButton'
-import { CommandTab } from 'src/element/commandTab/commandTab'
+import { CommandTab } from 'src/component/commandTab/commandTab'
 import { CommandType } from 'src/mainConfig'
 import { ExportXmlButton } from 'src/element/exportXmlButton/exportXmlButton'
+import * as Config from './config'
+import * as CommandTabConfig from 'src/component/commandTab/config'
 
 export const SqlContent: React.FC = () => {
   return (
-    <div className='col-8 container position-relative'>
-      <div className='d-flex justify-content-right position-absolute end-0'>
-        <ImportSqlButton />
-        <ExportXmlButton />
+    <div className={Config.sqlContentContainer.className}>
+      <div className={Config.buttonListContainer.className}>
+        <ImportSqlButton className={Config.importSqlButton.className} id={Config.importSqlButton.id}
+          label={Config.importSqlButton.label} input={Config.importSqlButton.input} />
+        <ExportXmlButton className={Config.exportXmlButton.className} id={Config.exportXmlButton.id} />
       </div>
-      <ul className='nav nav-tabs' id='commandTypeTabs' role='tablist'>
+      <ul className={Config.commandTypeTabs.className} role='tablist'>
         <CommandTab sqlType={CommandType.DML} active={true} />
         <CommandTab sqlType={CommandType.DDL} active={false} />
       </ul>
-      <div className='tab-content mt-3' id='commandTypeTabsContent'>
-        <div className='tab-pane fade show active' id='dml' role='tabpanel' aria-labelledby='dml-tab'>
-          <div className='text-center container' id='main-container-DML'>
+      <div className={Config.commandTypeTabsContent.className}>
+        <div className='tab-pane fade show active' id={Config.commadnTypePanelDml.id} role='tabpanel' aria-labelledby={CommandTabConfig.commandTabDml.id}>
+          <div className={Config.commandMainContainerDml.className} id={Config.commandMainContainerDml.id}>
           </div>
         </div>
-        <div className='tab-pane fade' id='ddl' role='tabpanel' aria-labelledby='ddl-tab'>
-          <div className='text-center container' id='main-container-DDL'>
+        <div className='tab-pane fade' id={Config.commadnTypePanelDdl.id} role='tabpanel' aria-labelledby={CommandTabConfig.commandTabDdl.id}>
+          <div className={Config.commandMainContainerDdl.className} id={Config.commandMainContainerDdl.id}>
           </div>
         </div>
       </div>
