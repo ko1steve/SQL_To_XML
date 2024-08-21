@@ -546,20 +546,9 @@ export class SqlContentController {
         message = message.replaceAll('{sql_index}', (detail.commandIndex + 1).toString())
         message = message.replaceAll('{textLineIndex}', (detail.globalTextLineIndex + 1).toString())
         message = message.replaceAll('{command}', detail.command)
-        switch (detail.messageType) {
-          case MessageType.INVALID_COMMAND_ERROR:
-            if (detail.command === Command.ANY_COMMAND) {
-              message = this.mainConfig.messageMap.get(detail.messageType).replaceAll(' "{command}" ', '任何')
-            }
-            paragraph.className = config.messageContainer.errorMessage.className
-            container = document.getElementById(config.messageContainer.id.replaceAll('{groupType}', groupType)) as HTMLDivElement
-            break
-          default:
-            paragraph.className = config.messageContainer.errorMessage.className
-            container = document.getElementById(config.messageContainer.id.replaceAll('{groupType}', groupType)) as HTMLDivElement
-            break
-        }
+        paragraph.className = config.messageContainer.errorMessage.className
         paragraph.innerText = message
+        container = document.getElementById(config.messageContainer.id.replaceAll('{groupType}', groupType)) as HTMLDivElement
         container.appendChild(paragraph)
       })
     }
