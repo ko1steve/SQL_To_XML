@@ -329,6 +329,9 @@ export class SqlContentController {
   protected setCommandGroup (textLines: string[], groupName: GroupType, detail: IGroupCommandDetail): Promise<void> {
     return new Promise(resolve => {
       if (textLines.length === 0) {
+        if (this.indicateCommandErrorMap.has(groupName)) {
+          this.indicateCommandErrorMap.delete(groupName)
+        }
         return resolve()
       }
       const commands: CommandData[] = []
@@ -374,6 +377,9 @@ export class SqlContentController {
         }
       }
       localforage.setItem(groupName + '-command', commands).then(() => {
+        if (commands.length === 0 && this.indicateCommandErrorMap.has(groupName)) {
+          this.indicateCommandErrorMap.delete(groupName)
+        }
         resolve()
       })
     })
