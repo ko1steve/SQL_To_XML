@@ -342,13 +342,15 @@ export class SqlContentController {
         if (!textLines[i].trim().startsWith(this.mainConfig.singleCommandIndicator)) {
           continue
         }
-        const startIndex = i
+        let startIndex = i
         commadTextSB = new StringBuilder()
         const commandDataMessages: ICommandDataMessage[] = []
 
         const newTextLine = textLines[i].replace(this.mainConfig.singleCommandIndicator, '').trim()
         if (newTextLine.length !== 0) {
           commadTextSB.append(newTextLine)
+        } else {
+          startIndex++
         }
 
         let j: number

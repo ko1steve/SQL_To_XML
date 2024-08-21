@@ -150,23 +150,23 @@ export class MainConfig implements IMainConfig {
     ],
     [
       MessageType.INVALID_COMMAND_ERROR,
-      '[ {titleInMsg}, sql_index = {sql_index}, 行數 = {textLineIndex} ]\n此區塊不允許使用 "{command}" 語法。請移除相關的語法。'
+      '[ {titleInMsg}, sql_index = {sql_index}, 原始文件行數 = {textLineIndex} ]\n此區塊不允許使用 "{command}" 語法。請移除相關的語法。'
     ],
     [
       MessageType.NO_VALID_COMMAND_ERROR,
-      '[ {titleInMsg}, sql_index = {sql_index}, 行數 = {textLineIndex} ]\n"找不到此區塊允許使用的語法。請檢查語法是否拼錯、或者使用了不合規的語法。'
+      '[ {titleInMsg}, sql_index = {sql_index}, 原始文件行數 = {textLineIndex} ]\n"找不到此區塊允許使用的語法。請檢查語法是否拼錯、或者使用了不合規的語法。'
     ],
     [
       MessageType.EXCEENDS_COMMAND_LIMIT_ERROR,
-      '[ {titleInMsg}, sql_index = {sql_index}, 行數 = {textLineIndex} ]\n"不得在 SQL 指令標記 (/*--!*/) 底下放置兩筆以上的語法。'
+      '[ {titleInMsg}, sql_index = {sql_index}, 原始文件行數 = {textLineIndex} ]\n"不得在 SQL 指令標記 (/*--!*/) 底下放置兩筆以上的語法。'
     ],
     [
       MessageType.EMPTY_OR_COMMENT_ONLY_ERROR,
-      '[ {titleInMsg}, sql_index = {sql_index}, 行數 = {textLineIndex} ]\n"不得在 SQL 指令標記下只放置單行的空白字串或註解。'
+      '[ {titleInMsg}, sql_index = {sql_index}, 原始文件行數 = {textLineIndex} ]\n"不得在 SQL 指令標記下只放置單行的空白字串或註解。'
     ],
     [
       MessageType.COMMAND_INDICATOR_NOT_FOUND_ERROR,
-      '[ {titleInMsg}, 行數 = {textLineIndex} ]\n SQL 指令標記 (/*--!*/) 有誤. 請檢查 SQL 檔案第一筆指令是否有做標註。'
+      '[ {titleInMsg}, 原始文件行數 = {textLineIndex} ]\n SQL 指令標記 (/*--!*/) 有誤. 請檢查 SQL 檔案第一筆指令是否有做標註。'
     ]
   ])
 
