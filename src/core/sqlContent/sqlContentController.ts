@@ -246,6 +246,8 @@ export class SqlContentController {
                     commandIndex: detail.commandIndex
                   })
                   matchError = true
+                } else {
+                  count--
                 }
               }
             }
@@ -290,14 +292,15 @@ export class SqlContentController {
           const matches: RegExpMatchArray | null = upperText.match(regExp)
           if (matches) {
             if (matches.length > 0) {
+              count += matches.length
               if (commandName !== Command.SELECT) {
-                count += matches.length
                 isMatch = true
               } else {
                 //* 判斷是否為 Insert Into 語法
-                  count += matches.length
                 if (upperText.search(RegExpConfig.INSERT_INTO_WITH_SELECT_REGEXP) < 0) {
                   isMatch = true
+                } else {
+                  count--
                 }
               }
             }
