@@ -238,7 +238,7 @@ export class SqlContentController {
                 matchError = true
               } else {
                 //* 判斷是否為 Insert Into 語法
-                if (upperText.search(RegExpConfig.INSERT_INTO_REGEXP) < 0) {
+                if (upperText.search(RegExpConfig.INSERT_INTO_WITH_SELECT_REGEXP) < 0) {
                   messages.push({
                     messageType: MessageType.INVALID_COMMAND_ERROR,
                     command: commandName!,
@@ -295,8 +295,8 @@ export class SqlContentController {
                 isMatch = true
               } else {
                 //* 判斷是否為 Insert Into 語法
-                if (upperText.search(RegExpConfig.INSERT_INTO_REGEXP) < 0) {
                   count += matches.length
+                if (upperText.search(RegExpConfig.INSERT_INTO_WITH_SELECT_REGEXP) < 0) {
                   isMatch = true
                 }
               }

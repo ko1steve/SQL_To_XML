@@ -16,8 +16,8 @@ export class RegExpConfig {
     RegExpConfig.ALL_DDL_VALID_REGEXP.source.replaceAll('(?!@|#|##)', ''), 'gmi'
   )
 
-  public static readonly ALL_MSSQL_DML_VALID_REGEXP: RegExp = /^(?:insert\s+into\s+(?!@|#|##)|select\s+(?:\52|.+)\s+into\s+(?!@|#|##).+\s+from\s+|update\s+\S+\s+set\s+|delete\s+).+$/gmi
-  public static readonly ALL_ORACLE_DML_VALID_REGEXP: RegExp = /^(?:insert\s+into\s+\S+\.\S+(?!@|#|##)|select\s+(?:\52|.+)\s+into\s+(?!@|#|##)\S+\.\S+\s+from\s+|update\s+\S+\.\S+\s+set\s+|delete\s+).+$/gmi
+  public static readonly ALL_MSSQL_DML_VALID_REGEXP: RegExp = /^(?:insert\s+into\s+(?!@|#|##)\S+|select\s+(?:\52|.+)\s+into\s+(?!@|#|##).+\s+from\s+|update\s+\S+\s+set\s+|delete\s+).+$/gmi
+  public static readonly ALL_ORACLE_DML_VALID_REGEXP: RegExp = /^(?:insert\s+into\s+(?!@|#|##)\S+\.\S+|select\s+(?:\52|.+)\s+into\s+(?!@|#|##)\S+\.\S+\s+from\s+|update\s+\S+\.\S+\s+set\s+|delete\s+).+$/gmi
 
   public static readonly ALL_DML_VALID_REGEXP: RegExp = RegExpConfig.combineRegExps([
     RegExpConfig.ALL_MSSQL_DML_VALID_REGEXP, RegExpConfig.ALL_ORACLE_DML_VALID_REGEXP
@@ -45,7 +45,7 @@ export class RegExpConfig {
 
   public static readonly ANY_COMMAND_REGEXP: RegExp = /^.+$/gmi
 
-  public static readonly INSERT_INTO_REGEXP: RegExp = /^(?:insert\s+into\s+(?:@|#|##)\S+\s+Select).+$/gmi
+  public static readonly INSERT_INTO_WITH_SELECT_REGEXP: RegExp = /^(?:insert\s+into\s+(?:@|#|##)\S+\s+Select).+$/gmi
 
   public static readonly ALL_VALID_REGEXP: RegExp = RegExpConfig.combineRegExps([
     RegExpConfig.ALL_DDL_VALID_REGEXP, RegExpConfig.ALL_DML_VALID_REGEXP, RegExpConfig.SELECT_VALID_REGEXP, RegExpConfig.SELECT_COUNT_REGEXP
