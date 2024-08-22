@@ -328,12 +328,6 @@ export class SqlContentController {
 
   protected setCommandGroup (textLines: string[], groupName: GroupType, detail: IGroupCommandDetail): Promise<void> {
     return new Promise(resolve => {
-      if (textLines.length === 0) {
-        if (this.indicateCommandErrorMap.has(groupName)) {
-          this.indicateCommandErrorMap.delete(groupName)
-        }
-        return resolve()
-      }
       const commands: CommandData[] = []
 
       let commadTextSB: StringBuilder | null = null
@@ -413,8 +407,9 @@ export class SqlContentController {
             if (!commands) {
               commands = []
             }
-            this.createGroupContainer(groupName!, commands as CommandData[], contentContainer, elementConfig)
-            resolve()
+            this.createGroupContainer(groupName!, commands as CommandData[], contentContainer, elementConfig).then(() => {
+              resolve()
+            })
           })
         })
         promistList.push(promise)
@@ -425,7 +420,7 @@ export class SqlContentController {
     })
   }
 
-  protected createGroupContainer (groupType: GroupType, commands: CommandData[], parent: HTMLElement, elementConfig: ISqlContentConfig): void {
+  protected async createGroupContainer (groupType: GroupType, commands: CommandData[], parent: HTMLElement, elementConfig: ISqlContentConfig): Promise<void> {
     const config: IGroupContainerConfig = elementConfig.groupContainer
 
     const groupContainer: HTMLDivElement = document.createElement('div')
@@ -535,6 +530,20 @@ export class SqlContentController {
         }
       })
     }
+
+    await localforage.getItem(groupType + '-command').then((items) => {
+      if (!items) {
+        this.dataModel.setCommandValid(this.commandType, false)
+        let errorMessage: string = this.mainConfig.messageMap.get(MessageType.NO_GROUP_TAG)
+        const groupTitle: string = this.mainConfig.groupSettingMap.get(groupType).titleInMsg
+        errorMessage = errorMessage.replaceAll('{titleInMsg}', groupTitle)
+        this.addClassName(title, 'command-error')
+        const span: HTMLSpanElement = document.createElement('span')
+        span.className = config.messageContainer.errorMessage.className
+        span.innerText = errorMessage
+        messageContainer.appendChild(span)
+      }
+    })
   }
 
   protected appendMessage (command: CommandData, groupType: GroupType, index: number, config: IGroupContainerConfig): void {
