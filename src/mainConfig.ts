@@ -16,6 +16,7 @@ export interface IMainConfig {
   grantRevokeCommand: { regExp: RegExp, command: string }
   maxGroupCommandAmount: number
   useAllRegExpCheckMultiCommand: boolean
+  checkAllGroupExist: boolean
 }
 
 export interface IGroupSetting {
@@ -145,6 +146,10 @@ export class MainConfig implements IMainConfig {
 
   public messageMap: TSMap<MessageType, string> = new TSMap<MessageType, string>([
     [
+      MessageType.NO_GROUP_TAG,
+      '[ {titleInMsg} ]\n找不到 "{titleInMsg}" 區塊. 請檢查 SQL 檔案是否存在該區塊的註解標籤。'
+    ],
+    [
       MessageType.CONTENT_NOT_FOUND_ERROR,
       '[ {titleInMsg} ]\n此區塊並未找到任何語法. 請檢查 SQL 檔案是否有包含該區塊指令。'
     ],
@@ -184,4 +189,6 @@ export class MainConfig implements IMainConfig {
   public useAllRegExpCheckMultiCommand: boolean = false
 
   public firstCommandIsNextToGroupName: boolean = true
+
+  public checkAllGroupExist: boolean = true
 }
