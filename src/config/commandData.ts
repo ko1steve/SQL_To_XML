@@ -33,6 +33,7 @@ export interface ICommandDataDetail {
 
 export interface IIndicateCommandErrorData {
   commandIndex: number
+  isBlank: boolean
 }
 
 export class CommandData implements ICommandData {

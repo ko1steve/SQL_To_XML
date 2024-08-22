@@ -81,8 +81,11 @@ export class SqlContentController {
 
         //* 區塊分割字串下一行是否必須是指令標註字串
         if (this.mainConfig.firstCommandIsNextToGroupName) {
-          if (i + 1 >= textLines.length || !textLines[i + 1].trim().startsWith(this.mainConfig.singleCommandIndicator)) {
-            this.indicateCommandErrorMap.set(groupName, { commandIndex: i + 1 })
+          if (i + 1 >= textLines.length) {
+            this.indicateCommandErrorMap.set(groupName, { commandIndex: i + 1, isBlank: true })
+          } else if (!textLines[i + 1].trim().startsWith(this.mainConfig.singleCommandIndicator)) {
+            const isBlank: boolean = textLines[i + 1].trim() === ''
+            this.indicateCommandErrorMap.set(groupName, { commandIndex: i + 1, isBlank })
           }
         } else {
           //* 支援「區塊分割字串」與「指令標註字串」之間有空白字串或註解
@@ -95,12 +98,12 @@ export class SqlContentController {
             } else if (textLines[j].trim() === '' || textLines[j].trim().search(/^--|^\/\*/) < 0) {
               continue
             } else {
-              this.indicateCommandErrorMap.set(groupName, { commandIndex: j })
+              this.indicateCommandErrorMap.set(groupName, { commandIndex: j, isBlank: false })
               isError = true
             }
           }
           if (j === textLines.length && !isError) {
-            this.indicateCommandErrorMap.set(groupName, { commandIndex: j - 1 })
+            this.indicateCommandErrorMap.set(groupName, { commandIndex: j - 1, isBlank: true })
             isError = true
           }
         }
@@ -377,7 +380,10 @@ export class SqlContentController {
       }
       localforage.setItem(groupName + '-command', commands).then(() => {
         if (commands.length === 0 && this.indicateCommandErrorMap.has(groupName)) {
-          this.indicateCommandErrorMap.delete(groupName)
+          const errorData: IIndicateCommandErrorData = this.indicateCommandErrorMap.get(groupName)
+          if (errorData.isBlank) {
+            this.indicateCommandErrorMap.delete(groupName)
+          }
         }
         resolve()
       })
