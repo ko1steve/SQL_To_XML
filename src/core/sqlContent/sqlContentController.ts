@@ -334,6 +334,11 @@ export class SqlContentController {
 
   protected setCommandGroup (textLines: string[], groupName: GroupType, detail: IGroupCommandDetail): Promise<void> {
     return new Promise(resolve => {
+      const setItemGroupTagPromise: Promise<void> = new Promise((resolve) => {
+        localforage.setItem(groupName + '-detail', detail).then(() => {
+          resolve()
+        })
+      })
       const commands: CommandData[] = []
 
       let commadTextSB: StringBuilder | null = null
@@ -360,7 +365,12 @@ export class SqlContentController {
               groupTextLineIndex: detail.startIndex + 1 + startIndex,
               commandIndex: commands.length
             }))
-            commands.push(new CommandData(commadTextSB, commandDataMessages))
+            commands.push(new CommandData(
+              commadTextSB,
+              commandDataMessages,
+              startIndex + detail.startIndex + 1,
+              j - 1 + detail.startIndex + 1)
+            )
             i = j - 1
             break
           } else {
@@ -374,17 +384,27 @@ export class SqlContentController {
             groupTextLineIndex: detail.startIndex + 1 + startIndex,
             commandIndex: commands.length
           }))
-          commands.push(new CommandData(commadTextSB, commandDataMessages))
+          commands.push(new CommandData(
+            commadTextSB,
+            commandDataMessages,
+            startIndex + detail.startIndex + 1,
+            j - 1 + detail.startIndex + 1)
+          )
           break
         }
       }
-      localforage.setItem(groupName + '-command', commands).then(() => {
-        if (commands.length === 0 && this.indicateCommandErrorMap.has(groupName)) {
-          const errorData: IIndicateCommandErrorData = this.indicateCommandErrorMap.get(groupName)
-          if (errorData.isBlank) {
-            this.indicateCommandErrorMap.delete(groupName)
+      const setItemCommandPromise: Promise<void> = new Promise((resolve) => {
+        localforage.setItem(groupName + '-command', commands).then(() => {
+          if (commands.length === 0 && this.indicateCommandErrorMap.has(groupName)) {
+            const errorData: IIndicateCommandErrorData = this.indicateCommandErrorMap.get(groupName)
+            if (errorData.isBlank) {
+              this.indicateCommandErrorMap.delete(groupName)
+            }
           }
-        }
+          resolve()
+        })
+      })
+      Promise.all([setItemGroupTagPromise, setItemCommandPromise]).then(() => {
         resolve()
       })
     })

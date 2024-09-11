@@ -12,6 +12,8 @@ export enum MessageType {
 export interface ICommandData {
   content: StringBuilder
   messages: ICommandDataMessage[]
+  startIndex: number
+  endIndex: number
 }
 
 export interface ICommandDataMessage {
@@ -39,10 +41,14 @@ export interface IIndicateCommandErrorData {
 export class CommandData implements ICommandData {
   public content: StringBuilder
   public messages: ICommandDataMessage[]
+  public startIndex: number
+  public endIndex: number
 
-  constructor (content: StringBuilder, messages: ICommandDataMessage[]) {
+  constructor (content: StringBuilder, messages: ICommandDataMessage[], startIndex: number, endIndex: number) {
     this.content = content
     this.messages = messages
+    this.startIndex = startIndex
+    this.endIndex = endIndex
   }
 }
 
