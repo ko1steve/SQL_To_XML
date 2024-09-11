@@ -29,7 +29,7 @@ export interface IGroupCommandDetail {
 }
 
 export interface ICommandDataDetail {
-  groupTextLineIndex: number
+  globalTextLineIndex: number
   commandIndex: number
 }
 

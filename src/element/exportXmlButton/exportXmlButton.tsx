@@ -37,20 +37,16 @@ const nextGroupCommandPromise = (xmlContentSB: StringBuilder, groupList: string[
         if (groupStartIndex != null) {
           groupTagStr = ` markLine="${groupStartIndex + 1}"`
         }
-        xmlContentSB.append(`  < ${groupList[0]}${groupTagStr}>`)
-        if (!commandData) {
-          xmlContentSB.append('  </' + groupList[0] + '>')
-          return resolve()
+        xmlContentSB.append(`  <${groupList[0]}${groupTagStr}>`)
+        if (commandData) {
+          const commands = commandData as CommandData[]
+          commands.forEach((command, index) => {
+            const sqlTagStr: string = `startLine="${command.startIndex + 1}" endLine="${command.endIndex + 1}"`
+            const sqlCommandStr = `    <SQL sql_idx="${index + 1}" ${sqlTagStr}>\n${escapeXml((command.content as any)._strings.join('\r\n'))}</SQL>`
+            xmlContentSB.append(sqlCommandStr)
+          })
         }
-        const commands = commandData as CommandData[]
-        commands.forEach((command, index) => {
-          const sqlTagStr: string = `startLine="${command.startIndex + 1}" endLine="${command.endIndex + 1}"`
-          let sqlCommandStr = `    <SQL sql_idx="${index + 1}" ${sqlTagStr}>`
-          //* 處理 XML 跳脫字元
-          sqlCommandStr += escapeXml((command.content as any)._strings.join('\r\n')) + '</SQL>'
-          xmlContentSB.append(sqlCommandStr)
-        })
-        xmlContentSB.append('  </' + groupList[0] + '>')
+        xmlContentSB.append(`  </${groupList[0]}>`)
         groupList.splice(0, 1)
         if (groupList.length > 0) {
           nextGroupCommandPromise(xmlContentSB, groupList).then(() => resolve())

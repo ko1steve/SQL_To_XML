@@ -151,7 +151,7 @@ export class SqlContentController {
       messages.push({
         messageType: MessageType.EMPTY_OR_COMMENT_ONLY_ERROR,
         command: '',
-        globalTextLineIndex: detail.groupTextLineIndex,
+        globalTextLineIndex: detail.globalTextLineIndex,
         commandIndex: detail.commandIndex
       })
       return messages
@@ -167,7 +167,7 @@ export class SqlContentController {
           messages.push({
             messageType: MessageType.EXCEENDS_COMMAND_LIMIT_ERROR,
             command: '',
-            globalTextLineIndex: detail.groupTextLineIndex,
+            globalTextLineIndex: detail.globalTextLineIndex,
             commandIndex: detail.commandIndex
           })
           matchError = true
@@ -186,7 +186,7 @@ export class SqlContentController {
             messages.push({
               messageType: MessageType.EXCEENDS_COMMAND_LIMIT_ERROR,
               command: '',
-              globalTextLineIndex: detail.groupTextLineIndex,
+              globalTextLineIndex: detail.globalTextLineIndex,
               commandIndex: detail.commandIndex
             })
             matchError = true
@@ -208,7 +208,7 @@ export class SqlContentController {
         messages.push({
           messageType: MessageType.INVALID_COMMAND_ERROR,
           command: this.mainConfig.grantRevokeCommand.command,
-          globalTextLineIndex: detail.groupTextLineIndex,
+          globalTextLineIndex: detail.globalTextLineIndex,
           commandIndex: detail.commandIndex
         })
         matchError = true
@@ -235,7 +235,7 @@ export class SqlContentController {
                 messages.push({
                   messageType: MessageType.INVALID_COMMAND_ERROR,
                   command: commandName!,
-                  globalTextLineIndex: detail.groupTextLineIndex,
+                  globalTextLineIndex: detail.globalTextLineIndex,
                   commandIndex: detail.commandIndex
                 })
                 matchError = true
@@ -245,7 +245,7 @@ export class SqlContentController {
                   messages.push({
                     messageType: MessageType.INVALID_COMMAND_ERROR,
                     command: commandName!,
-                    globalTextLineIndex: detail.groupTextLineIndex,
+                    globalTextLineIndex: detail.globalTextLineIndex,
                     commandIndex: detail.commandIndex
                   })
                   matchError = true
@@ -262,7 +262,7 @@ export class SqlContentController {
             messages.push({
               messageType: MessageType.EXCEENDS_COMMAND_LIMIT_ERROR,
               command: '',
-              globalTextLineIndex: detail.groupTextLineIndex,
+              globalTextLineIndex: detail.globalTextLineIndex,
               commandIndex: detail.commandIndex
             })
             matchError = true
@@ -273,7 +273,7 @@ export class SqlContentController {
             messages.push({
               messageType: MessageType.EXCEENDS_COMMAND_LIMIT_ERROR,
               command: '',
-              globalTextLineIndex: detail.groupTextLineIndex,
+              globalTextLineIndex: detail.globalTextLineIndex,
               commandIndex: detail.commandIndex
             })
             matchError = true
@@ -314,7 +314,7 @@ export class SqlContentController {
           messages.push({
             messageType: MessageType.EXCEENDS_COMMAND_LIMIT_ERROR,
             command: '',
-            globalTextLineIndex: detail.groupTextLineIndex,
+            globalTextLineIndex: detail.globalTextLineIndex,
             commandIndex: detail.commandIndex
           })
         }
@@ -323,7 +323,7 @@ export class SqlContentController {
           messages.push({
             messageType: MessageType.NO_VALID_COMMAND_ERROR,
             command: '',
-            globalTextLineIndex: detail.groupTextLineIndex,
+            globalTextLineIndex: detail.globalTextLineIndex,
             commandIndex: detail.commandIndex
           })
         }
@@ -362,14 +362,16 @@ export class SqlContentController {
         for (j = i + 1; j < textLines.length; j++) {
           if (textLines[j].trim().startsWith(this.mainConfig.singleCommandIndicator)) {
             commandDataMessages.push(...this.getCommandDataDetail(commadTextSB, groupName!, {
-              groupTextLineIndex: detail.startIndex + 1 + startIndex,
+              globalTextLineIndex: detail.startIndex + startIndex,
               commandIndex: commands.length
             }))
-            commands.push(new CommandData(
-              commadTextSB,
-              commandDataMessages,
-              startIndex + detail.startIndex + 1,
-              j - 1 + detail.startIndex + 1)
+            commands.push(
+              new CommandData(
+                commadTextSB,
+                commandDataMessages,
+                detail.startIndex + startIndex,
+                detail.startIndex + 1 + j - 1
+              )
             )
             i = j - 1
             break
@@ -381,14 +383,16 @@ export class SqlContentController {
 
         if (j === textLines.length) {
           commandDataMessages.push(...this.getCommandDataDetail(commadTextSB, groupName!, {
-            groupTextLineIndex: detail.startIndex + 1 + startIndex,
+            globalTextLineIndex: detail.startIndex + startIndex,
             commandIndex: commands.length
           }))
-          commands.push(new CommandData(
-            commadTextSB,
-            commandDataMessages,
-            startIndex + detail.startIndex + 1,
-            j - 1 + detail.startIndex + 1)
+          commands.push(
+            new CommandData(
+              commadTextSB,
+              commandDataMessages,
+              detail.startIndex + startIndex,
+              detail.startIndex + 1 + j - 1
+            )
           )
           break
         }
