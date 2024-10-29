@@ -1,3 +1,5 @@
+import { StringBuilder } from './stringBuilder'
+
 export enum MessageType {
   CONTENT_NOT_FOUND_ERROR = 'CONTENT_NOT_FOUND_ERROR',
   INVALID_COMMAND_ERROR = 'INVALID_COMMAND_ERROR',
@@ -49,29 +51,5 @@ export class CommandData implements ICommandData {
     this.messages = messages
     this.startIndex = startIndex
     this.endIndex = endIndex
-  }
-}
-
-export class StringBuilder {
-  protected _strings: string[]
-
-  public get strings (): string[] {
-    return this._strings
-  }
-
-  public get size (): number {
-    return this._strings.length
-  }
-
-  constructor () {
-    this._strings = []
-  }
-
-  append (str: string) {
-    this._strings.push(str)
-  }
-
-  toString (symbol: string = '') {
-    return this._strings.join(symbol)
   }
 }
