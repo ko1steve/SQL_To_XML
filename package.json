@@ -7,26 +7,20 @@
     "start": "cross-env NODE_ENV=production webpack-dev-server --open --config ./config/webpack.dev.ts",
     "release-dev": "cross-env NODE_ENV=production ts-node node_modules/webpack/bin/webpack.js --config config/webpack.dev.ts --progress",
     "lint": "eslint .",
-    "test": "mocha -r ts-node/register tests/**/*.test.ts"
+    "test": "mocha"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "bootstrap": "^5.3.3",
-    "cross-env": "^7.0.3",
     "jschardet": "^3.1.2",
     "localforage": "^1.10.0",
     "mini-signals": "^2.0.0",
-    "process": "^0.11.10",
-    "typescript-ioc": "^3.2.2",
-    "typescript-map": "0.0.7"
+    "process": "^0.11.10"
   },
   "devDependencies": {
-    "@babel/core": "^7.24.0",
-    "@babel/preset-env": "^7.24.0",
-    "@babel/preset-typescript": "^7.23.3",
     "@types/bootstrap": "^5.2.10",
-    "@types/chai": "^5.0.0",
+    "@types/chai": "^4.3.20",
     "@types/he": "^1.2.3",
     "@types/html-webpack-plugin": "^3.2.9",
     "@types/mocha": "^10.0.9",
@@ -39,7 +33,8 @@
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
     "babel-loader": "^9.1.3",
-    "chai": "^5.1.1",
+    "chai": "^4.5.0",
+    "cross-env": "^7.0.3",
     "css-loader": "^6.10.0",
     "eslint": "^8.57.0",
     "eslint-config-standard": "^17.1.0",
@@ -67,6 +62,8 @@
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.3.3",
+    "typescript-ioc": "^3.2.2",
+    "typescript-map": "0.0.7",
     "typescript-plugin-css-modules": "^5.1.0",
     "url-loader": "^4.1.1",
     "webpack": "^5.90.3",
