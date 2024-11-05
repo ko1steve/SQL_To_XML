@@ -6,7 +6,7 @@ import { ExportXmlButton } from 'src/element/exportXmlButton/exportXmlButton'
 import * as Config from './config'
 import * as CommandTabConfig from 'src/component/commandTab/config'
 
-export const SqlContent: React.FC = () => {
+export const SqlContentArea: React.FC = () => {
   return (
     <div className={Config.sqlContentContainer.className}>
       <div className={Config.buttonListContainer.className}>

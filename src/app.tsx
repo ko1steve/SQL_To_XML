@@ -4,7 +4,7 @@ import 'src/styles.css'
 import React from 'react'
 import { Header } from './component/header/header'
 import { Description } from './component/description/description'
-import { SqlContent } from './component/sqlContent/sqlContent'
+import { SqlContentArea } from './component/sqlContentArea/sqlContentArea'
 import { LoadOverlay } from './component/loadOverlay/loadOverlay'
 import { OverlayUI } from './component/overlayUI/overlayUI'
 
@@ -14,7 +14,7 @@ const App: React.FC = () => {
       <div className='row container-fluid px-5 mt-100'>
         <Header />
         <Description />
-        <SqlContent />
+        <SqlContentArea />
       </div>
       <OverlayUI />
       <LoadOverlay />
