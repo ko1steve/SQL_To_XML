@@ -7,16 +7,19 @@ import localforage from 'localforage'
 import { Container } from 'typescript-ioc'
 import { DataModel } from 'src/model/dataModel'
 import { RegExpConfig, Command } from 'src/config/regExpConfig'
+import { SqlHandler } from 'src/core/sqlHandler/sqlHandler'
 
 export class SqlContentController {
   protected dataModel: DataModel
-  protected mainConfig: MainConfig = new MainConfig()
+  protected mainConfig: MainConfig
+  protected sqlHandler: SqlHandler
   protected commandType: CommandType = CommandType.NONE
   protected textFromFileLoaded: string
-  protected indicateCommandErrorMap: TSMap<GroupType, IIndicateCommandErrorData> = new TSMap()
 
   constructor (commandType: CommandType, textFromFileLoaded: string, fileName: string) {
     this.dataModel = Container.get(DataModel)
+    this.mainConfig = Container.get(MainConfig)
+    this.sqlHandler = new SqlHandler(commandType)
     this.dataModel.fileName = fileName
     this.commandType = commandType
     this.textFromFileLoaded = textFromFileLoaded
@@ -36,7 +39,8 @@ export class SqlContentController {
   }
 
   protected initialize (): void {
-    this.transTextToCommand().then(() => {
+    this.sqlHandler.transTextToCommand(this.textFromFileLoaded).then(() => {
+      this.textFromFileLoaded = ''
       this.createPageContent().then(() => {
         const overlay = document.getElementById('overlay') as HTMLDivElement
         overlay.style.display = 'none'
@@ -52,7 +56,7 @@ export class SqlContentController {
       this.dataModel.setCommandValid(this.commandType, true)
       this.dataModel.fileName = fileName
       this.textFromFileLoaded = textFromFileLoaded
-      this.indicateCommandErrorMap.clear()
+      this.sqlHandler.reset()
       this.initialize()
     })
   }
@@ -63,367 +67,6 @@ export class SqlContentController {
         resolve()
       })
     })
-  }
-
-  protected transTextToCommand (): Promise<void> {
-    return new Promise(resolve => {
-      const promiseList: Promise<void>[] = []
-      const textLines: string[] = this.textFromFileLoaded.split('\r\n')
-      this.textFromFileLoaded = ''
-      let groupName: GroupType | null
-      for (let i = 0; i < textLines.length; i++) {
-        groupName = this.getGroupName(textLines[i])
-
-        //* 若找不到區塊分割的判斷字串，則略過換下一行
-        if (groupName === null) {
-          continue
-        }
-        const startIndex = i
-
-        //* 區塊分割字串下一行是否必須是指令標註字串
-        if (this.mainConfig.firstCommandIsNextToGroupName) {
-          if (i + 1 >= textLines.length) {
-            this.indicateCommandErrorMap.set(groupName, { commandIndex: i + 1, isBlank: true })
-          } else if (!textLines[i + 1].trim().startsWith(this.mainConfig.singleCommandIndicator)) {
-            const isBlank: boolean = textLines[i + 1].trim() === ''
-            this.indicateCommandErrorMap.set(groupName, { commandIndex: i + 1, isBlank })
-          }
-        } else {
-          //* 支援「區塊分割字串」與「指令標註字串」之間有空白字串或註解
-          let j
-          let isError: boolean = false
-          for (j = i + 1; j < textLines.length; j++) {
-            if (textLines[j].trim().startsWith(this.mainConfig.singleCommandIndicator)) {
-              i = j - 1
-              break
-            } else if (textLines[j].trim() === '' || textLines[j].trim().search(/^--|^\/\*/) < 0) {
-              continue
-            } else {
-              this.indicateCommandErrorMap.set(groupName, { commandIndex: j, isBlank: false })
-              isError = true
-            }
-          }
-          if (j === textLines.length && !isError) {
-            this.indicateCommandErrorMap.set(groupName, { commandIndex: j - 1, isBlank: true })
-            isError = true
-          }
-        }
-        const searchEndArr: string[] = this.mainConfig.groupSettingMap.get(groupName).searchEndPattern
-        const textSB = new StringBuilder()
-
-        //* 找到區塊分割的判斷字串後，尋找區塊的結束點
-        let j: number
-        for (j = i + 1; j < textLines.length; j++) {
-          i = j - 1
-          //* 若找到下一個區塊，開始將文字拆分為指令
-          if (searchEndArr.some(pattern => textLines[j].trim().startsWith(pattern))) {
-            const promise = this.setCommandGroup(textSB.strings, groupName, {
-              startIndex,
-              lines: j - startIndex
-            })
-            promiseList.push(promise)
-            break
-          }
-          //* 找到結束點之前，不斷累加該行的指令文字
-          textSB.append(textLines[j])
-        }
-        //* 若 textlines 已全部判斷過，開始將文字拆分為語法
-        if (j === textLines.length) {
-          const promise = this.setCommandGroup(textSB.strings, groupName, {
-            startIndex,
-            lines: j - 1 - startIndex
-          })
-          promiseList.push(promise)
-          break
-        }
-      }
-      //* 等待所有區塊的純文字拆分成語法
-      Promise.all(promiseList).then(() => {
-        resolve()
-      })
-    })
-  }
-
-  protected getCommandDataDetail (commadTextSB: StringBuilder, groupName: GroupType, detail: ICommandDataDetail): ICommandDataMessage[] {
-    const messages: ICommandDataMessage[] = []
-
-    const upperText = commadTextSB.strings.filter(e => !e.trim().startsWith('--')).join('\r\n').toUpperCase().trim()
-    if (upperText === '') {
-      messages.push({
-        messageType: MessageType.EMPTY_OR_COMMENT_ONLY_ERROR,
-        command: '',
-        globalTextLineIndex: detail.globalTextLineIndex,
-        commandIndex: detail.commandIndex
-      })
-      return messages
-    }
-
-    let matchError: boolean = false
-
-    //* 反向表列的部分 (不包含 PreProdSQL)，檢查指令是否超過一個語法
-    if ([GroupType.PreSQL, GroupType.PostSQL].includes(groupName)) {
-      if (this.mainConfig.useAllRegExpCheckMultiCommand) {
-        const matches: RegExpMatchArray | null = upperText.match(RegExpConfig.ALL_VALID_REGEXP)
-        if (matches && matches.length > 1) {
-          messages.push({
-            messageType: MessageType.EXCEENDS_COMMAND_LIMIT_ERROR,
-            command: '',
-            globalTextLineIndex: detail.globalTextLineIndex,
-            commandIndex: detail.commandIndex
-          })
-          matchError = true
-        }
-        if (matchError) {
-          return messages
-        }
-      } else {
-        const regExpArr: RegExp[] = [
-          RegExpConfig.ALL_DDL_VALID_REGEXP_WITHOUT_CHECK_TEMP_TABLE,
-          RegExpConfig.ALL_DML_VALID_REGEXP_WITHOUT_CHECK_TEMP_TABLE
-        ]
-        for (const regExp of regExpArr) {
-          const matches: RegExpMatchArray | null = upperText.match(regExp)
-          if (matches && matches.length > 1) {
-            messages.push({
-              messageType: MessageType.EXCEENDS_COMMAND_LIMIT_ERROR,
-              command: '',
-              globalTextLineIndex: detail.globalTextLineIndex,
-              commandIndex: detail.commandIndex
-            })
-            matchError = true
-          }
-          if (matchError) {
-            return messages
-          }
-        }
-      }
-    }
-
-    //* 檢查 GRANT、REVOKE 等語法是否出現在 DDL 複雜語法之外
-    const cleanedTextlines = commadTextSB.strings.map(line => line.trim())
-    for (let i: number = cleanedTextlines.length - 1; i >= 0; i--) {
-      //* 若抓到 DDL 複查語法的結束符號，跳過檢查
-      if (this.mainConfig.ddlComplexCommandEnds.includes(cleanedTextlines[i])) {
-        break
-      } else if (cleanedTextlines[i].search(this.mainConfig.grantRevokeCommand.regExp) > -1) {
-        messages.push({
-          messageType: MessageType.INVALID_COMMAND_ERROR,
-          command: this.mainConfig.grantRevokeCommand.command,
-          globalTextLineIndex: detail.globalTextLineIndex,
-          commandIndex: detail.commandIndex
-        })
-        matchError = true
-      }
-    }
-    if (matchError) {
-      return messages
-    }
-
-    //* 檢查指令是否包含不合規的語法
-    if (this.mainConfig.invalidCommandMap.has(this.commandType)) {
-      const groupInvalidCommandMap: TSMap<GroupType, TSMap<string, RegExp>> = this.mainConfig.invalidCommandMap.get(this.commandType)
-      if (groupInvalidCommandMap.has(groupName)) {
-        const invalidCommandMap: TSMap<string, RegExp> = groupInvalidCommandMap.get(groupName)
-        //* 取得該 GroupName 所有非法語法
-        let count = 0
-        invalidCommandMap.forEach((regExp, commandName) => {
-          //* 若抓到該 Group 禁止的任一非法語法
-          const matches: RegExpMatchArray | null = upperText.match(regExp)
-          if (matches) {
-            if (matches.length > 0) {
-              count += matches.length
-              if (commandName !== Command.SELECT) {
-                messages.push({
-                  messageType: MessageType.INVALID_COMMAND_ERROR,
-                  command: commandName!,
-                  globalTextLineIndex: detail.globalTextLineIndex,
-                  commandIndex: detail.commandIndex
-                })
-                matchError = true
-              } else {
-                //* 判斷是否為 Insert Into 語法
-                if (upperText.search(RegExpConfig.INSERT_INTO_WITH_SELECT_REGEXP) < 0) {
-                  messages.push({
-                    messageType: MessageType.INVALID_COMMAND_ERROR,
-                    command: commandName!,
-                    globalTextLineIndex: detail.globalTextLineIndex,
-                    commandIndex: detail.commandIndex
-                  })
-                  matchError = true
-                } else {
-                  count--
-                }
-              }
-            }
-          }
-        })
-        //* 判斷多筆語法錯誤 (若這邊不擋，同時出現 Insert-Into-Select 和 Select 語法時會有問題)
-        if (!this.mainConfig.useAllRegExpCheckMultiCommand) {
-          if (count > 1) {
-            messages.push({
-              messageType: MessageType.EXCEENDS_COMMAND_LIMIT_ERROR,
-              command: '',
-              globalTextLineIndex: detail.globalTextLineIndex,
-              commandIndex: detail.commandIndex
-            })
-            matchError = true
-          }
-        } else {
-          const matches: RegExpMatchArray | null = upperText.match(RegExpConfig.ALL_VALID_REGEXP)
-          if (matches && matches.length > 1) {
-            messages.push({
-              messageType: MessageType.EXCEENDS_COMMAND_LIMIT_ERROR,
-              command: '',
-              globalTextLineIndex: detail.globalTextLineIndex,
-              commandIndex: detail.commandIndex
-            })
-            matchError = true
-          }
-        }
-      }
-    }
-    if (matchError) {
-      return messages
-    }
-
-    //* 檢查指令是否至少包含任何一個合規的語法
-    if (this.mainConfig.validCommandMap.has(this.commandType)) {
-      const validCommandMap: TSMap<string, RegExp> = this.mainConfig.validCommandMap.get(this.commandType)?.get(groupName)
-      if (validCommandMap) {
-        let isMatch: boolean = false
-        let count: number = 0
-        validCommandMap.forEach((regExp, commandName) => {
-          const matches: RegExpMatchArray | null = upperText.match(regExp)
-          if (matches) {
-            if (matches.length > 0) {
-              count += matches.length
-              if (commandName !== Command.SELECT) {
-                isMatch = true
-              } else {
-                //* 判斷是否為 Insert Into 語法
-                if (upperText.search(RegExpConfig.INSERT_INTO_WITH_SELECT_REGEXP) < 0) {
-                  isMatch = true
-                } else {
-                  count--
-                }
-              }
-            }
-          }
-        })
-        //* 判斷多筆語法錯誤
-        if (!this.mainConfig.useAllRegExpCheckMultiCommand && count > 1) {
-          messages.push({
-            messageType: MessageType.EXCEENDS_COMMAND_LIMIT_ERROR,
-            command: '',
-            globalTextLineIndex: detail.globalTextLineIndex,
-            commandIndex: detail.commandIndex
-          })
-        }
-        //* 沒有匹配到任何語法，則視為錯誤
-        if (!isMatch) {
-          messages.push({
-            messageType: MessageType.NO_VALID_COMMAND_ERROR,
-            command: '',
-            globalTextLineIndex: detail.globalTextLineIndex,
-            commandIndex: detail.commandIndex
-          })
-        }
-      }
-    }
-    return messages
-  }
-
-  protected setCommandGroup (textLines: string[], groupName: GroupType, detail: IGroupCommandDetail): Promise<void> {
-    return new Promise(resolve => {
-      const setItemGroupTagPromise: Promise<void> = new Promise((resolve) => {
-        localforage.setItem(groupName + '-detail', detail).then(() => {
-          resolve()
-        })
-      })
-      const commands: CommandData[] = []
-
-      let commadTextSB: StringBuilder | null = null
-
-      for (let i = 0; i < textLines.length; i++) {
-        if (!textLines[i].trim().startsWith(this.mainConfig.singleCommandIndicator)) {
-          continue
-        }
-        let startIndex = i
-        commadTextSB = new StringBuilder()
-        const commandDataMessages: ICommandDataMessage[] = []
-
-        const newTextLine = textLines[i].replace(this.mainConfig.singleCommandIndicator, '').trim()
-        if (newTextLine.length !== 0) {
-          commadTextSB.append(newTextLine)
-        } else {
-          startIndex++
-        }
-
-        let j: number
-        for (j = i + 1; j < textLines.length; j++) {
-          if (textLines[j].trim().startsWith(this.mainConfig.singleCommandIndicator)) {
-            commandDataMessages.push(...this.getCommandDataDetail(commadTextSB, groupName!, {
-              globalTextLineIndex: detail.startIndex + startIndex,
-              commandIndex: commands.length
-            }))
-            commands.push(
-              new CommandData(
-                commadTextSB,
-                commandDataMessages,
-                detail.startIndex + startIndex,
-                detail.startIndex + 1 + j - 1
-              )
-            )
-            i = j - 1
-            break
-          } else {
-            textLines[j] = textLines[j].replace(this.mainConfig.singleCommandIndicator, '')
-            commadTextSB.append(textLines[j])
-          }
-        }
-
-        if (j === textLines.length) {
-          commandDataMessages.push(...this.getCommandDataDetail(commadTextSB, groupName!, {
-            globalTextLineIndex: detail.startIndex + startIndex,
-            commandIndex: commands.length
-          }))
-          commands.push(
-            new CommandData(
-              commadTextSB,
-              commandDataMessages,
-              detail.startIndex + startIndex,
-              detail.startIndex + 1 + j - 1
-            )
-          )
-          break
-        }
-      }
-      const setItemCommandPromise: Promise<void> = new Promise((resolve) => {
-        localforage.setItem(groupName + '-command', commands).then(() => {
-          if (commands.length === 0 && this.indicateCommandErrorMap.has(groupName)) {
-            const errorData: IIndicateCommandErrorData = this.indicateCommandErrorMap.get(groupName)
-            if (errorData.isBlank) {
-              this.indicateCommandErrorMap.delete(groupName)
-            }
-          }
-          resolve()
-        })
-      })
-      Promise.all([setItemGroupTagPromise, setItemCommandPromise]).then(() => {
-        resolve()
-      })
-    })
-  }
-
-  protected getGroupName (textLine: string): GroupType | null {
-    const groupNames: GroupType[] = Array.from(this.mainConfig.groupSettingMap.keys())
-    const groupSetting: IGroupSetting[] = Array.from(this.mainConfig.groupSettingMap.values())
-    for (let i = 0; i < groupSetting.length; i++) {
-      if (textLine.trim().startsWith(groupSetting[i].indicator)) {
-        return groupNames[i]
-      }
-    }
-    return null
   }
 
   protected createPageContent (): Promise<void> {
@@ -485,8 +128,8 @@ export class SqlContentController {
     }
 
     //* 顯示「沒有 SQL 命令標註字串錯誤」
-    if (this.indicateCommandErrorMap.has(groupType)) {
-      const commandIndex: number = this.indicateCommandErrorMap.get(groupType).commandIndex
+    if (this.sqlHandler.indicateCommandErrorMap.has(groupType)) {
+      const commandIndex: number = this.sqlHandler.indicateCommandErrorMap.get(groupType).commandIndex
       this.dataModel.setCommandValid(this.commandType, false)
       let errorMessage: string = this.mainConfig.messageMap.get(MessageType.COMMAND_INDICATOR_NOT_FOUND_ERROR)
       const groupTitle: string = this.mainConfig.groupSettingMap.get(groupType).titleInMsg
@@ -510,7 +153,7 @@ export class SqlContentController {
       messageContainer.appendChild(span)
     }
 
-    if (commands.length > 0 && !this.indicateCommandErrorMap.has(groupType)) {
+    if (commands.length > 0 && !this.sqlHandler.indicateCommandErrorMap.has(groupType)) {
       if (groupType === GroupType.MainSQL) {
         const totalCommandsText = document.createElement('p')
         totalCommandsText.innerText = '語法數量 : ' + commands.length.toString()

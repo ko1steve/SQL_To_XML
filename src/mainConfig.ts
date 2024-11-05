@@ -1,3 +1,4 @@
+import { Singleton } from 'typescript-ioc'
 import { ISqlContentConfig, SqlContentConfig } from 'src/core/sqlContent/sqlContentConfig'
 import { MessageType } from 'src/data/commandData'
 import { TSMap } from 'typescript-map'
@@ -41,6 +42,7 @@ export enum CommandType {
   DDL = 'DDL'
 }
 
+@Singleton
 export class MainConfig implements IMainConfig {
   protected regExpConig = new RegExpMapConfig()
   public groupSettingMap: TSMap<GroupType, IGroupSetting> = new TSMap<GroupType, IGroupSetting>([

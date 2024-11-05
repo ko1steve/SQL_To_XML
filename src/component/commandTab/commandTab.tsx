@@ -3,7 +3,7 @@ import { CommandType } from 'src/mainConfig'
 import { DataModel } from 'src/model/dataModel'
 import { Container } from 'typescript-ioc'
 import * as Config from './config'
-import * as SqlContentConfig from 'src/component/sqlContent/config'
+import * as SqlContentConfig from 'src/component/sqlContentArea/config'
 
 interface ICommamdTabProps {
   sqlType: CommandType
