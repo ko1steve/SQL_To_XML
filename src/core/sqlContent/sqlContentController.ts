@@ -13,7 +13,7 @@ export class SqlContentController {
   protected dataModel: DataModel
   protected mainConfig: MainConfig
   protected sqlHandler: SqlHandler
-  protected commandType: CommandType = CommandType.NONE
+  protected commandType: CommandType
   protected textFromFileLoaded: string
 
   constructor (commandType: CommandType, textFromFileLoaded: string, fileName: string) {
@@ -171,7 +171,7 @@ export class SqlContentController {
       commands.forEach((command: CommandData, index: number) => {
         let showCommand = true
         if (command.messages.length > 0) {
-          this.appendMessage(command, groupType, index, config)
+          this.appendMessage(command, groupType, config)
         } else if (commands.length >= this.mainConfig.maxGroupCommandAmount) {
           showCommand = false
         }
@@ -223,7 +223,7 @@ export class SqlContentController {
     })
   }
 
-  protected appendMessage (command: CommandData, groupType: GroupType, index: number, config: IGroupContainerConfig): void {
+  protected appendMessage (command: CommandData, groupType: GroupType, config: IGroupContainerConfig): void {
     if (command.messages.length > 0) {
       let container: HTMLDivElement
       const paragraph: HTMLSpanElement = document.createElement('p')
