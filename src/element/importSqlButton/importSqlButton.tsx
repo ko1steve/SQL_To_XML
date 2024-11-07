@@ -43,10 +43,10 @@ export const ImportSqlButton: React.FC<IImportSqlButtonProps> = ({ className, id
             if (event.target == null) {
               return
             }
-            const text = event.target.result as string
+            const textFromFileLoaded = event.target.result as string
             if (dataModel.tabContentControllerMap.has(dataModel.currentTab)) {
-              const tabContentController = dataModel.tabContentControllerMap.get(dataModel.currentTab)
-              tabContentController.updateNewPageContent(text, file.name)
+              dataModel.fileName = file.name
+              dataModel.onTextFromFileLoadedChangeSignal.dispatch({ textFromFileLoaded, commandType: dataModel.currentTab })
             }
           }
           console.log('encoding : ' + detectMap.encoding)

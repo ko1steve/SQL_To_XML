@@ -12,7 +12,6 @@ export interface ISqlContentControllerProps {
   className: string
   commandType: CommandType
   textFromFileLoaded?: string
-  fileName?: string
 }
 
 export interface ISqlContentControllerState {
@@ -25,7 +24,6 @@ export class SqlContentController extends React.Component<ISqlContentControllerP
   protected mainConfig: MainConfig
   protected sqlHandler: SqlHandler
   protected commandType: CommandType
-  protected textFromFileLoaded: string = ''
 
   state: ISqlContentControllerState
 
@@ -40,15 +38,6 @@ export class SqlContentController extends React.Component<ISqlContentControllerP
     this.dataModel = Container.get(DataModel)
     this.dataModel.tabContentControllerMap.set(props.commandType, this)
     this.commandType = props.commandType
-    if (props.fileName) {
-      this.dataModel.fileName = props.fileName
-    }
-    if (props.textFromFileLoaded) {
-      this.textFromFileLoaded = props.textFromFileLoaded
-      this.dataModel.setCommandValid(props.commandType, true)
-      this.initLocalForge()
-      this.initialize()
-    }
   }
 
   protected initLocalForge (): void {
@@ -62,12 +51,11 @@ export class SqlContentController extends React.Component<ISqlContentControllerP
   }
 
   protected initialize (): void {
-    this.state = {
+    this.setState({
       isInit: false,
       pageContent: null
-    }
-    this.sqlHandler.transTextToCommand(this.textFromFileLoaded).then(() => {
-      this.textFromFileLoaded = ''
+    })
+    this.sqlHandler.transTextToCommand(this.props.textFromFileLoaded!).then(() => {
       this.getPageContent().then((mainContainer) => {
         const overlay = document.getElementById('overlay') as HTMLDivElement
         overlay.style.display = 'none'
@@ -76,16 +64,6 @@ export class SqlContentController extends React.Component<ISqlContentControllerP
           pageContent: mainContainer
         } as ISqlContentControllerState)
       })
-    })
-  }
-
-  public updateNewPageContent (textFromFileLoaded: string, fileName: string): void {
-    this.resetLocalForge().then(() => {
-      this.dataModel.setCommandValid(this.commandType, true)
-      this.dataModel.fileName = fileName
-      this.textFromFileLoaded = textFromFileLoaded
-      this.sqlHandler.reset()
-      this.initialize()
     })
   }
 
@@ -219,7 +197,6 @@ export class SqlContentController extends React.Component<ISqlContentControllerP
 
   protected getGroupErrorMessage (groupType: GroupType, commands: CommandData[], config: IGroupContainerConfig, isCheckGroup: boolean): JSX.Element | null {
     if (this.sqlHandler.indicateCommandErrorMap.has(groupType)) {
-      //* 顯示「區塊第一行沒有 SQL 命令標註字串」錯誤
       this.dataModel.setCommandValid(this.commandType, false)
       const commandIndex: number = this.sqlHandler.indicateCommandErrorMap.get(groupType).commandIndex
       const groupTitle: string = this.mainConfig.groupSettingMap.get(groupType).titleInMsg
@@ -230,7 +207,6 @@ export class SqlContentController extends React.Component<ISqlContentControllerP
         <span className={config.messageContainer.errorMessage.className}>{errorMessage}</span>
       )
     } else if (commands.length === 0 && isCheckGroup) {
-      //* 顯示「沒有任何 SQL 命令」錯誤
       this.dataModel.setCommandValid(this.commandType, false)
       const groupTitle: string = this.mainConfig.groupSettingMap.get(groupType).titleInMsg
       let errorMessage: string = this.mainConfig.messageMap.get(MessageType.CONTENT_NOT_FOUND_ERROR)
@@ -273,6 +249,14 @@ export class SqlContentController extends React.Component<ISqlContentControllerP
       )
     }
     return null
+  }
+
+  componentDidUpdate (prevProps: Readonly<ISqlContentControllerProps>) {
+    if (prevProps.textFromFileLoaded !== this.props.textFromFileLoaded) {
+      this.dataModel.setCommandValid(this.props.commandType, true)
+      this.initLocalForge()
+      this.initialize()
+    }
   }
 
   render (): JSX.Element {

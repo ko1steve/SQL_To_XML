@@ -36,6 +36,7 @@ export class DataModel {
   private _isCommandValidMap: TSMap<CommandType, boolean>
 
   public onTabChangeSignal: MiniSignal
+  public onTextFromFileLoadedChangeSignal: MiniSignal
   public onCommandValidChangeSignal: MiniSignal
 
   constructor () {
@@ -46,6 +47,7 @@ export class DataModel {
       [CommandType.DML, false]
     ])
     this.onTabChangeSignal = new MiniSignal()
+    this.onTextFromFileLoadedChangeSignal = new MiniSignal()
     this.onCommandValidChangeSignal = new MiniSignal()
     this._fileName = ''
   }
