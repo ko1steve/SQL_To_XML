@@ -3,8 +3,9 @@ import { ImportSqlButton } from 'src/element/importSqlButton/importSqlButton'
 import { CommandTab } from 'src/component/commandTab/commandTab'
 import { CommandType } from 'src/mainConfig'
 import { ExportXmlButton } from 'src/element/exportXmlButton/exportXmlButton'
-import * as Config from './config'
+import * as Config from 'src/component/sqlContentArea/config'
 import * as CommandTabConfig from 'src/component/commandTab/config'
+import { SqlContentController } from 'src/component/sqlContentArea/sqlContent/sqlContentController'
 
 export const SqlContentArea: React.FC = () => {
   return (
@@ -20,12 +21,10 @@ export const SqlContentArea: React.FC = () => {
       </ul>
       <div className={Config.commandTypeTabsContent.className}>
         <div className='tab-pane fade show active' id={Config.commadnTypePanelDml.id} role='tabpanel' aria-labelledby={CommandTabConfig.commandTabDml.id}>
-          <div className={Config.commandMainContainerDml.className} id={Config.commandMainContainerDml.id}>
-          </div>
+          <SqlContentController commandType={CommandType.DML} className={Config.commandMainContainerDml.className} id={Config.commandMainContainerDml.id} />
         </div>
         <div className='tab-pane fade' id={Config.commadnTypePanelDdl.id} role='tabpanel' aria-labelledby={CommandTabConfig.commandTabDdl.id}>
-          <div className={Config.commandMainContainerDdl.className} id={Config.commandMainContainerDdl.id}>
-          </div>
+          <SqlContentController commandType={CommandType.DDL} className={Config.commandMainContainerDdl.className} id={Config.commandMainContainerDdl.id} />
         </div>
       </div>
     </div>

@@ -3,7 +3,6 @@ import GetRawString, { IGetRawStringResponse } from 'src/util/worker/getRawStrin
 import jschardet from 'jschardet'
 import { Container } from 'typescript-ioc'
 import { DataModel } from 'src/model/dataModel'
-import { SqlContentController } from 'src/core/sqlContent/sqlContentController'
 
 interface IImportSqlButtonProps {
   className: string
@@ -48,9 +47,6 @@ export const ImportSqlButton: React.FC<IImportSqlButtonProps> = ({ className, id
             if (dataModel.tabContentControllerMap.has(dataModel.currentTab)) {
               const tabContentController = dataModel.tabContentControllerMap.get(dataModel.currentTab)
               tabContentController.updateNewPageContent(text, file.name)
-            } else {
-              const tabContentController = new SqlContentController(dataModel.currentTab, text, file.name)
-              dataModel.tabContentControllerMap.set(dataModel.currentTab, tabContentController)
             }
           }
           console.log('encoding : ' + detectMap.encoding)

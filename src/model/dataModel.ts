@@ -1,8 +1,8 @@
 import { MiniSignal } from 'mini-signals'
-import { SqlContentController } from 'src/core/sqlContent/sqlContentController'
-import { CommandType } from 'src/mainConfig'
 import { Singleton } from 'typescript-ioc'
 import { TSMap } from 'typescript-map'
+import { CommandType } from 'src/mainConfig'
+import { SqlContentController } from 'src/component/sqlContentArea/sqlContent/sqlContentController'
 
 @Singleton
 export class DataModel {
