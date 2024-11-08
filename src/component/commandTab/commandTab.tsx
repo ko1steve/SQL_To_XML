@@ -28,9 +28,9 @@ export const CommandTab: React.FC<ICommamdTabProps> = ({ sqlType, active }) => {
       break
   }
   return (
-    <li className='nav-item' role='presentation'>
+    <li key={'tab-' + sqlType} className='nav-item' role='presentation'>
       <button className={`nav-link ${(active ? 'active' : '')}`} id={commandTabId} data-bs-toggle='tab' data-bs-target={'#' + targetPanelId} type='button'
-        role='tab' aria-controls={targetPanelId} aria-selected={`${(active ? 'true' : 'false')}`} onClick={handleOnClick}>{sqlType}</button>
+        role='tab' aria-controls={targetPanelId} aria-selected={active} onClick={handleOnClick}>{sqlType}</button>
     </li>
   )
 }

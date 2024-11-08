@@ -134,7 +134,7 @@ export class SqlContentController extends React.Component<ISqlContentControllerP
     const isShowAmountWarning: boolean = isShowAmount && commands.length >= this.mainConfig.maxGroupCommandAmount
 
     return (
-      <div id={config.id.replace('{groupType}', groupType)} className={config.className}>
+      <div key={'groupContainer-' + groupType} id={config.id.replace('{groupType}', groupType)} className={config.className}>
         <div id={config.commandContainer.id.replace('{groupType}', groupType)} className={config.commandContainer.className}>
           <p id={config.commandContainer.title.id.replace('{groupType}', groupType)} className={config.commandContainer.title.className + (isTitleErrorStyle ? ' command-error' : '')}>
             {this.mainConfig.groupSettingMap.get(groupType).title}
@@ -179,11 +179,9 @@ export class SqlContentController extends React.Component<ISqlContentControllerP
         commands.map((command: CommandData, index: number) => {
           const showCommand = !(command.messages.length === 0 && commands.length >= this.mainConfig.maxGroupCommandAmount)
           if (showCommand) {
-            if (command.messages.length > 0) {
-              this.dataModel.setCommandValid(this.commandType, false)
-            }
+            this.dataModel.setCommandValid(this.commandType, false)
             return (
-              <li key={'commandItem_' + index} className={'command' + (command.messages.length > 0 ? ' command-error' : '')}>
+              <li key={'commandItem-' + index} className={'command' + (command.messages.length > 0 ? ' command-error' : '')}>
                 <p className='num-of-item'>{(index + 1).toString()}</p>
                 <CommandItem command={command} index={index} />
               </li>
@@ -219,21 +217,19 @@ export class SqlContentController extends React.Component<ISqlContentControllerP
   }
 
   protected getCommandMessages (commands: CommandData[], groupType: GroupType, config: IGroupContainerConfig): (JSX.Element | null)[] {
-    return commands.map((command: CommandData, index: number) => {
+    return commands.map((command: CommandData) => {
       if (command.messages.length > 0) {
-        if (command.messages.length > 0) {
-          command.messages.map(detail => {
-            let message: string = this.mainConfig.messageMap.get(detail.messageType)
-            const titleInMsg = this.mainConfig.groupSettingMap.get(groupType).titleInMsg
-            message = message.replaceAll('{titleInMsg}', titleInMsg)
-            message = message.replaceAll('{sql_index}', (detail.commandIndex + 1).toString())
-            message = message.replaceAll('{textLineIndex}', (detail.globalTextLineIndex + 1).toString())
-            message = message.replaceAll('{command}', detail.command)
-            return (
-              <p className={config.messageContainer.errorMessage.className}>{message}</p>
-            )
-          })
-        }
+        command.messages.map(detail => {
+          let message: string = this.mainConfig.messageMap.get(detail.messageType)
+          const titleInMsg = this.mainConfig.groupSettingMap.get(groupType).titleInMsg
+          message = message.replaceAll('{titleInMsg}', titleInMsg)
+          message = message.replaceAll('{sql_index}', (detail.commandIndex + 1).toString())
+          message = message.replaceAll('{textLineIndex}', (detail.globalTextLineIndex + 1).toString())
+          message = message.replaceAll('{command}', detail.command)
+          return (
+            <p className={config.messageContainer.errorMessage.className}>{message}</p>
+          )
+        })
       }
       return null
     })
