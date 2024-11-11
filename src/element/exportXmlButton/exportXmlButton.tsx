@@ -81,9 +81,7 @@ export const ExportXmlButton: React.FC<IExportXmlButtonProps> = ({ className, id
       const a = document.createElement('a')
       a.href = URL.createObjectURL(blob)
       a.download = dataModel.fileName.replace(/.sql$/, '.xml')
-      document.body.appendChild(a)
       a.click()
-      document.body.removeChild(a)
       dataModel.onCompleteLoadSignal.dispatch()
     })
   }
