@@ -18,8 +18,10 @@ export const SqlContentArea: React.FC = () => {
   const onTextFromFileLoadedChange = (data: { textFromFileLoaded: string, commandType: CommandType }) => {
     if (data.commandType === CommandType.DML) {
       setTextFromFileLoadedDml(data.textFromFileLoaded)
+      setTextFromFileLoadedDdl('')
     } else if (data.commandType === CommandType.DDL) {
       setTextFromFileLoadedDdl(data.textFromFileLoaded)
+      setTextFromFileLoadedDml('')
     }
   }
 

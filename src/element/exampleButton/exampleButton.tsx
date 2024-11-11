@@ -13,9 +13,7 @@ export const ExampleButton: React.FC<IExampleButtonProps> = ({ content, fileName
     const a = document.createElement('a')
     a.href = URL.createObjectURL(blob)
     a.download = fileName
-    document.body.appendChild(a)
     a.click()
-    document.body.removeChild(a)
   }
   return (
     <button className={className} id={id} onClick={handleOnClick}>Example</button>

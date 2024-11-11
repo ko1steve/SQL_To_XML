@@ -22,6 +22,7 @@ export interface ISqlContentControllerState {
 export class SqlContentController extends React.Component<ISqlContentControllerProps> {
   protected dataModel: DataModel
   protected mainConfig: MainConfig
+  protected elementConfig: ISqlContentConfig
   protected sqlHandler: SqlHandler
 
   state: ISqlContentControllerState
@@ -33,6 +34,7 @@ export class SqlContentController extends React.Component<ISqlContentControllerP
       pageContent: null
     }
     this.mainConfig = Container.get(MainConfig)
+    this.elementConfig = this.mainConfig.tabContentConfigMap.get(this.props.commandType) as ISqlContentConfig
     this.sqlHandler = new SqlHandler(props.commandType)
     this.dataModel = Container.get(DataModel)
     this.dataModel.tabContentControllerMap.set(props.commandType, this)
@@ -53,16 +55,36 @@ export class SqlContentController extends React.Component<ISqlContentControllerP
       isInit: false,
       pageContent: null
     })
+    if (this.props.textFromFileLoaded === '') {
+      this.dataModel.setCommandValid(this.props.commandType, false)
+      this.onCompleteRender()
+      return this.setState({
+        isInit: true,
+        pageContent: this.getEmptyContainer()
+      } as ISqlContentControllerState)
+    }
     this.sqlHandler.transTextToCommand(this.props.textFromFileLoaded!).then(() => {
       this.getPageContent().then((mainContainer) => {
-        const overlay = document.getElementById('overlay') as HTMLDivElement
-        overlay.style.display = 'none'
+        this.onCompleteRender()
         this.setState({
           isInit: true,
           pageContent: mainContainer
         } as ISqlContentControllerState)
       })
     })
+  }
+
+  protected onCompleteRender (): void {
+    this.dataModel.onCompleteLoadSignal.dispatch()
+  }
+
+  protected getEmptyContainer (): JSX.Element {
+    return (
+      <div id={this.props.id} className={this.props.className}>
+        <div id={this.elementConfig.mainContainer.contentContainer.id}>
+        </div>
+      </div>
+    )
   }
 
   protected resetLocalForge (): Promise<void> {
@@ -76,16 +98,13 @@ export class SqlContentController extends React.Component<ISqlContentControllerP
   protected getPageContent (): Promise<JSX.Element> {
     return new Promise<JSX.Element>(resolve => {
       const promistList: Promise<JSX.Element | null>[] = []
-
-      const elementConfig: ISqlContentConfig = this.mainConfig.tabContentConfigMap.get(this.props.commandType) as ISqlContentConfig
-
       this.mainConfig.groupSettingMap.keys().forEach(groupName => {
         const promise = new Promise<JSX.Element | null>(resolve => {
           localforage.getItem(groupName + '-command').then((commands) => {
             if (!commands) {
               commands = []
             }
-            this.getGroupContainer(groupName!, commands as CommandData[], elementConfig).then((groupContainer) => {
+            this.getGroupContainer(groupName!, commands as CommandData[], this.elementConfig).then((groupContainer) => {
               resolve(groupContainer)
             })
           })
@@ -96,7 +115,7 @@ export class SqlContentController extends React.Component<ISqlContentControllerP
       Promise.all(promistList).then((groupContainers) => {
         resolve(
           <div id={this.props.id} className={this.props.className}>
-            <div id={elementConfig.mainContainer.contentContainer.id}>
+            <div id={this.elementConfig.mainContainer.contentContainer.id}>
               {groupContainers}
             </div>
           </div>

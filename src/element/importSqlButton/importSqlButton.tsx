@@ -26,8 +26,8 @@ export const ImportSqlButton: React.FC<IImportSqlButtonProps> = ({ className, id
     const arrayBufferReader: FileReader = new FileReader()
     const worker = new Worker(GetRawString)
 
-    const overlay = document.getElementById('overlay') as HTMLDivElement
-    overlay.style.display = 'flex'
+    const dataModel: DataModel = Container.get(DataModel)
+    dataModel.onStartLoadSignal.dispatch()
 
     arrayBufferReader.onload = (event) => {
       if (event.target == null) {

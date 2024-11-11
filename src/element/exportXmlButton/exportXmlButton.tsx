@@ -67,8 +67,7 @@ export const ExportXmlButton: React.FC<IExportXmlButtonProps> = ({ className, id
     if (!dataModel.getCommandValid(dataModel.currentTab)) {
       return
     }
-    const overlay = document.getElementById('overlay') as HTMLDivElement
-    overlay.style.display = 'flex'
+    dataModel.onStartLoadSignal.dispatch()
 
     const xmlContentSB = new StringBuilder()
     xmlContentSB.append('<?xml version="1.0" encoding="UTF-8"?>')
@@ -85,7 +84,7 @@ export const ExportXmlButton: React.FC<IExportXmlButtonProps> = ({ className, id
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
-      overlay.style.display = 'none'
+      dataModel.onCompleteLoadSignal.dispatch()
     })
   }
 

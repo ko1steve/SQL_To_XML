@@ -38,17 +38,25 @@ export class DataModel {
   public onTabChangeSignal: MiniSignal
   public onTextFromFileLoadedChangeSignal: MiniSignal
   public onCommandValidChangeSignal: MiniSignal
+  public onStartLoadSignal: MiniSignal
+  public onCompleteLoadSignal: MiniSignal
 
   constructor () {
     this._tabContentControllerMap = new TSMap()
     this._currentTab = CommandType.DML
     this._isCommandValidMap = new TSMap<CommandType, boolean>([
-      [CommandType.DDL, false],
-      [CommandType.DML, false]
+      [
+        CommandType.DDL, false
+      ],
+      [
+        CommandType.DML, false
+      ]
     ])
     this.onTabChangeSignal = new MiniSignal()
     this.onTextFromFileLoadedChangeSignal = new MiniSignal()
     this.onCommandValidChangeSignal = new MiniSignal()
+    this.onStartLoadSignal = new MiniSignal()
+    this.onCompleteLoadSignal = new MiniSignal()
     this._fileName = ''
   }
 
