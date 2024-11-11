@@ -1,12 +1,37 @@
-import React from 'react'
+import React, { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { ImportSqlButton } from 'src/element/importSqlButton/importSqlButton'
 import { CommandTab } from 'src/component/commandTab/commandTab'
 import { CommandType } from 'src/mainConfig'
 import { ExportXmlButton } from 'src/element/exportXmlButton/exportXmlButton'
-import * as Config from './config'
+import * as Config from 'src/component/sqlContentArea/config'
 import * as CommandTabConfig from 'src/component/commandTab/config'
+import { SqlContentController } from 'src/component/sqlContentArea/sqlContent/sqlContentController'
+import { Container } from 'typescript-ioc'
+import { DataModel } from 'src/model/dataModel'
 
 export const SqlContentArea: React.FC = () => {
+  const [textFromFileLoadedDml, setTextFromFileLoadedDml]: [string, Dispatch<SetStateAction<string>>] = useState('')
+  const [textFromFileLoadedDdl, setTextFromFileLoadedDdl]: [string, Dispatch<SetStateAction<string>>] = useState('')
+
+  const dataModel = Container.get(DataModel)
+
+  const onTextFromFileLoadedChange = (data: { textFromFileLoaded: string, commandType: CommandType }) => {
+    if (data.commandType === CommandType.DML) {
+      setTextFromFileLoadedDml(data.textFromFileLoaded)
+      setTextFromFileLoadedDdl('')
+    } else if (data.commandType === CommandType.DDL) {
+      setTextFromFileLoadedDdl(data.textFromFileLoaded)
+      setTextFromFileLoadedDml('')
+    }
+  }
+
+  useEffect(() => {
+    const onTextFromFileLoadedChangeBinding = dataModel.onTextFromFileLoadedChangeSignal.add(onTextFromFileLoadedChange)
+    return () => {
+      dataModel.onTextFromFileLoadedChangeSignal.detach(onTextFromFileLoadedChangeBinding)
+    }
+  }, [textFromFileLoadedDml, textFromFileLoadedDdl])
+
   return (
     <div className={Config.sqlContentContainer.className}>
       <div className={Config.buttonListContainer.className}>
@@ -20,12 +45,10 @@ export const SqlContentArea: React.FC = () => {
       </ul>
       <div className={Config.commandTypeTabsContent.className}>
         <div className='tab-pane fade show active' id={Config.commadnTypePanelDml.id} role='tabpanel' aria-labelledby={CommandTabConfig.commandTabDml.id}>
-          <div className={Config.commandMainContainerDml.className} id={Config.commandMainContainerDml.id}>
-          </div>
+          <SqlContentController commandType={CommandType.DML} className={Config.commandMainContainerDml.className} id={Config.commandMainContainerDml.id} textFromFileLoaded={textFromFileLoadedDml} />
         </div>
         <div className='tab-pane fade' id={Config.commadnTypePanelDdl.id} role='tabpanel' aria-labelledby={CommandTabConfig.commandTabDdl.id}>
-          <div className={Config.commandMainContainerDdl.className} id={Config.commandMainContainerDdl.id}>
-          </div>
+          <SqlContentController commandType={CommandType.DDL} className={Config.commandMainContainerDdl.className} id={Config.commandMainContainerDdl.id} textFromFileLoaded={textFromFileLoadedDdl} />
         </div>
       </div>
     </div>

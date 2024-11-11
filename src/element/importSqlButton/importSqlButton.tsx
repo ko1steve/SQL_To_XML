@@ -3,7 +3,6 @@ import GetRawString, { IGetRawStringResponse } from 'src/util/worker/getRawStrin
 import jschardet from 'jschardet'
 import { Container } from 'typescript-ioc'
 import { DataModel } from 'src/model/dataModel'
-import { SqlContentController } from 'src/core/sqlContent/sqlContentController'
 
 interface IImportSqlButtonProps {
   className: string
@@ -27,8 +26,8 @@ export const ImportSqlButton: React.FC<IImportSqlButtonProps> = ({ className, id
     const arrayBufferReader: FileReader = new FileReader()
     const worker = new Worker(GetRawString)
 
-    const overlay = document.getElementById('overlay') as HTMLDivElement
-    overlay.style.display = 'flex'
+    const dataModel: DataModel = Container.get(DataModel)
+    dataModel.onStartLoadSignal.dispatch()
 
     arrayBufferReader.onload = (event) => {
       if (event.target == null) {
@@ -44,13 +43,10 @@ export const ImportSqlButton: React.FC<IImportSqlButtonProps> = ({ className, id
             if (event.target == null) {
               return
             }
-            const text = event.target.result as string
+            const textFromFileLoaded = event.target.result as string
             if (dataModel.tabContentControllerMap.has(dataModel.currentTab)) {
-              const tabContentController = dataModel.tabContentControllerMap.get(dataModel.currentTab)
-              tabContentController.updateNewPageContent(text, file.name)
-            } else {
-              const tabContentController = new SqlContentController(dataModel.currentTab, text, file.name)
-              dataModel.tabContentControllerMap.set(dataModel.currentTab, tabContentController)
+              dataModel.fileName = file.name
+              dataModel.onTextFromFileLoadedChangeSignal.dispatch({ textFromFileLoaded, commandType: dataModel.currentTab })
             }
           }
           console.log('encoding : ' + detectMap.encoding)

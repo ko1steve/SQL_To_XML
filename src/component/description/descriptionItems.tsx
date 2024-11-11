@@ -9,7 +9,7 @@ export const DescriptionItems: React.FC<IItemListProps> = ({ className, items })
   return (
     <ul>
       {items.map((item, index) => (
-        <li className={className} key={index}>{item}</li>
+        <li key={'descItems-' + index} className={className}>{item}</li>
       ))}
     </ul>
   )

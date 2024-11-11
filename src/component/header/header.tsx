@@ -11,7 +11,7 @@ export const Header: React.FC = () => {
         <span id={Config.title.id}>SQL 產生器</span>
         <div className={Config.buttonListContainer.className}>
           <ul className={Config.buttonList.className}>
-            <li className={Config.buttonListItem.className}>
+            <li key={'exampleButton'} className={Config.buttonListItem.className}>
               <ExampleButton content={content} fileName={Config.exampleButton.fileName} className={Config.exampleButton.className} id={Config.exampleButton.id} />
             </li>
           </ul>
