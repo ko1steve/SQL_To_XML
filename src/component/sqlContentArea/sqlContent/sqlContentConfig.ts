@@ -1,5 +1,5 @@
-import { IHtmlElementConfig } from 'src/config/htmlConfig'
-import { CommandType } from 'src/mainConfig'
+import { IHtmlElementConfig } from '../../../config/htmlConfig'
+import { CommandType } from '../../../mainConfig'
 
 export class SqlContentConfig implements ISqlContentConfig {
   constructor (commandType: CommandType) {

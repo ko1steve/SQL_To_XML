@@ -1,8 +1,8 @@
 import { Singleton } from 'typescript-ioc'
 import { TSMap } from 'typescript-map'
-import { ISqlContentConfig, SqlContentConfig } from 'src/component/sqlContentArea/sqlContent/sqlContentConfig'
-import { MessageType } from 'src/data/commandData'
-import { RegExpMapConfig, RegExpConfig } from 'src/config/regExpConfig'
+import { ISqlContentConfig, SqlContentConfig } from '../src/component/sqlContentArea/sqlContent/sqlContentConfig'
+import { MessageType } from '../src/data/commandData'
+import { RegExpMapConfig, RegExpConfig } from '../src/config/regExpConfig'
 
 export interface IMainConfig {
   checkCommandGroup: TSMap<CommandType, GroupType[]>

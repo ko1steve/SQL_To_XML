@@ -1,7 +1,7 @@
-import { StringBuilder } from 'src/data/stringBuilder'
-import { GroupType } from 'src/mainConfig'
 import { Singleton } from 'typescript-ioc'
 import { TSMap } from 'typescript-map'
+import { StringBuilder } from '../data/stringBuilder'
+import { GroupType } from '../mainConfig'
 
 @Singleton
 export class RegExpConfig {
