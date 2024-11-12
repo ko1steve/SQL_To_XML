@@ -1,5 +1,4 @@
 import React, { useState, JSX } from 'react'
-import localforage from 'localforage'
 import { Container } from 'typescript-ioc'
 import { CommandType, GroupType, MainConfig } from 'src/mainConfig'
 import { IGroupContainerConfig, ISqlContentConfig } from 'src/component/sqlContentArea/sqlContent/sqlContentConfig'
@@ -40,16 +39,6 @@ export class SqlContentController extends React.Component<ISqlContentControllerP
     this.dataModel.tabContentControllerMap.set(props.commandType, this)
   }
 
-  protected initLocalForge (): void {
-    this.resetLocalForge().then(() => {
-      localforage.config({
-        driver: localforage.INDEXEDDB,
-        name: 'SqlConverter',
-        storeName: 'SqlConverter'
-      })
-    })
-  }
-
   protected initialize (): void {
     this.setState({
       isInit: false,
@@ -87,24 +76,16 @@ export class SqlContentController extends React.Component<ISqlContentControllerP
     )
   }
 
-  protected resetLocalForge (): Promise<void> {
-    return new Promise<void>(resolve => {
-      localforage.clear().then(() => {
-        resolve()
-      })
-    })
-  }
-
   protected getPageContent (): Promise<JSX.Element> {
     return new Promise<JSX.Element>(resolve => {
       const promistList: Promise<JSX.Element | null>[] = []
-      this.mainConfig.groupSettingMap.keys().forEach(groupName => {
+      this.mainConfig.groupSettingMap.keys().forEach(groupType => {
         const promise = new Promise<JSX.Element | null>(resolve => {
-          localforage.getItem(groupName + '-command').then((commands) => {
+          this.sqlHandler.getItem<CommandData[] | null>(groupType + '-command').then((commands) => {
             if (!commands) {
               commands = []
             }
-            this.getGroupContainer(groupName!, commands as CommandData[], this.elementConfig).then((groupContainer) => {
+            this.getGroupContainer(groupType!, commands, this.elementConfig).then((groupContainer) => {
               resolve(groupContainer)
             })
           })
@@ -135,8 +116,8 @@ export class SqlContentController extends React.Component<ISqlContentControllerP
 
     let isGroupExist: boolean = true
 
-    await localforage.getItem(groupType + '-command').then((items) => {
-      if (!items) {
+    await this.sqlHandler.getItem<CommandData[] | null>(groupType + '-command').then((commands) => {
+      if (!commands) {
         isGroupExist = false
         this.dataModel.setCommandValid(this.props.commandType, false)
       }
@@ -275,7 +256,6 @@ export class SqlContentController extends React.Component<ISqlContentControllerP
     if (prevProps.textFromFileLoaded !== this.props.textFromFileLoaded) {
       this.dataModel.setCommandValid(this.props.commandType, true)
       this.sqlHandler.reset()
-      this.initLocalForge()
       this.initialize()
     }
   }

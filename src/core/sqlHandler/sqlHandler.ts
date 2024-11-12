@@ -19,6 +19,25 @@ export class SqlHandler {
     this.commandType = commandType
     this.mainConfig = Container.get(MainConfig)
     this._indicateCommandErrorMap = new TSMap()
+    this.initLocalForge()
+  }
+
+  protected initLocalForge (): void {
+    this.resetLocalForge().then(() => {
+      localforage.config({
+        driver: localforage.INDEXEDDB,
+        name: 'SqlConverter',
+        storeName: 'SqlConverter'
+      })
+    })
+  }
+
+  protected resetLocalForge (): Promise<void> {
+    return new Promise<void>(resolve => {
+      localforage.clear().then(() => {
+        resolve()
+      })
+    })
   }
 
   public transTextToCommand (textFromFileLoaded: string): Promise<void> {
@@ -100,55 +119,28 @@ export class SqlHandler {
   }
 
   protected setCommandGroup (textLines: string[], groupName: GroupType, detail: IGroupCommandDetail): Promise<void> {
-    return new Promise(resolve => {
-      const setItemGroupTagPromise: Promise<void> = new Promise((resolve) => {
-        localforage.setItem(groupName + '-detail', detail).then(() => {
-          resolve()
-        })
-      })
-      const commands: CommandData[] = []
+    const commands: CommandData[] = []
 
-      let commadTextSB: StringBuilder | null = null
+    let commadTextSB: StringBuilder | null = null
 
-      for (let i = 0; i < textLines.length; i++) {
-        if (!textLines[i].trim().startsWith(this.mainConfig.singleCommandIndicator)) {
-          continue
-        }
-        let startIndex = i
-        commadTextSB = new StringBuilder()
-        const commandDataMessages: ICommandDataMessage[] = []
+    for (let i = 0; i < textLines.length; i++) {
+      if (!textLines[i].trim().startsWith(this.mainConfig.singleCommandIndicator)) {
+        continue
+      }
+      let startIndex = i
+      commadTextSB = new StringBuilder()
+      const commandDataMessages: ICommandDataMessage[] = []
 
-        const newTextLine = textLines[i].replace(this.mainConfig.singleCommandIndicator, '').trim()
-        if (newTextLine.length !== 0) {
-          commadTextSB.append(newTextLine)
-        } else {
-          startIndex++
-        }
+      const newTextLine = textLines[i].replace(this.mainConfig.singleCommandIndicator, '').trim()
+      if (newTextLine.length !== 0) {
+        commadTextSB.append(newTextLine)
+      } else {
+        startIndex++
+      }
 
-        let j: number
-        for (j = i + 1; j < textLines.length; j++) {
-          if (textLines[j].trim().startsWith(this.mainConfig.singleCommandIndicator)) {
-            commandDataMessages.push(...this.getCommandDataDetail(commadTextSB, groupName!, {
-              globalTextLineIndex: detail.startIndex + startIndex,
-              commandIndex: commands.length
-            }))
-            commands.push(
-              new CommandData(
-                commadTextSB,
-                commandDataMessages,
-                detail.startIndex + startIndex,
-                detail.startIndex + 1 + j - 1
-              )
-            )
-            i = j - 1
-            break
-          } else {
-            textLines[j] = textLines[j].replace(this.mainConfig.singleCommandIndicator, '')
-            commadTextSB.append(textLines[j])
-          }
-        }
-
-        if (j === textLines.length) {
+      let j: number
+      for (j = i + 1; j < textLines.length; j++) {
+        if (textLines[j].trim().startsWith(this.mainConfig.singleCommandIndicator)) {
           commandDataMessages.push(...this.getCommandDataDetail(commadTextSB, groupName!, {
             globalTextLineIndex: detail.startIndex + startIndex,
             commandIndex: commands.length
@@ -161,21 +153,38 @@ export class SqlHandler {
               detail.startIndex + 1 + j - 1
             )
           )
+          i = j - 1
           break
+        } else {
+          textLines[j] = textLines[j].replace(this.mainConfig.singleCommandIndicator, '')
+          commadTextSB.append(textLines[j])
         }
       }
-      const setItemCommandPromise: Promise<void> = new Promise((resolve) => {
-        localforage.setItem(groupName + '-command', commands).then(() => {
-          if (commands.length === 0 && this.indicateCommandErrorMap.has(groupName)) {
-            const errorData: IIndicateCommandErrorData = this.indicateCommandErrorMap.get(groupName)
-            if (errorData.isBlank) {
-              this.indicateCommandErrorMap.delete(groupName)
-            }
+
+      if (j === textLines.length) {
+        commandDataMessages.push(...this.getCommandDataDetail(commadTextSB, groupName!, {
+          globalTextLineIndex: detail.startIndex + startIndex,
+          commandIndex: commands.length
+        }))
+        commands.push(
+          new CommandData(
+            commadTextSB,
+            commandDataMessages,
+            detail.startIndex + startIndex,
+            detail.startIndex + 1 + j - 1
+          )
+        )
+        break
+      }
+    }
+    return new Promise<void>((resolve) => {
+      this.setItem(groupName + '-command', commands).then(() => {
+        if (commands.length === 0 && this.indicateCommandErrorMap.has(groupName)) {
+          const errorData: IIndicateCommandErrorData = this.indicateCommandErrorMap.get(groupName)
+          if (errorData.isBlank) {
+            this.indicateCommandErrorMap.delete(groupName)
           }
-          resolve()
-        })
-      })
-      Promise.all([setItemGroupTagPromise, setItemCommandPromise]).then(() => {
+        }
         resolve()
       })
     })
@@ -381,7 +390,24 @@ export class SqlHandler {
     return messages
   }
 
+  protected setItem (key: string, value: any): Promise<void> {
+    return new Promise<void>(resolve => {
+      localforage.setItem(key, value).then(() => {
+        resolve()
+      })
+    })
+  }
+
+  public getItem<T> (key: string): Promise<T | null> {
+    return new Promise<T | null>(resolve => {
+      localforage.getItem<T>(key).then((items) => {
+        resolve(items)
+      })
+    })
+  }
+
   public reset (): void {
     this.indicateCommandErrorMap.clear()
+    this.initLocalForge()
   }
 }
