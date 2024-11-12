@@ -81,7 +81,7 @@ export class SqlContentController extends React.Component<ISqlContentControllerP
       const promistList: Promise<JSX.Element | null>[] = []
       this.mainConfig.groupSettingMap.keys().forEach(groupType => {
         const promise = new Promise<JSX.Element | null>(resolve => {
-          this.sqlHandler.getCommands(groupType).then((commands) => {
+          this.sqlHandler.getItem<CommandData[] | null>(groupType + '-command').then((commands) => {
             if (!commands) {
               commands = []
             }
@@ -116,7 +116,7 @@ export class SqlContentController extends React.Component<ISqlContentControllerP
 
     let isGroupExist: boolean = true
 
-    await this.sqlHandler.getCommands(groupType).then((commands) => {
+    await this.sqlHandler.getItem<CommandData[] | null>(groupType + '-command').then((commands) => {
       if (!commands) {
         isGroupExist = false
         this.dataModel.setCommandValid(this.props.commandType, false)
