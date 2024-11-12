@@ -19,6 +19,25 @@ export class SqlHandler {
     this.commandType = commandType
     this.mainConfig = Container.get(MainConfig)
     this._indicateCommandErrorMap = new TSMap()
+    this.initLocalForge()
+  }
+
+  protected initLocalForge (): void {
+    this.resetLocalForge().then(() => {
+      localforage.config({
+        driver: localforage.INDEXEDDB,
+        name: 'SqlConverter',
+        storeName: 'SqlConverter'
+      })
+    })
+  }
+
+  protected resetLocalForge (): Promise<void> {
+    return new Promise<void>(resolve => {
+      localforage.clear().then(() => {
+        resolve()
+      })
+    })
   }
 
   public transTextToCommand (textFromFileLoaded: string): Promise<void> {
@@ -381,7 +400,16 @@ export class SqlHandler {
     return messages
   }
 
+  public getCommands (groupType: GroupType): Promise<CommandData[] | null> {
+    return new Promise<CommandData[] | null>(resolve => {
+      localforage.getItem<CommandData[]>(groupType + '-command').then((commands) => {
+        resolve(commands)
+      })
+    })
+  }
+
   public reset (): void {
     this.indicateCommandErrorMap.clear()
+    this.initLocalForge()
   }
 }
