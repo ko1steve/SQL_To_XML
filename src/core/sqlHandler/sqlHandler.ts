@@ -390,7 +390,7 @@ export class SqlHandler {
     return messages
   }
 
-  protected setItem (key: string, value: any): Promise<void> {
+  protected setItem (key: string, value: unknown): Promise<void> {
     return new Promise<void>(resolve => {
       localforage.setItem(key, value).then(() => {
         resolve()
