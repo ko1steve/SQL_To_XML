@@ -1,10 +1,10 @@
-import { CommandData, ICommandDataDetail, ICommandDataMessage, IGroupCommandDetail, IIndicateCommandErrorData, MessageType } from 'src/data/commandData'
-import { StringBuilder } from 'src/data/stringBuilder'
-import { CommandType, GroupType, IGroupSetting, MainConfig } from 'src/mainConfig'
+import localforage from 'localforage'
 import { Container } from 'typescript-ioc'
 import { TSMap } from 'typescript-map'
-import localforage from 'localforage'
-import { Command, RegExpConfig } from 'src/config/regExpConfig'
+import { CommandData, ICommandDataDetail, ICommandDataMessage, IGroupCommandDetail, IIndicateCommandErrorData, MessageType } from '../../data/commandData'
+import { StringBuilder } from '../../data/stringBuilder'
+import { CommandType, GroupType, IGroupSetting, MainConfig } from '../../mainConfig'
+import { Command, RegExpConfig } from '../../config/regExpConfig'
 
 export class SqlHandler {
   protected mainConfig: MainConfig
@@ -390,7 +390,7 @@ export class SqlHandler {
     return messages
   }
 
-  protected setItem (key: string, value: any): Promise<void> {
+  protected setItem (key: string, value: unknown): Promise<void> {
     return new Promise<void>(resolve => {
       localforage.setItem(key, value).then(() => {
         resolve()
