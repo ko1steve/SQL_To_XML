@@ -2,7 +2,7 @@ import React, { useState, JSX } from 'react'
 import { Container } from 'typescript-ioc'
 import { CommandType, GroupType, MainConfig } from 'src/mainConfig'
 import { IGroupContainerConfig, ISqlContentConfig } from 'src/component/sqlContentArea/sqlContent/sqlContentConfig'
-import { CommandData, MessageType } from 'src/data/commandData'
+import { ICommandData, MessageType } from 'src/data/commandData'
 import { DataModel } from 'src/model/dataModel'
 import { SqlHandler } from 'src/core/sqlHandler/sqlHandler'
 
@@ -81,7 +81,7 @@ export class SqlContentController extends React.Component<ISqlContentControllerP
       const promistList: Promise<JSX.Element | null>[] = []
       this.mainConfig.groupSettingMap.keys().forEach(groupType => {
         const promise = new Promise<JSX.Element | null>(resolve => {
-          this.sqlHandler.getItem<CommandData[] | null>(groupType + '-command').then((commands) => {
+          this.sqlHandler.getItem<ICommandData[] | null>(groupType + '-command').then((commands) => {
             if (!commands) {
               commands = []
             }
@@ -105,7 +105,7 @@ export class SqlContentController extends React.Component<ISqlContentControllerP
     })
   }
 
-  protected async getGroupContainer (groupType: GroupType, commands: CommandData[], elementConfig: ISqlContentConfig): Promise<JSX.Element> {
+  protected async getGroupContainer (groupType: GroupType, commands: ICommandData[], elementConfig: ISqlContentConfig): Promise<JSX.Element> {
     let isCheckGroup: boolean = false
     if (this.mainConfig.checkCommandGroup.has(this.props.commandType)) {
       const checkGroupTypes: GroupType[] = this.mainConfig.checkCommandGroup.get(this.props.commandType)
@@ -116,7 +116,7 @@ export class SqlContentController extends React.Component<ISqlContentControllerP
 
     let isGroupExist: boolean = true
 
-    await this.sqlHandler.getItem<CommandData[] | null>(groupType + '-command').then((commands) => {
+    await this.sqlHandler.getItem<ICommandData[] | null>(groupType + '-command').then((commands) => {
       if (!commands) {
         isGroupExist = false
         this.dataModel.setCommandValid(this.props.commandType, false)
@@ -157,7 +157,7 @@ export class SqlContentController extends React.Component<ISqlContentControllerP
     )
   }
 
-  protected getAmountText (commands: CommandData[]): JSX.Element | null {
+  protected getAmountText (commands: ICommandData[]): JSX.Element | null {
     return <p>{'語法數量 : ' + commands.length.toString()}</p>
   }
 
@@ -165,7 +165,7 @@ export class SqlContentController extends React.Component<ISqlContentControllerP
     return <p>{'語法數量超過 ' + this.mainConfig.maxGroupCommandAmount.toString() + ' 筆, 以下區塊只顯示錯誤語法'}</p>
   }
 
-  protected getCommandList (commands: CommandData[], groupType: GroupType, config: IGroupContainerConfig): JSX.Element | null {
+  protected getCommandList (commands: ICommandData[], groupType: GroupType, config: IGroupContainerConfig): JSX.Element | null {
     const CommandItem: React.FC<ICommandItemProps> = ({ command, index }) => {
       const [isHover, setHover] = useState(false)
 
@@ -181,7 +181,7 @@ export class SqlContentController extends React.Component<ISqlContentControllerP
 
     return (
       <ul className='command-list'>{
-        commands.map((command: CommandData, index: number) => {
+        commands.map((command: ICommandData, index: number) => {
           const showCommand = !(command.messages.length === 0 && commands.length >= this.mainConfig.maxGroupCommandAmount)
           if (showCommand) {
             return (
@@ -197,7 +197,7 @@ export class SqlContentController extends React.Component<ISqlContentControllerP
     )
   }
 
-  protected getGroupErrorMessage (groupType: GroupType, commands: CommandData[], config: IGroupContainerConfig, isCheckGroup: boolean): JSX.Element | null {
+  protected getGroupErrorMessage (groupType: GroupType, commands: ICommandData[], config: IGroupContainerConfig, isCheckGroup: boolean): JSX.Element | null {
     if (this.sqlHandler.indicateCommandErrorMap.has(groupType)) {
       this.dataModel.setCommandValid(this.props.commandType, false)
       const commandIndex: number = this.sqlHandler.indicateCommandErrorMap.get(groupType).commandIndex
@@ -220,9 +220,9 @@ export class SqlContentController extends React.Component<ISqlContentControllerP
     return null
   }
 
-  protected getCommandMessages (commands: CommandData[], groupType: GroupType, config: IGroupContainerConfig): JSX.Element[] {
+  protected getCommandMessages (commands: ICommandData[], groupType: GroupType, config: IGroupContainerConfig): JSX.Element[] {
     const messageElements: JSX.Element[] = []
-    commands.forEach((command: CommandData) => {
+    commands.forEach((command: ICommandData) => {
       if (command.messages.length > 0) {
         command.messages.forEach(detail => {
           let message: string = this.mainConfig.messageMap.get(detail.messageType)
@@ -268,6 +268,6 @@ export class SqlContentController extends React.Component<ISqlContentControllerP
 }
 
 interface ICommandItemProps {
-  command: CommandData
+  command: ICommandData
   index: number
 }

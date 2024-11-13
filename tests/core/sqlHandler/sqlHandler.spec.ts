@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import { SqlHandler } from '../../../src/core/sqlHandler/sqlHandler'
 import { CommandType, GroupType } from '../../../src/mainConfig';
 import { TSMap } from 'typescript-map';
-import { CommandData } from '../../../src/data/commandData';
+import { ICommandData } from '../../../src/data/commandData';
 import Result from './example/result.json'
 
 class MockSqlHandler extends SqlHandler {
@@ -48,35 +48,35 @@ describe('SqlHandler(DML)', () => {
   })
 
   it('getItem(DML-PreSQL-command)', async () => {
-    const commandsPreSqlDml: CommandData[] | null = await sqlHandler.getItem<CommandData[]>(GroupType.PreSQL + '-command')
+    const commandsPreSqlDml: ICommandData[] | null = await sqlHandler.getItem<ICommandData[]>(GroupType.PreSQL + '-command')
     expect(commandsPreSqlDml!.length).equal(0)
   })
 
   it('getItem(PreProdSQL-command)', async () => {
-    const commandsPreProdSqlDml: CommandData[] | null = await sqlHandler.getItem<CommandData[]>(GroupType.PreProdSQL + '-command')
+    const commandsPreProdSqlDml: ICommandData[] | null = await sqlHandler.getItem<ICommandData[]>(GroupType.PreProdSQL + '-command')
     expect(commandsPreProdSqlDml!.length).equal(0)
   })
 
   it('getItem(CountSQL-command)', async () => {
-    const commandsCountSqlDml: CommandData[] | null = await sqlHandler.getItem<CommandData[]>(GroupType.CountSQL + '-command')
+    const commandsCountSqlDml: ICommandData[] | null = await sqlHandler.getItem<ICommandData[]>(GroupType.CountSQL + '-command')
     expect(commandsCountSqlDml!.length).equal(1)
     expect(commandsCountSqlDml![0].content.toString('\r\n')).equal(Result.DML.CountSQL)
   })
 
   it('getItem(SelectSQL-command)', async () => {
-    const commandsSelectSqlDml: CommandData[] | null = await sqlHandler.getItem<CommandData[]>(GroupType.SelectSQL + '-command')
+    const commandsSelectSqlDml: ICommandData[] | null = await sqlHandler.getItem<ICommandData[]>(GroupType.SelectSQL + '-command')
     expect(commandsSelectSqlDml!.length).equal(1)
     expect(commandsSelectSqlDml![0].content.toString('\r\n')).equal(Result.DML.SelectSQL)
   })
 
   it('getItem(MainSQL-command)', async () => {
-    const commandsMainSqlDml: CommandData[] | null = await sqlHandler.getItem<CommandData[]>(GroupType.MainSQL + '-command')
+    const commandsMainSqlDml: ICommandData[] | null = await sqlHandler.getItem<ICommandData[]>(GroupType.MainSQL + '-command')
     expect(commandsMainSqlDml!.length).equal(1)
     expect(commandsMainSqlDml![0].content.toString('\r\n')).equal(Result.DML.MainSQL)
   })
 
   it('getItem(PostSQL-command)', async () => {
-    const commandsPostSqlDml: CommandData[] | null = await sqlHandler.getItem<CommandData[]>(GroupType.PostSQL + '-command')
+    const commandsPostSqlDml: ICommandData[] | null = await sqlHandler.getItem<ICommandData[]>(GroupType.PostSQL + '-command')
     expect(commandsPostSqlDml!.length).equal(0)
   })
 })
@@ -90,33 +90,33 @@ describe('SqlHandler(DDL)', () => {
   })
 
   it('getItem(PreSQL-command)', async () => {
-    const commandsPreSqlDdl: CommandData[] | null = await sqlHandler.getItem<CommandData[]>(GroupType.PreSQL + '-command')
+    const commandsPreSqlDdl: ICommandData[] | null = await sqlHandler.getItem<ICommandData[]>(GroupType.PreSQL + '-command')
     expect(commandsPreSqlDdl!.length).equal(0)
   })
 
   it('getItem(PreProdSQL-command)', async () => {
-    const commandsPreProdSqlDdl: CommandData[] | null = await sqlHandler.getItem<CommandData[]>(GroupType.PreProdSQL + '-command')
+    const commandsPreProdSqlDdl: ICommandData[] | null = await sqlHandler.getItem<ICommandData[]>(GroupType.PreProdSQL + '-command')
     expect(commandsPreProdSqlDdl!.length).equal(0)
   })
 
   it('getItem(CountSQL-command)', async () => {
-    const commandsCountSqlDdl: CommandData[] | null = await sqlHandler.getItem<CommandData[]>(GroupType.CountSQL + '-command')
+    const commandsCountSqlDdl: ICommandData[] | null = await sqlHandler.getItem<ICommandData[]>(GroupType.CountSQL + '-command')
     expect(commandsCountSqlDdl!.length).equal(0)
   })
 
   it('getItem(SelectSQL-command)', async () => {
-    const commandsSelectSqlDdl: CommandData[] | null = await sqlHandler.getItem<CommandData[]>(GroupType.SelectSQL + '-command')
+    const commandsSelectSqlDdl: ICommandData[] | null = await sqlHandler.getItem<ICommandData[]>(GroupType.SelectSQL + '-command')
     expect(commandsSelectSqlDdl!.length).equal(0)
   })
 
   it('getItem(MainSQL-command)', async () => {
-    const commandsMainSqlDdl: CommandData[] | null = await sqlHandler.getItem<CommandData[]>(GroupType.MainSQL + '-command')
+    const commandsMainSqlDdl: ICommandData[] | null = await sqlHandler.getItem<ICommandData[]>(GroupType.MainSQL + '-command')
     expect(commandsMainSqlDdl!.length).equal(1)
     expect(commandsMainSqlDdl![0].content.toString('\r\n')).equal(Result.DDL.MainSQL)
   })
 
   it('getItem(PostSQL-command)', async () => {
-    const commandsPostSqlDdl: CommandData[] | null = await sqlHandler.getItem<CommandData[]>(GroupType.PostSQL + '-command')
+    const commandsPostSqlDdl: ICommandData[] | null = await sqlHandler.getItem<ICommandData[]>(GroupType.PostSQL + '-command')
     expect(commandsPostSqlDdl!.length).equal(1)
     expect(commandsPostSqlDdl![0].content.toString('\r\n')).equal(Result.DDL.PostSQL)
   })
