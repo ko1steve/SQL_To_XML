@@ -1,6 +1,6 @@
 import localforage from 'localforage'
 import React, { useEffect, useState } from 'react'
-import { CommandData, IGroupCommandDetail } from 'src/data/commandData'
+import { ICommandData, IGroupCommandDetail } from 'src/data/commandData'
 import { StringBuilder } from 'src/data/stringBuilder'
 import { CommandType, GroupType } from 'src/mainConfig'
 import { DataModel } from 'src/model/dataModel'
@@ -40,7 +40,7 @@ const nextGroupCommandPromise = (xmlContentSB: StringBuilder, groupList: string[
         }
         xmlContentSB.append(`  <${groupList[0]}${groupTagStr}>`)
         if (commandData) {
-          const commands = commandData as CommandData[]
+          const commands = commandData as ICommandData[]
           commands.forEach((command, index) => {
             const sqlTagStr: string = `startLine="${command.startIndex + 1}" endLine="${command.endIndex + 1}"`
             const sqlCommandStr = `    <SQL sql_idx="${index + 1}" ${sqlTagStr}>\n${escapeXml((command.content as any)._strings.join('\r\n'))}</SQL>`

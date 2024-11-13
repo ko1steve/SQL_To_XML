@@ -1,7 +1,7 @@
 import localforage from 'localforage'
 import { Container } from 'typescript-ioc'
 import { TSMap } from 'typescript-map'
-import { CommandData, ICommandDataDetail, ICommandDataMessage, IGroupCommandDetail, IIndicateCommandErrorData, MessageType } from '../../data/commandData'
+import { ICommandData, ICommandDataDetail, ICommandDataMessage, IGroupCommandDetail, IIndicateCommandErrorData, MessageType } from '../../data/commandData'
 import { StringBuilder } from '../../data/stringBuilder'
 import { CommandType, GroupType, IGroupSetting, MainConfig } from '../../mainConfig'
 import { Command, RegExpConfig } from '../../config/regExpConfig'
@@ -119,7 +119,7 @@ export class SqlHandler {
   }
 
   protected setCommandGroup (textLines: string[], groupName: GroupType, detail: IGroupCommandDetail): Promise<void> {
-    const commands: CommandData[] = []
+    const commands: ICommandData[] = []
 
     let commadTextSB: StringBuilder | null = null
 
@@ -145,14 +145,12 @@ export class SqlHandler {
             globalTextLineIndex: detail.startIndex + startIndex,
             commandIndex: commands.length
           }))
-          commands.push(
-            new CommandData(
-              commadTextSB,
-              commandDataMessages,
-              detail.startIndex + startIndex,
-              detail.startIndex + 1 + j - 1
-            )
-          )
+          commands.push({
+            content: commadTextSB,
+            messages: commandDataMessages,
+            startIndex: detail.startIndex + startIndex,
+            endIndex: detail.startIndex + 1 + j - 1
+          })
           i = j - 1
           break
         } else {
@@ -166,14 +164,12 @@ export class SqlHandler {
           globalTextLineIndex: detail.startIndex + startIndex,
           commandIndex: commands.length
         }))
-        commands.push(
-          new CommandData(
-            commadTextSB,
-            commandDataMessages,
-            detail.startIndex + startIndex,
-            detail.startIndex + 1 + j - 1
-          )
-        )
+        commands.push({
+          content: commadTextSB,
+          messages: commandDataMessages,
+          startIndex: detail.startIndex + startIndex,
+          endIndex: detail.startIndex + 1 + j - 1
+        })
         break
       }
     }

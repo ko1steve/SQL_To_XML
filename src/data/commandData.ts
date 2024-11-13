@@ -39,17 +39,3 @@ export interface IIndicateCommandErrorData {
   commandIndex: number
   isBlank: boolean
 }
-
-export class CommandData implements ICommandData {
-  public content: StringBuilder
-  public messages: ICommandDataMessage[]
-  public startIndex: number
-  public endIndex: number
-
-  constructor (content: StringBuilder, messages: ICommandDataMessage[], startIndex: number, endIndex: number) {
-    this.content = content
-    this.messages = messages
-    this.startIndex = startIndex
-    this.endIndex = endIndex
-  }
-}
