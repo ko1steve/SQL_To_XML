@@ -2,7 +2,7 @@
   "DML":{
     "CountSQL":"select COUNT(*)\r\nfrom TEST_UUPAY_LIFE_PAY_PUBLIC_UTILITIES_CONFIG with(nolock)\r\nwhere BTYPECLASS = 'YLNCPF'\r\nand BILLER_ID = '40401902'\r\nand SELLER_MEMBER_UID = 1202404305208877\r\nand CONTRACT_NO = 3202404300000029\r\nand AGE >= 18;\r\n",
     "SelectSQL":"select *\r\nfrom TEST_UUPAY_LIFE_PAY_PUBLIC_UTILITIES_CONFIG with(nolock)\r\nwhere BTYPECLASS = 'YLNCPF'\r\nand BILLER_ID = '40401902'\r\nand SELLER_MEMBER_UID = 1202404305208877\r\nand CONTRACT_NO = 3202404300000029;\r\n",
-    "MainSQL":"INSERT INTO TEST_UUPAY_LIFE_PAY_PUBLIC_UTILITIES_CONFIG (BTYPECLASS,BILLER_ID,BILLER_CODE,BILLER_NICKNAME,SELLER_MEMBER_UID,CONTRACT_NO) VALUES ('YLNCPF','40401902',NULL,'宜蘭市路邊停車費',1202404305208877,3202404300000029);\r\n"
+    "MainSQL":"INSERT INTO TEST_UUPAY_LIFE_PAY_PUBLIC_UTILITIES_CONFIG (BTYPECLASS,BILLER_ID,BILLER_CODE,BILLER_NICKNAME,SELLER_MEMBER_UID,CONTRACT_NO) VALUES ('YLNCPF','40401902',NULL,'路邊停車費',1202404305208877,3202404300000029);\r\n"
   },
   "DDL":{
     "MainSQL":"--CREATE TABLE\r\nCREATE TABLE BUS.TEST_MTPASS_DIFFSUBSIDY_TICKET\r\n(\r\n  UNI_ID                                  CHAR(6)                                  , --堃定期票類別\r\n  SETT_DATE_S                             DATE                                     , --清分日期(起)\r\n  SETT_DATE_E                             DATE                                     , --清分日期(訖)\r\n  CDATE                                  DATE                                       --資料建立日期\r\n)\r\nTABLESPACE BUS_TAB03;\r\n",
