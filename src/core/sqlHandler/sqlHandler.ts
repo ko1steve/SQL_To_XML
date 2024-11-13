@@ -41,7 +41,7 @@ export class SqlHandler {
   }
 
   public transTextToCommand (textFromFileLoaded: string): Promise<void> {
-    return new Promise(resolve => {
+    return new Promise<void>(resolve => {
       const promiseList: Promise<void>[] = []
       const textLines: string[] = textFromFileLoaded.split('\r\n')
       let groupName: GroupType | null
