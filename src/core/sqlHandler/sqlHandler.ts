@@ -53,21 +53,28 @@ export class SqlHandler {
           continue
         }
         const startIndex = i
+        const searchEndArr: string[] = this.mainConfig.groupSettingMap.get(groupName).searchEndPattern
 
         //* 區塊分割字串下一行是否必須是指令標註字串
         if (this.mainConfig.firstCommandIsNextToGroupName) {
           if (i + 1 >= textLines.length) {
             this.indicateCommandErrorMap.set(groupName, { commandIndex: i + 1, isBlank: true })
-          } else if (!textLines[i + 1].trim().startsWith(this.mainConfig.singleCommandIndicator)) {
-            const isBlank: boolean = textLines[i + 1].trim() === ''
-            this.indicateCommandErrorMap.set(groupName, { commandIndex: i + 1, isBlank })
+          } else {
+            const isFindCommandTag: boolean = textLines[i + 1].trim().startsWith(this.mainConfig.singleCommandIndicator)
+            const isFindGroupTag: boolean = searchEndArr.some(pattern => textLines[i + 1].trim().startsWith(pattern))
+            if (!isFindCommandTag && !isFindGroupTag) {
+              const isBlank: boolean = textLines[i + 1].trim() === ''
+              this.indicateCommandErrorMap.set(groupName, { commandIndex: i + 1, isBlank })
+            }
           }
         } else {
           //* 支援「區塊分割字串」與「指令標註字串」之間有空白字串或註解
-          let j
+          let j: number
           let isError: boolean = false
           for (j = i + 1; j < textLines.length; j++) {
-            if (textLines[j].trim().startsWith(this.mainConfig.singleCommandIndicator)) {
+            const isFindCommandTag: boolean = textLines[j].trim().startsWith(this.mainConfig.singleCommandIndicator)
+            const isFindGroupTag: boolean = searchEndArr.some(pattern => textLines[j].trim().startsWith(pattern))
+            if (isFindCommandTag || isFindGroupTag) {
               i = j - 1
               break
             } else if (textLines[j].trim() === '' || textLines[j].trim().search(/^--|^\/\*/) < 0) {
@@ -82,7 +89,6 @@ export class SqlHandler {
             isError = true
           }
         }
-        const searchEndArr: string[] = this.mainConfig.groupSettingMap.get(groupName).searchEndPattern
         const textSB = new StringBuilder()
 
         //* 找到區塊分割的判斷字串後，尋找區塊的結束點
