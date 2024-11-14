@@ -5,7 +5,3 @@ export const overlay = {
 export const overlayText = {
   id: 'overlay-text'
 }
-
-export const progressText = {
-  id: 'progress-text'
-}

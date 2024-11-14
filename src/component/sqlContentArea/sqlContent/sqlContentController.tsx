@@ -18,7 +18,7 @@ export interface ISqlContentControllerState {
   pageContent: JSX.Element | null
 }
 
-export class SqlContentController extends React.Component<ISqlContentControllerProps> {
+export class SqlContentController extends React.Component<ISqlContentControllerProps, ISqlContentControllerState> {
   protected dataModel: DataModel
   protected mainConfig: MainConfig
   protected elementConfig: ISqlContentConfig
@@ -50,7 +50,7 @@ export class SqlContentController extends React.Component<ISqlContentControllerP
       return this.setState({
         isInit: true,
         pageContent: this.getEmptyContainer()
-      } as ISqlContentControllerState)
+      })
     }
     this.sqlHandler.transTextToCommand(this.props.textFromFileLoaded!).then(() => {
       this.getPageContent().then((mainContainer) => {
@@ -58,7 +58,7 @@ export class SqlContentController extends React.Component<ISqlContentControllerP
         this.setState({
           isInit: true,
           pageContent: mainContainer
-        } as ISqlContentControllerState)
+        })
       })
     })
   }
