@@ -34,7 +34,7 @@ const nextGroupCommandPromise = (xmlContentSB: StringBuilder, groupList: string[
     localforage.getItem(groupList[0] + '-command').then((commandData) => {
       localforage.getItem(groupList[0] + '-detail').then((groupData) => {
         let groupTagStr: string = ''
-        const groupStartIndex: number = (groupData as IGroupCommandDetail)?.startIndex
+        const groupStartIndex = (groupData as IGroupCommandDetail)?.startIndex
         if (groupStartIndex != null) {
           groupTagStr = ` markLine="${groupStartIndex + 1}"`
         }
@@ -42,7 +42,7 @@ const nextGroupCommandPromise = (xmlContentSB: StringBuilder, groupList: string[
         if (commandData) {
           const commands = commandData as ICommandData[]
           commands.forEach((command, index) => {
-            const sqlTagStr: string = `startLine="${command.startIndex + 1}" endLine="${command.endIndex + 1}"`
+            const sqlTagStr = `startLine="${command.startIndex + 1}" endLine="${command.endIndex + 1}"`
             const sqlCommandStr = `    <SQL sql_idx="${index + 1}" ${sqlTagStr}>\n${escapeXml((command.content as any)._strings.join('\r\n'))}</SQL>`
             xmlContentSB.append(sqlCommandStr)
           })
@@ -61,7 +61,7 @@ const nextGroupCommandPromise = (xmlContentSB: StringBuilder, groupList: string[
 
 export const ExportXmlButton: React.FC<IExportXmlButtonProps> = ({ className, id }) => {
   const dataModel = Container.get(DataModel)
-  const [isCommandValid, setCommandValid] = useState<boolean>(dataModel.getCommandValid(dataModel.currentTab))
+  const [isCommandValid, setCommandValid] = useState(dataModel.getCommandValid(dataModel.currentTab))
 
   const handleOnClick = () => {
     if (!dataModel.getCommandValid(dataModel.currentTab)) {
@@ -73,7 +73,7 @@ export const ExportXmlButton: React.FC<IExportXmlButtonProps> = ({ className, id
     xmlContentSB.append('<?xml version="1.0" encoding="UTF-8"?>')
     xmlContentSB.append('<SQLBodys>')
 
-    const groupList: GroupType[] = Object.values(GroupType)
+    const groupList = Object.values(GroupType)
 
     nextGroupCommandPromise(xmlContentSB, groupList).then(() => {
       xmlContentSB.append('</SQLBodys>')

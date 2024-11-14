@@ -22,11 +22,11 @@ export const ImportSqlButton: React.FC<IImportSqlButtonProps> = ({ className, id
     if (!event.target || !event.target.files || event.target.files.length === 0) {
       return
     }
-    const file: File = event.target.files[0]
-    const arrayBufferReader: FileReader = new FileReader()
+    const file = event.target.files[0]
+    const arrayBufferReader = new FileReader()
     const worker = new Worker(GetRawString)
 
-    const dataModel: DataModel = Container.get(DataModel)
+    const dataModel = Container.get(DataModel)
     dataModel.onStartLoadSignal.dispatch()
 
     arrayBufferReader.onload = (event) => {
@@ -34,9 +34,9 @@ export const ImportSqlButton: React.FC<IImportSqlButtonProps> = ({ className, id
         return
       }
       worker.onmessage = (event: any) => {
-        const { type, data }: IGetRawStringResponse = event.data
+        const { type, data } = event.data as IGetRawStringResponse
         if (type === 'complete') {
-          const detectMap: jschardet.IDetectedMap = jschardet.detect(data.rawString)
+          const detectMap = jschardet.detect(data.rawString)
           const textReader = new FileReader()
           textReader.onload = (event) => {
             const dataModel = Container.get(DataModel)

@@ -4,7 +4,7 @@ import { Container } from 'typescript-ioc'
 import { DataModel } from 'src/model/dataModel'
 
 export const LoadOverlay: React.FC = () => {
-  const [isLoad, setLoad]: [boolean, Dispatch<SetStateAction<boolean>>] = useState(false)
+  const [isLoad, setLoad] = useState(false)
 
   const dataModel = Container.get(DataModel)
 

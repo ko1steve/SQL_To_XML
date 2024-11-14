@@ -17,17 +17,17 @@ const workerFunction = () => {
       }
       return result
     }
-    const { file }: IGetRawStringMessage = event.data
-    const arrayBufferReader: FileReader = new FileReader()
+    const { file } = event.data as IGetRawStringMessage
+    const arrayBufferReader = new FileReader()
     const maxSafeArrayLength = 1000000
     arrayBufferReader.onload = (event) => {
       if (event.target == null) {
         return
       }
-      const arrayBuffer: ArrayBuffer = event.target.result as ArrayBuffer
-      const uint8Array: Uint8Array = new Uint8Array(arrayBuffer)
-      const chunkedArray: Uint8Array[] = chunkArray(uint8Array, maxSafeArrayLength)
-      const rawString: string = Array.from(chunkedArray, arr => Array.from(arr, byte => String.fromCharCode(byte)).join('')).join('')
+      const arrayBuffer = event.target.result as ArrayBuffer
+      const uint8Array = new Uint8Array(arrayBuffer)
+      const chunkedArray = chunkArray(uint8Array, maxSafeArrayLength)
+      const rawString = Array.from(chunkedArray, arr => Array.from(arr, byte => String.fromCharCode(byte)).join('')).join('')
       self.postMessage({ type: 'complete', data: { rawString } })
     }
     arrayBufferReader.readAsArrayBuffer(file)
