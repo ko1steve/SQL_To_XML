@@ -96,15 +96,15 @@ export class SqlContentController extends React.Component<ISqlContentControllerP
   }
 
   protected async getGroupContainer (groupType: GroupType, commands: ICommandData[], elementConfig: ISqlContentConfig): Promise<JSX.Element> {
-    let isCheckGroup: boolean = false
+    let isCheckGroup = false
     if (this.mainConfig.checkCommandGroup.has(this.props.commandType)) {
-      const checkGroupTypes: GroupType[] = this.mainConfig.checkCommandGroup.get(this.props.commandType)
+      const checkGroupTypes = this.mainConfig.checkCommandGroup.get(this.props.commandType)
       isCheckGroup = checkGroupTypes.includes(groupType)
     }
 
-    const config: IGroupContainerConfig = elementConfig.groupContainer
+    const config = elementConfig.groupContainer
 
-    let isGroupExist: boolean = true
+    let isGroupExist = true
 
     await this.sqlHandler.getItem<ICommandData[] | null>(groupType + '-command').then((commands) => {
       if (!commands) {
@@ -122,11 +122,11 @@ export class SqlContentController extends React.Component<ISqlContentControllerP
       }
     }
 
-    const isShowCommand: boolean = commands.length > 0 && !this.sqlHandler.indicateCommandErrorMap.has(groupType)
+    const isShowCommand = commands.length > 0 && !this.sqlHandler.indicateCommandErrorMap.has(groupType)
 
-    const isShowAmount: boolean = isShowCommand && groupType === GroupType.MainSQL
+    const isShowAmount = isShowCommand && groupType === GroupType.MainSQL
 
-    const isShowAmountWarning: boolean = isShowAmount && commands.length >= this.mainConfig.maxGroupCommandAmount
+    const isShowAmountWarning = isShowAmount && commands.length >= this.mainConfig.maxGroupCommandAmount
 
     return (
       <div key={'groupContainer-' + groupType} id={config.id.replace('{groupType}', groupType)} className={config.className}>
@@ -190,8 +190,8 @@ export class SqlContentController extends React.Component<ISqlContentControllerP
   protected getGroupErrorMessage (groupType: GroupType, commands: ICommandData[], config: IGroupContainerConfig, isCheckGroup: boolean): JSX.Element | null {
     if (this.sqlHandler.indicateCommandErrorMap.has(groupType)) {
       this.dataModel.setCommandValid(this.props.commandType, false)
-      const commandIndex: number = this.sqlHandler.indicateCommandErrorMap.get(groupType).commandIndex
-      const groupTitle: string = this.mainConfig.groupSettingMap.get(groupType).titleInMsg
+      const commandIndex = this.sqlHandler.indicateCommandErrorMap.get(groupType).commandIndex
+      const groupTitle = this.mainConfig.groupSettingMap.get(groupType).titleInMsg
       let errorMessage = this.mainConfig.messageMap.get(MessageType.COMMAND_INDICATOR_NOT_FOUND_ERROR)
       errorMessage = errorMessage.replaceAll('{titleInMsg}', groupTitle)
       errorMessage = errorMessage.replaceAll('{textLineIndex}', (commandIndex + 1).toString())
@@ -200,7 +200,7 @@ export class SqlContentController extends React.Component<ISqlContentControllerP
       )
     } else if (commands.length === 0 && isCheckGroup) {
       this.dataModel.setCommandValid(this.props.commandType, false)
-      const groupTitle: string = this.mainConfig.groupSettingMap.get(groupType).titleInMsg
+      const groupTitle = this.mainConfig.groupSettingMap.get(groupType).titleInMsg
       let errorMessage: string = this.mainConfig.messageMap.get(MessageType.CONTENT_NOT_FOUND_ERROR)
       errorMessage = errorMessage.replaceAll('{titleInMsg}', groupTitle)
       return (
@@ -232,8 +232,8 @@ export class SqlContentController extends React.Component<ISqlContentControllerP
 
   protected getNoGroupMessage (groupType: GroupType, config: IGroupContainerConfig, isGroupExist: boolean): JSX.Element | null {
     if (!isGroupExist) {
-      let errorMessage: string = this.mainConfig.messageMap.get(MessageType.NO_GROUP_TAG)
-      const groupTitle: string = this.mainConfig.groupSettingMap.get(groupType).titleInMsg
+      let errorMessage = this.mainConfig.messageMap.get(MessageType.NO_GROUP_TAG)
+      const groupTitle = this.mainConfig.groupSettingMap.get(groupType).titleInMsg
       errorMessage = errorMessage.replaceAll('{titleInMsg}', groupTitle)
       return (
         <span className={config.messageContainer.errorMessage.className}>{errorMessage}</span>

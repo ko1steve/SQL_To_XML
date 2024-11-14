@@ -4,7 +4,7 @@ import * as Config from './config'
 import * as ExampleContent from './exampleContent.json'
 
 export const Header: React.FC = () => {
-  const content: string = ExampleContent.content.join('')
+  const content = ExampleContent.content.join('')
   return (
     <div className={Config.background.className}>
       <div className={Config.titleContainer.className}>
