@@ -36,7 +36,7 @@ export const ImportSqlButton: React.FC<IImportSqlButtonProps> = ({ className, id
       worker.onmessage = (event: any) => {
         const { type, data } = event.data as IGetRawStringResponse
         if (type === 'complete') {
-          const detectMap: jschardet.IDetectedMap = jschardet.detect(data.rawString)
+          const detectMap = jschardet.detect(data.rawString)
           const textReader = new FileReader()
           textReader.onload = (event) => {
             const dataModel = Container.get(DataModel)
