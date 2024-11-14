@@ -261,7 +261,7 @@ export class SqlHandler {
     //* 檢查 GRANT、REVOKE 等語法是否出現在 DDL 複雜語法之外
     const cleanedTextlines = commadTextSB.strings.map(line => line.trim())
     for (let i: number = cleanedTextlines.length - 1; i >= 0; i--) {
-      //* 若抓到 DDL 複查語法的結束符號，跳過檢查
+      //* 若抓到 DDL 複雜語法的結束符號，跳過檢查
       if (this.mainConfig.ddlComplexCommandEnds.includes(cleanedTextlines[i])) {
         break
       } else if (cleanedTextlines[i].search(this.mainConfig.grantRevokeCommand.regExp) > -1) {
