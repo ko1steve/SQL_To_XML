@@ -124,28 +124,53 @@ export class SqlHandler {
   }
 
   protected setCommandGroup (textLines: string[], groupName: GroupType, detail: IGroupCommandDetail): Promise<void> {
-    const commands: ICommandData[] = []
+    return new Promise<void>(resolve => {
+      const setItemGroupTagPromise: Promise<void> = new Promise((resolve) => {
+        localforage.setItem(groupName + '-detail', detail).then(() => {
+          resolve()
+        })
+      })
+      const commands: ICommandData[] = []
 
-    let commadTextSB: StringBuilder | null = null
+      let commadTextSB: StringBuilder | null = null
 
-    for (let i = 0; i < textLines.length; i++) {
-      if (!textLines[i].trim().startsWith(this.mainConfig.singleCommandIndicator)) {
-        continue
-      }
-      let startIndex = i
-      commadTextSB = new StringBuilder()
-      const commandDataMessages: ICommandDataMessage[] = []
+      for (let i = 0; i < textLines.length; i++) {
+        if (!textLines[i].trim().startsWith(this.mainConfig.singleCommandIndicator)) {
+          continue
+        }
+        let startIndex = i
+        commadTextSB = new StringBuilder()
+        const commandDataMessages: ICommandDataMessage[] = []
 
-      const newTextLine = textLines[i].replace(this.mainConfig.singleCommandIndicator, '').trim()
-      if (newTextLine.length !== 0) {
-        commadTextSB.append(newTextLine)
-      } else {
-        startIndex++
-      }
+        const newTextLine = textLines[i].replace(this.mainConfig.singleCommandIndicator, '').trim()
+        if (newTextLine.length !== 0) {
+          commadTextSB.append(newTextLine)
+        } else {
+          startIndex++
+        }
 
-      let j: number
-      for (j = i + 1; j < textLines.length; j++) {
-        if (textLines[j].trim().startsWith(this.mainConfig.singleCommandIndicator)) {
+        let j: number
+        for (j = i + 1; j < textLines.length; j++) {
+          if (textLines[j].trim().startsWith(this.mainConfig.singleCommandIndicator)) {
+            commandDataMessages.push(...this.getCommandDataDetail(commadTextSB, groupName!, {
+              globalTextLineIndex: detail.startIndex + startIndex,
+              commandIndex: commands.length
+            }))
+            commands.push({
+              content: commadTextSB,
+              messages: commandDataMessages,
+              startIndex: detail.startIndex + startIndex,
+              endIndex: detail.startIndex + 1 + j - 1
+            })
+            i = j - 1
+            break
+          } else {
+            textLines[j] = textLines[j].replace(this.mainConfig.singleCommandIndicator, '')
+            commadTextSB.append(textLines[j])
+          }
+        }
+
+        if (j === textLines.length) {
           commandDataMessages.push(...this.getCommandDataDetail(commadTextSB, groupName!, {
             globalTextLineIndex: detail.startIndex + startIndex,
             commandIndex: commands.length
@@ -156,36 +181,22 @@ export class SqlHandler {
             startIndex: detail.startIndex + startIndex,
             endIndex: detail.startIndex + 1 + j - 1
           })
-          i = j - 1
           break
-        } else {
-          textLines[j] = textLines[j].replace(this.mainConfig.singleCommandIndicator, '')
-          commadTextSB.append(textLines[j])
         }
       }
 
-      if (j === textLines.length) {
-        commandDataMessages.push(...this.getCommandDataDetail(commadTextSB, groupName!, {
-          globalTextLineIndex: detail.startIndex + startIndex,
-          commandIndex: commands.length
-        }))
-        commands.push({
-          content: commadTextSB,
-          messages: commandDataMessages,
-          startIndex: detail.startIndex + startIndex,
-          endIndex: detail.startIndex + 1 + j - 1
-        })
-        break
-      }
-    }
-    return new Promise<void>((resolve) => {
-      this.setItem(groupName + '-command', commands).then(() => {
-        if (commands.length === 0 && this.indicateCommandErrorMap.has(groupName)) {
-          const errorData = this.indicateCommandErrorMap.get(groupName)
-          if (errorData.isBlank) {
-            this.indicateCommandErrorMap.delete(groupName)
+      const setItemCommandPromise = new Promise<void>((resolve) => {
+        this.setItem(groupName + '-command', commands).then(() => {
+          if (commands.length === 0 && this.indicateCommandErrorMap.has(groupName)) {
+            const errorData = this.indicateCommandErrorMap.get(groupName)
+            if (errorData.isBlank) {
+              this.indicateCommandErrorMap.delete(groupName)
+            }
           }
-        }
+          resolve()
+        })
+      })
+      Promise.all([setItemGroupTagPromise, setItemCommandPromise]).then(() => {
         resolve()
       })
     })
