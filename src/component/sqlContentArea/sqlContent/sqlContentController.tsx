@@ -27,27 +27,19 @@ export class SqlContentController extends React.Component<ISqlContentControllerP
 
   constructor (props: ISqlContentControllerProps) {
     super(props)
+    this.state = {
+      isInit: false
+    }
     this.mainConfig = Container.get(MainConfig)
     this.elementConfig = this.mainConfig.tabContentConfigMap.get(this.props.commandType) as ISqlContentConfig
     this.sqlHandler = new SqlHandler(props.commandType)
     this.dataModel = Container.get(DataModel)
     this.dataModel.tabContentControllerMap.set(props.commandType, this)
-    this.mainContainer = <div></div>
-    this.state = {
-      isInit: false
-    }
-  }
-
-  protected initialize (): void {
     this.dataModel.setCommandValid(this.props.commandType, false)
-    this.dataModel.onCompleteLoadSignal.dispatch()
-    this.mainContainer = this.getEmptyContainer()
-    this.setState({
-      isInit: true
-    })
+    this.mainContainer = this.getEmptyMainContainer()
   }
 
-  protected getEmptyContainer (): JSX.Element {
+  protected getEmptyMainContainer (): JSX.Element {
     return (
       <div id={this.props.id} className={this.props.className}>
         <div id={this.elementConfig.mainContainer.contentContainer.id}>
@@ -58,7 +50,7 @@ export class SqlContentController extends React.Component<ISqlContentControllerP
 
   public updatePageContent (textFromFileLoaded: string): void {
     this.sqlHandler.reset()
-    this.mainContainer = <div></div>
+    this.mainContainer = this.getEmptyMainContainer()
     this.setState({
       isInit: false
     })
