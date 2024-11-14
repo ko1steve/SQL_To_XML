@@ -10,12 +10,10 @@ export interface ISqlContentControllerProps {
   id: string
   className: string
   commandType: CommandType
-  textFromFileLoaded?: string
 }
 
 export interface ISqlContentControllerState {
   isInit: boolean
-  pageContent: JSX.Element | null
 }
 
 export class SqlContentController extends React.Component<ISqlContentControllerProps, ISqlContentControllerState> {
@@ -23,48 +21,30 @@ export class SqlContentController extends React.Component<ISqlContentControllerP
   protected mainConfig: MainConfig
   protected elementConfig: ISqlContentConfig
   protected sqlHandler: SqlHandler
+  protected mainContainer: JSX.Element
 
   state: ISqlContentControllerState
 
   constructor (props: ISqlContentControllerProps) {
     super(props)
-    this.state = {
-      isInit: false,
-      pageContent: null
-    }
     this.mainConfig = Container.get(MainConfig)
     this.elementConfig = this.mainConfig.tabContentConfigMap.get(this.props.commandType) as ISqlContentConfig
     this.sqlHandler = new SqlHandler(props.commandType)
     this.dataModel = Container.get(DataModel)
     this.dataModel.tabContentControllerMap.set(props.commandType, this)
+    this.mainContainer = <div></div>
+    this.state = {
+      isInit: false
+    }
   }
 
   protected initialize (): void {
-    this.setState({
-      isInit: false,
-      pageContent: null
-    })
-    if (this.props.textFromFileLoaded === '') {
-      this.dataModel.setCommandValid(this.props.commandType, false)
-      this.onCompleteRender()
-      return this.setState({
-        isInit: true,
-        pageContent: this.getEmptyContainer()
-      })
-    }
-    this.sqlHandler.transTextToCommand(this.props.textFromFileLoaded!).then(() => {
-      this.getPageContent().then((mainContainer) => {
-        this.onCompleteRender()
-        this.setState({
-          isInit: true,
-          pageContent: mainContainer
-        })
-      })
-    })
-  }
-
-  protected onCompleteRender (): void {
+    this.dataModel.setCommandValid(this.props.commandType, false)
     this.dataModel.onCompleteLoadSignal.dispatch()
+    this.mainContainer = this.getEmptyContainer()
+    this.setState({
+      isInit: true
+    })
   }
 
   protected getEmptyContainer (): JSX.Element {
@@ -74,6 +54,24 @@ export class SqlContentController extends React.Component<ISqlContentControllerP
         </div>
       </div>
     )
+  }
+
+  public updatePageContent (textFromFileLoaded: string): void {
+    this.sqlHandler.reset()
+    this.mainContainer = <div></div>
+    this.setState({
+      isInit: false
+    })
+    this.dataModel.setCommandValid(this.props.commandType, true)
+    this.sqlHandler.transTextToCommand(textFromFileLoaded!).then(() => {
+      this.getPageContent().then((mainContainer) => {
+        this.dataModel.onCompleteLoadSignal.dispatch()
+        this.mainContainer = mainContainer
+        this.setState({
+          isInit: true
+        })
+      })
+    })
   }
 
   protected getPageContent (): Promise<JSX.Element> {
@@ -252,17 +250,9 @@ export class SqlContentController extends React.Component<ISqlContentControllerP
     return null
   }
 
-  componentDidUpdate (prevProps: Readonly<ISqlContentControllerProps>) {
-    if (prevProps.textFromFileLoaded !== this.props.textFromFileLoaded) {
-      this.dataModel.setCommandValid(this.props.commandType, true)
-      this.sqlHandler.reset()
-      this.initialize()
-    }
-  }
-
   render (): JSX.Element {
     return (
-      this.state.pageContent as JSX.Element
+      this.mainContainer
     )
   }
 }
