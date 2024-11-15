@@ -1,10 +1,11 @@
 import localforage from 'localforage'
 import React, { useEffect, useState } from 'react'
-import { ICommandData, IGroupCommandDetail } from 'src/data/commandData'
-import { StringBuilder } from 'src/data/stringBuilder'
-import { CommandType, GroupType } from 'src/mainConfig'
-import { DataModel } from 'src/model/dataModel'
 import { Container } from 'typescript-ioc'
+import { ICommandData, IGroupCommandDetail } from '../../data/commandData'
+import { StringBuilder } from '../../data/stringBuilder'
+import { CommandType, GroupType } from '../../mainConfig'
+import { DataModel } from '../..//model/dataModel'
+import { Common } from '../../util/common'
 
 enum ButtonState {
   Active = 'active',
@@ -33,7 +34,7 @@ const nextGroupCommandPromise = (xmlContentSB: StringBuilder, groupList: string[
   return new Promise<void>(resolve => {
     localforage.getItem(groupList[0] + '-command').then((commandData) => {
       localforage.getItem(groupList[0] + '-detail').then((groupData) => {
-        let groupTagStr = ''
+        let groupTagStr = Common.EmptyString
         const groupStartIndex = (groupData as IGroupCommandDetail)?.startIndex
         if (groupStartIndex != null) {
           groupTagStr = ` markLine="${groupStartIndex + 1}"`

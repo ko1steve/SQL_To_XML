@@ -1,3 +1,5 @@
+import { Common } from '../../util/common'
+
 export const sqlContentContainer = {
   className: 'col-8 container position-relative'
 }
@@ -45,6 +47,6 @@ export const importSqlButton = {
 }
 
 export const exportXmlButton = {
-  className: '',
+  className: Common.EmptyString,
   id: 'export-xml-button'
 }

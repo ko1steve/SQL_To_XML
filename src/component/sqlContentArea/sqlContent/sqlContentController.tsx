@@ -1,10 +1,11 @@
 import React, { useState, JSX } from 'react'
 import { Container } from 'typescript-ioc'
-import { CommandType, GroupType, MainConfig } from 'src/mainConfig'
-import { IGroupContainerConfig, ISqlContentConfig } from 'src/component/sqlContentArea/sqlContent/sqlContentConfig'
-import { ICommandData, MessageType } from 'src/data/commandData'
-import { DataModel } from 'src/model/dataModel'
-import { SqlHandler } from 'src/core/sqlHandler/sqlHandler'
+import { CommandType, GroupType, MainConfig } from '../../../mainConfig'
+import { IGroupContainerConfig, ISqlContentConfig } from '../../../component/sqlContentArea/sqlContent/sqlContentConfig'
+import { ICommandData, MessageType } from '../../../data/commandData'
+import { DataModel } from '../../../model/dataModel'
+import { SqlHandler } from '../../../core/sqlHandler/sqlHandler'
+import { Common } from '../../../util/common'
 
 export interface ISqlContentControllerProps {
   id: string
@@ -131,7 +132,7 @@ export class SqlContentController extends React.Component<ISqlContentControllerP
     return (
       <div key={'groupContainer-' + groupType} id={config.id.replace('{groupType}', groupType)} className={config.className}>
         <div id={config.commandContainer.id.replace('{groupType}', groupType)} className={config.commandContainer.className}>
-          <p id={config.commandContainer.title.id.replace('{groupType}', groupType)} className={config.commandContainer.title.className + (isTitleErrorStyle ? ' command-error' : '')}>
+          <p id={config.commandContainer.title.id.replace('{groupType}', groupType)} className={config.commandContainer.title.className + (isTitleErrorStyle ? ' command-error' : Common.EmptyString)}>
             {this.mainConfig.groupSettingMap.get(groupType).title}
           </p>
           {isShowAmount ? this.getAmountText(commands) : null}
@@ -175,7 +176,7 @@ export class SqlContentController extends React.Component<ISqlContentControllerP
           const showCommand = !(command.messages.length === 0 && commands.length >= this.mainConfig.maxGroupCommandAmount)
           if (showCommand) {
             return (
-              <li key={'commandItem-' + index} className={'command' + (command.messages.length > 0 ? ' command-error' : '')}>
+              <li key={'commandItem-' + index} className={'command' + (command.messages.length > 0 ? ' command-error' : Common.EmptyString)}>
                 <p className='num-of-item'>{(index + 1).toString()}</p>
                 <CommandItem command={command} index={index} />
               </li>

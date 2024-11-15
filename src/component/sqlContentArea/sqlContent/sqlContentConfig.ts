@@ -1,3 +1,4 @@
+import { Common } from '../../../util/common'
 import { IHtmlElementConfig } from '../../../config/htmlConfig'
 import { CommandType } from '../../../mainConfig'
 
@@ -23,10 +24,10 @@ export class SqlContentConfig implements ISqlContentConfig {
 
   public mainContainer: IMainContainerConfig = {
     id: 'main-container-{commandType}',
-    className: '',
+    className: Common.EmptyString,
     contentContainer: {
       id: 'content-container-{commandType}',
-      className: ''
+      className: Common.EmptyString
     }
   }
 

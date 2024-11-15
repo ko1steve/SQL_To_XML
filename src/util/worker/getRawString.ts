@@ -1,3 +1,5 @@
+import { Common } from '../common'
+
 interface IGetRawStringMessage {
   file: File
 }
@@ -27,7 +29,7 @@ const workerFunction = () => {
       const arrayBuffer = event.target.result as ArrayBuffer
       const uint8Array = new Uint8Array(arrayBuffer)
       const chunkedArray = chunkArray(uint8Array, maxSafeArrayLength)
-      const rawString = Array.from(chunkedArray, arr => Array.from(arr, byte => String.fromCharCode(byte)).join('')).join('')
+      const rawString = Array.from(chunkedArray, arr => Array.from(arr, byte => String.fromCharCode(byte)).join(Common.EmptyString)).join(Common.EmptyString)
       self.postMessage({ type: 'complete', data: { rawString } })
     }
     arrayBufferReader.readAsArrayBuffer(file)
