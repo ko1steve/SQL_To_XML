@@ -113,7 +113,7 @@ export class SqlContentController extends React.Component<ISqlContentControllerP
       }
     })
 
-    let isTitleErrorStyle: boolean = !isGroupExist || this.sqlHandler.indicateCommandErrorMap.has(groupType) || (commands.length === 0 && isCheckGroup)
+    let isTitleErrorStyle = !isGroupExist || this.sqlHandler.indicateCommandErrorMap.has(groupType) || (commands.length === 0 && isCheckGroup)
 
     for (let i = 0; i < commands.length; i++) {
       if (commands[i].messages.length > 0) {
@@ -201,7 +201,7 @@ export class SqlContentController extends React.Component<ISqlContentControllerP
     } else if (commands.length === 0 && isCheckGroup) {
       this.dataModel.setCommandValid(this.props.commandType, false)
       const groupTitle = this.mainConfig.groupSettingMap.get(groupType).titleInMsg
-      let errorMessage: string = this.mainConfig.messageMap.get(MessageType.CONTENT_NOT_FOUND_ERROR)
+      let errorMessage = this.mainConfig.messageMap.get(MessageType.CONTENT_NOT_FOUND_ERROR)
       errorMessage = errorMessage.replaceAll('{titleInMsg}', groupTitle)
       return (
         <span className={config.messageContainer.errorMessage.className}>{errorMessage}</span>
@@ -215,7 +215,7 @@ export class SqlContentController extends React.Component<ISqlContentControllerP
     commands.forEach((command: ICommandData) => {
       if (command.messages.length > 0) {
         command.messages.forEach(detail => {
-          let message: string = this.mainConfig.messageMap.get(detail.messageType)
+          let message = this.mainConfig.messageMap.get(detail.messageType)
           const titleInMsg = this.mainConfig.groupSettingMap.get(groupType).titleInMsg
           message = message.replaceAll('{titleInMsg}', titleInMsg)
           message = message.replaceAll('{sql_index}', (detail.commandIndex + 1).toString())

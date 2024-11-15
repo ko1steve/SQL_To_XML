@@ -33,7 +33,7 @@ const nextGroupCommandPromise = (xmlContentSB: StringBuilder, groupList: string[
   return new Promise<void>(resolve => {
     localforage.getItem(groupList[0] + '-command').then((commandData) => {
       localforage.getItem(groupList[0] + '-detail').then((groupData) => {
-        let groupTagStr: string = ''
+        let groupTagStr = ''
         const groupStartIndex = (groupData as IGroupCommandDetail)?.startIndex
         if (groupStartIndex != null) {
           groupTagStr = ` markLine="${groupStartIndex + 1}"`
@@ -48,7 +48,7 @@ const nextGroupCommandPromise = (xmlContentSB: StringBuilder, groupList: string[
           })
         }
         xmlContentSB.append(`  </${groupList[0]}>`)
-        groupList.splice(0, 1)
+        groupList = groupList.slice(1)
         if (groupList.length > 0) {
           nextGroupCommandPromise(xmlContentSB, groupList).then(() => resolve())
         } else {

@@ -227,7 +227,7 @@ export class SqlHandler {
       return messages
     }
 
-    let matchError: boolean = false
+    let matchError = false
 
     //* 反向表列的部分 (不包含 PreProdSQL)，檢查指令是否超過一個語法
     if ([GroupType.PreSQL, GroupType.PostSQL].includes(groupName)) {
@@ -270,7 +270,7 @@ export class SqlHandler {
 
     //* 檢查 GRANT、REVOKE 等語法是否出現在 DDL 複雜語法之外
     const cleanedTextlines = commadTextSB.strings.map(line => line.trim())
-    for (let i: number = cleanedTextlines.length - 1; i >= 0; i--) {
+    for (let i = cleanedTextlines.length - 1; i >= 0; i--) {
       //* 若抓到 DDL 複雜語法的結束符號，跳過檢查
       if (this.mainConfig.ddlComplexCommandEnds.includes(cleanedTextlines[i])) {
         break
@@ -294,7 +294,7 @@ export class SqlHandler {
       if (groupInvalidCommandMap.has(groupName)) {
         const invalidCommandMap = groupInvalidCommandMap.get(groupName)
         //* 取得該 GroupName 所有非法語法
-        let count: number = 0
+        let count = 0
         invalidCommandMap.forEach((regExp, commandName) => {
           //* 若抓到該 Group 禁止的任一非法語法
           const matches = upperText.match(regExp)
@@ -357,8 +357,8 @@ export class SqlHandler {
     if (this.mainConfig.validCommandMap.has(this.commandType)) {
       const validCommandMap = this.mainConfig.validCommandMap.get(this.commandType)?.get(groupName)
       if (validCommandMap) {
-        let isMatch: boolean = false
-        let count: number = 0
+        let isMatch = false
+        let count = 0
         validCommandMap.forEach((regExp, commandName) => {
           const matches = upperText.match(regExp)
           if (matches) {
