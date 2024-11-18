@@ -2,6 +2,7 @@ import { Singleton } from 'typescript-ioc'
 import { TSMap } from 'typescript-map'
 import { StringBuilder } from '../data/stringBuilder'
 import { GroupType } from '../mainConfig'
+import { Common } from '../util/common'
 
 @Singleton
 export class RegExpConfig {
@@ -13,7 +14,7 @@ export class RegExpConfig {
   ])
 
   public static readonly ALL_DDL_VALID_REGEXP_WITHOUT_CHECK_TEMP_TABLE = new RegExp(
-    RegExpConfig.ALL_DDL_VALID_REGEXP.source.replaceAll('(?!@|#|##)', ''), 'gmi'
+    RegExpConfig.ALL_DDL_VALID_REGEXP.source.replaceAll('(?!@|#|##)', Common.EmptyString), 'gmi'
   )
 
   public static readonly ALL_MSSQL_DML_VALID_REGEXP: RegExp = /^(?:insert\s+into\s+(?!@|#|##)\S+|select\s+(?:\52|.+)\s+into\s+(?!@|#|##).+\s+from\s+|update\s+\S+\s+set\s+|delete\s+).+$/gmi
@@ -24,7 +25,7 @@ export class RegExpConfig {
   ])
 
   public static readonly ALL_DML_VALID_REGEXP_WITHOUT_CHECK_TEMP_TABLE = new RegExp(
-    RegExpConfig.ALL_DML_VALID_REGEXP.source.replaceAll('(?!@|#|##)', ''), 'gmi'
+    RegExpConfig.ALL_DML_VALID_REGEXP.source.replaceAll('(?!@|#|##)', Common.EmptyString), 'gmi'
   )
 
   public static readonly MSSQL_SELECT_VALID_REGEXP: RegExp = /^SELECT\s+(?!COUNT\((?:[0-9]+|\*)\)\s+|.+\s+INTO\s+)(?:.+|\*)\s+FROM\s+\S+.+$/gmi

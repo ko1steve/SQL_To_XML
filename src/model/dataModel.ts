@@ -1,8 +1,9 @@
 import { MiniSignal } from 'mini-signals'
 import { Singleton } from 'typescript-ioc'
 import { TSMap } from 'typescript-map'
-import { CommandType } from 'src/mainConfig'
-import { SqlContentController } from 'src/component/sqlContentArea/sqlContent/sqlContentController'
+import { CommandType } from '../mainConfig'
+import { SqlContentController } from '../component/sqlContentArea/sqlContent/sqlContentController'
+import { Common } from '../util/common'
 
 @Singleton
 export class DataModel {
@@ -57,7 +58,7 @@ export class DataModel {
     this.onCommandValidChangeSignal = new MiniSignal()
     this.onStartLoadSignal = new MiniSignal()
     this.onCompleteLoadSignal = new MiniSignal()
-    this._fileName = ''
+    this._fileName = Common.EmptyString
   }
 
   public getCommandValid (commandType: CommandType): boolean {

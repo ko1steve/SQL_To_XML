@@ -1,3 +1,5 @@
+import { Common } from '../util/common'
+
 export class StringBuilder {
   protected _strings: string[]
 
@@ -17,7 +19,7 @@ export class StringBuilder {
     this._strings.push(str)
   }
 
-  toString (symbol: string = '') {
+  toString (symbol: string = Common.EmptyString) {
     return this._strings.join(symbol)
   }
 }

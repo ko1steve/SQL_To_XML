@@ -1,10 +1,11 @@
 import React, { useState, JSX } from 'react'
 import { Container } from 'typescript-ioc'
-import { CommandType, GroupType, MainConfig } from 'src/mainConfig'
-import { IGroupContainerConfig, ISqlContentConfig } from 'src/component/sqlContentArea/sqlContent/sqlContentConfig'
-import { ICommandData, MessageType } from 'src/data/commandData'
-import { DataModel } from 'src/model/dataModel'
-import { SqlHandler } from 'src/core/sqlHandler/sqlHandler'
+import { CommandType, GroupType, MainConfig } from '../../../mainConfig'
+import { IGroupContainerConfig, ISqlContentConfig } from '../../../component/sqlContentArea/sqlContent/sqlContentConfig'
+import { ICommandData, MessageType } from '../../../data/commandData'
+import { DataModel } from '../../../model/dataModel'
+import { SqlHandler } from '../../../core/sqlHandler/sqlHandler'
+import { Common } from '../../../util/common'
 
 export interface ISqlContentControllerProps {
   id: string
@@ -20,8 +21,12 @@ export class SqlContentController extends React.Component<ISqlContentControllerP
   protected dataModel: DataModel
   protected mainConfig: MainConfig
   protected elementConfig: ISqlContentConfig
-  protected sqlHandler: SqlHandler
   protected mainContainer: JSX.Element
+
+  protected _sqlHandler: SqlHandler
+  public get sqlHandler () {
+    return this._sqlHandler
+  }
 
   state: ISqlContentControllerState
 
@@ -32,7 +37,7 @@ export class SqlContentController extends React.Component<ISqlContentControllerP
     }
     this.mainConfig = Container.get(MainConfig)
     this.elementConfig = this.mainConfig.tabContentConfigMap.get(this.props.commandType) as ISqlContentConfig
-    this.sqlHandler = new SqlHandler(props.commandType)
+    this._sqlHandler = new SqlHandler(props.commandType)
     this.dataModel = Container.get(DataModel)
     this.dataModel.tabContentControllerMap.set(props.commandType, this)
     this.dataModel.setCommandValid(this.props.commandType, false)
@@ -71,7 +76,7 @@ export class SqlContentController extends React.Component<ISqlContentControllerP
       const promistList: Promise<JSX.Element | null>[] = []
       this.mainConfig.groupSettingMap.keys().forEach(groupType => {
         const promise = new Promise<JSX.Element | null>(resolve => {
-          this.sqlHandler.getItem<ICommandData[] | null>(groupType + '-command').then((commands) => {
+          this.sqlHandler.getItem<ICommandData[]>(groupType + '-command').then((commands) => {
             if (!commands) {
               commands = []
             }
@@ -106,14 +111,14 @@ export class SqlContentController extends React.Component<ISqlContentControllerP
 
     let isGroupExist = true
 
-    await this.sqlHandler.getItem<ICommandData[] | null>(groupType + '-command').then((commands) => {
+    await this.sqlHandler.getItem<ICommandData[]>(groupType + '-command').then((commands) => {
       if (!commands) {
         isGroupExist = false
         this.dataModel.setCommandValid(this.props.commandType, false)
       }
     })
 
-    let isTitleErrorStyle: boolean = !isGroupExist || this.sqlHandler.indicateCommandErrorMap.has(groupType) || (commands.length === 0 && isCheckGroup)
+    let isTitleErrorStyle = !isGroupExist || this.sqlHandler.indicateCommandErrorMap.has(groupType) || (commands.length === 0 && isCheckGroup)
 
     for (let i = 0; i < commands.length; i++) {
       if (commands[i].messages.length > 0) {
@@ -131,7 +136,7 @@ export class SqlContentController extends React.Component<ISqlContentControllerP
     return (
       <div key={'groupContainer-' + groupType} id={config.id.replace('{groupType}', groupType)} className={config.className}>
         <div id={config.commandContainer.id.replace('{groupType}', groupType)} className={config.commandContainer.className}>
-          <p id={config.commandContainer.title.id.replace('{groupType}', groupType)} className={config.commandContainer.title.className + (isTitleErrorStyle ? ' command-error' : '')}>
+          <p id={config.commandContainer.title.id.replace('{groupType}', groupType)} className={config.commandContainer.title.className + (isTitleErrorStyle ? ' command-error' : Common.EmptyString)}>
             {this.mainConfig.groupSettingMap.get(groupType).title}
           </p>
           {isShowAmount ? this.getAmountText(commands) : null}
@@ -175,7 +180,7 @@ export class SqlContentController extends React.Component<ISqlContentControllerP
           const showCommand = !(command.messages.length === 0 && commands.length >= this.mainConfig.maxGroupCommandAmount)
           if (showCommand) {
             return (
-              <li key={'commandItem-' + index} className={'command' + (command.messages.length > 0 ? ' command-error' : '')}>
+              <li key={'commandItem-' + index} className={'command' + (command.messages.length > 0 ? ' command-error' : Common.EmptyString)}>
                 <p className='num-of-item'>{(index + 1).toString()}</p>
                 <CommandItem command={command} index={index} />
               </li>
@@ -201,7 +206,7 @@ export class SqlContentController extends React.Component<ISqlContentControllerP
     } else if (commands.length === 0 && isCheckGroup) {
       this.dataModel.setCommandValid(this.props.commandType, false)
       const groupTitle = this.mainConfig.groupSettingMap.get(groupType).titleInMsg
-      let errorMessage: string = this.mainConfig.messageMap.get(MessageType.CONTENT_NOT_FOUND_ERROR)
+      let errorMessage = this.mainConfig.messageMap.get(MessageType.CONTENT_NOT_FOUND_ERROR)
       errorMessage = errorMessage.replaceAll('{titleInMsg}', groupTitle)
       return (
         <span className={config.messageContainer.errorMessage.className}>{errorMessage}</span>
@@ -215,7 +220,7 @@ export class SqlContentController extends React.Component<ISqlContentControllerP
     commands.forEach((command: ICommandData) => {
       if (command.messages.length > 0) {
         command.messages.forEach(detail => {
-          let message: string = this.mainConfig.messageMap.get(detail.messageType)
+          let message = this.mainConfig.messageMap.get(detail.messageType)
           const titleInMsg = this.mainConfig.groupSettingMap.get(groupType).titleInMsg
           message = message.replaceAll('{titleInMsg}', titleInMsg)
           message = message.replaceAll('{sql_index}', (detail.commandIndex + 1).toString())

@@ -1,10 +1,11 @@
 import React from 'react'
-import { ExampleButton } from 'src/element/exampleButton/exampleButton'
+import { ExampleButton } from '../../element/exampleButton/exampleButton'
 import * as Config from './config'
 import * as ExampleContent from './exampleContent.json'
+import { Common } from '../../util/common'
 
 export const Header: React.FC = () => {
-  const content = ExampleContent.content.join('')
+  const content = ExampleContent.content.join(Common.EmptyString)
   return (
     <div className={Config.background.className}>
       <div className={Config.titleContainer.className}>

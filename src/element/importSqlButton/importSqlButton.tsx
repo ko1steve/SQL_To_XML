@@ -3,6 +3,7 @@ import GetRawString, { IGetRawStringResponse } from 'src/util/worker/getRawStrin
 import jschardet from 'jschardet'
 import { Container } from 'typescript-ioc'
 import { DataModel } from 'src/model/dataModel'
+import { Common } from 'src/util/common'
 
 interface IImportSqlButtonProps {
   className: string
@@ -63,7 +64,7 @@ export const ImportSqlButton: React.FC<IImportSqlButtonProps> = ({ className, id
     //* 將文字檔讀取為 ArrayBuffer Type
     arrayBufferReader.readAsArrayBuffer(file)
     event.target.files = null
-    event.target.value = ''
+    event.target.value = Common.EmptyString
   }
 
   return (

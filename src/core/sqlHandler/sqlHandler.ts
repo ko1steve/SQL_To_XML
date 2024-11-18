@@ -5,6 +5,7 @@ import { ICommandData, ICommandDataDetail, ICommandDataMessage, IGroupCommandDet
 import { StringBuilder } from '../../data/stringBuilder'
 import { CommandType, GroupType, IGroupSetting, MainConfig } from '../../mainConfig'
 import { Command, RegExpConfig } from '../../config/regExpConfig'
+import { Common } from '../../util/common'
 
 export class SqlHandler {
   protected mainConfig: MainConfig
@@ -62,7 +63,7 @@ export class SqlHandler {
             const isFindCommandTag = textLines[i + 1].trim().startsWith(this.mainConfig.singleCommandIndicator)
             const isFindGroupTag = searchEndArr.some(pattern => textLines[i + 1].trim().startsWith(pattern))
             if (!isFindCommandTag && !isFindGroupTag) {
-              const isBlank = textLines[i + 1].trim() === ''
+              const isBlank = textLines[i + 1].trim() === Common.EmptyString
               this.indicateCommandErrorMap.set(groupName, { commandIndex: i + 1, isBlank })
             }
           }
@@ -76,7 +77,7 @@ export class SqlHandler {
             if (isFindCommandTag || isFindGroupTag) {
               i = j - 1
               break
-            } else if (textLines[j].trim() === '' || textLines[j].trim().search(/^--|^\/\*/) < 0) {
+            } else if (textLines[j].trim() === Common.EmptyString || textLines[j].trim().search(/^--|^\/\*/) < 0) {
               continue
             } else {
               this.indicateCommandErrorMap.set(groupName, { commandIndex: j, isBlank: false })
@@ -142,7 +143,7 @@ export class SqlHandler {
         commadTextSB = new StringBuilder()
         const commandDataMessages: ICommandDataMessage[] = []
 
-        const newTextLine = textLines[i].replace(this.mainConfig.singleCommandIndicator, '').trim()
+        const newTextLine = textLines[i].replace(this.mainConfig.singleCommandIndicator, Common.EmptyString).trim()
         if (newTextLine.length !== 0) {
           commadTextSB.append(newTextLine)
         } else {
@@ -165,7 +166,7 @@ export class SqlHandler {
             i = j - 1
             break
           } else {
-            textLines[j] = textLines[j].replace(this.mainConfig.singleCommandIndicator, '')
+            textLines[j] = textLines[j].replace(this.mainConfig.singleCommandIndicator, Common.EmptyString)
             commadTextSB.append(textLines[j])
           }
         }
@@ -217,17 +218,17 @@ export class SqlHandler {
     const messages: ICommandDataMessage[] = []
 
     const upperText = commadTextSB.strings.filter(e => !e.trim().startsWith('--')).join('\r\n').toUpperCase().trim()
-    if (upperText === '') {
+    if (upperText === Common.EmptyString) {
       messages.push({
         messageType: MessageType.EMPTY_OR_COMMENT_ONLY_ERROR,
-        command: '',
+        command: Common.EmptyString,
         globalTextLineIndex: detail.globalTextLineIndex,
         commandIndex: detail.commandIndex
       })
       return messages
     }
 
-    let matchError: boolean = false
+    let matchError = false
 
     //* 反向表列的部分 (不包含 PreProdSQL)，檢查指令是否超過一個語法
     if ([GroupType.PreSQL, GroupType.PostSQL].includes(groupName)) {
@@ -236,7 +237,7 @@ export class SqlHandler {
         if (matches && matches.length > 1) {
           messages.push({
             messageType: MessageType.EXCEENDS_COMMAND_LIMIT_ERROR,
-            command: '',
+            command: Common.EmptyString,
             globalTextLineIndex: detail.globalTextLineIndex,
             commandIndex: detail.commandIndex
           })
@@ -255,7 +256,7 @@ export class SqlHandler {
           if (matches && matches.length > 1) {
             messages.push({
               messageType: MessageType.EXCEENDS_COMMAND_LIMIT_ERROR,
-              command: '',
+              command: Common.EmptyString,
               globalTextLineIndex: detail.globalTextLineIndex,
               commandIndex: detail.commandIndex
             })
@@ -270,7 +271,7 @@ export class SqlHandler {
 
     //* 檢查 GRANT、REVOKE 等語法是否出現在 DDL 複雜語法之外
     const cleanedTextlines = commadTextSB.strings.map(line => line.trim())
-    for (let i: number = cleanedTextlines.length - 1; i >= 0; i--) {
+    for (let i = cleanedTextlines.length - 1; i >= 0; i--) {
       //* 若抓到 DDL 複雜語法的結束符號，跳過檢查
       if (this.mainConfig.ddlComplexCommandEnds.includes(cleanedTextlines[i])) {
         break
@@ -294,7 +295,7 @@ export class SqlHandler {
       if (groupInvalidCommandMap.has(groupName)) {
         const invalidCommandMap = groupInvalidCommandMap.get(groupName)
         //* 取得該 GroupName 所有非法語法
-        let count: number = 0
+        let count = 0
         invalidCommandMap.forEach((regExp, commandName) => {
           //* 若抓到該 Group 禁止的任一非法語法
           const matches = upperText.match(regExp)
@@ -329,7 +330,7 @@ export class SqlHandler {
           if (count > 1) {
             messages.push({
               messageType: MessageType.EXCEENDS_COMMAND_LIMIT_ERROR,
-              command: '',
+              command: Common.EmptyString,
               globalTextLineIndex: detail.globalTextLineIndex,
               commandIndex: detail.commandIndex
             })
@@ -340,7 +341,7 @@ export class SqlHandler {
           if (matches && matches.length > 1) {
             messages.push({
               messageType: MessageType.EXCEENDS_COMMAND_LIMIT_ERROR,
-              command: '',
+              command: Common.EmptyString,
               globalTextLineIndex: detail.globalTextLineIndex,
               commandIndex: detail.commandIndex
             })
@@ -357,8 +358,8 @@ export class SqlHandler {
     if (this.mainConfig.validCommandMap.has(this.commandType)) {
       const validCommandMap = this.mainConfig.validCommandMap.get(this.commandType)?.get(groupName)
       if (validCommandMap) {
-        let isMatch: boolean = false
-        let count: number = 0
+        let isMatch = false
+        let count = 0
         validCommandMap.forEach((regExp, commandName) => {
           const matches = upperText.match(regExp)
           if (matches) {
@@ -381,7 +382,7 @@ export class SqlHandler {
         if (!this.mainConfig.useAllRegExpCheckMultiCommand && count > 1) {
           messages.push({
             messageType: MessageType.EXCEENDS_COMMAND_LIMIT_ERROR,
-            command: '',
+            command: Common.EmptyString,
             globalTextLineIndex: detail.globalTextLineIndex,
             commandIndex: detail.commandIndex
           })
@@ -390,7 +391,7 @@ export class SqlHandler {
         if (!isMatch) {
           messages.push({
             messageType: MessageType.NO_VALID_COMMAND_ERROR,
-            command: '',
+            command: Common.EmptyString,
             globalTextLineIndex: detail.globalTextLineIndex,
             commandIndex: detail.commandIndex
           })
