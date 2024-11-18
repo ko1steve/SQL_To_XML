@@ -1,4 +1,3 @@
-import localforage from 'localforage'
 import React, { useEffect, useState } from 'react'
 import { Container } from 'typescript-ioc'
 import { ICommandData, IGroupCommandDetail } from '../../data/commandData'
@@ -6,6 +5,7 @@ import { StringBuilder } from '../../data/stringBuilder'
 import { CommandType, GroupType } from '../../mainConfig'
 import { DataModel } from '../..//model/dataModel'
 import { Common } from '../../util/common'
+import { SqlHandler } from 'src/core/sqlHandler/sqlHandler'
 
 enum ButtonState {
   Active = 'active',
@@ -30,18 +30,17 @@ const escapeXml = (unsafe: string) => {
   })
 }
 
-const nextGroupCommandPromise = (xmlContentSB: StringBuilder, groupList: string[]) => {
+const nextGroupCommandPromise = (xmlContentSB: StringBuilder, groupList: string[], sqlHandler: SqlHandler) => {
   return new Promise<void>(resolve => {
-    localforage.getItem(groupList[0] + '-command').then((commandData) => {
-      localforage.getItem(groupList[0] + '-detail').then((groupData) => {
+    sqlHandler.getItem<ICommandData[]>(groupList[0] + '-command').then(commands => {
+      sqlHandler.getItem(groupList[0] + '-detail').then(groupData => {
         let groupTagStr = Common.EmptyString
         const groupStartIndex = (groupData as IGroupCommandDetail)?.startIndex
         if (groupStartIndex != null) {
           groupTagStr = ` markLine="${groupStartIndex + 1}"`
         }
         xmlContentSB.append(`  <${groupList[0]}${groupTagStr}>`)
-        if (commandData) {
-          const commands = commandData as ICommandData[]
+        if (commands) {
           commands.forEach((command, index) => {
             const sqlTagStr = `startLine="${command.startIndex + 1}" endLine="${command.endIndex + 1}"`
             const sqlCommandStr = `    <SQL sql_idx="${index + 1}" ${sqlTagStr}>\n${escapeXml((command.content as any)._strings.join('\r\n'))}</SQL>`
@@ -51,7 +50,7 @@ const nextGroupCommandPromise = (xmlContentSB: StringBuilder, groupList: string[
         xmlContentSB.append(`  </${groupList[0]}>`)
         groupList = groupList.slice(1)
         if (groupList.length > 0) {
-          nextGroupCommandPromise(xmlContentSB, groupList).then(() => resolve())
+          nextGroupCommandPromise(xmlContentSB, groupList, sqlHandler).then(() => resolve())
         } else {
           resolve()
         }
@@ -75,8 +74,9 @@ export const ExportXmlButton: React.FC<IExportXmlButtonProps> = ({ className, id
     xmlContentSB.append('<SQLBodys>')
 
     const groupList = Object.values(GroupType)
+    const sqlHandler = dataModel.tabContentControllerMap.get(dataModel.currentTab)!.sqlHandler
 
-    nextGroupCommandPromise(xmlContentSB, groupList).then(() => {
+    nextGroupCommandPromise(xmlContentSB, groupList, sqlHandler).then(() => {
       xmlContentSB.append('</SQLBodys>')
       const blob = new Blob([xmlContentSB.toString('\r\n')], { type: 'text/xml' })
       const a = document.createElement('a')

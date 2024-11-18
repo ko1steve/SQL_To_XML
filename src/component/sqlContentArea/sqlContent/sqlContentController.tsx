@@ -21,8 +21,12 @@ export class SqlContentController extends React.Component<ISqlContentControllerP
   protected dataModel: DataModel
   protected mainConfig: MainConfig
   protected elementConfig: ISqlContentConfig
-  protected sqlHandler: SqlHandler
   protected mainContainer: JSX.Element
+
+  protected _sqlHandler: SqlHandler
+  public get sqlHandler () {
+    return this._sqlHandler
+  }
 
   state: ISqlContentControllerState
 
@@ -33,7 +37,7 @@ export class SqlContentController extends React.Component<ISqlContentControllerP
     }
     this.mainConfig = Container.get(MainConfig)
     this.elementConfig = this.mainConfig.tabContentConfigMap.get(this.props.commandType) as ISqlContentConfig
-    this.sqlHandler = new SqlHandler(props.commandType)
+    this._sqlHandler = new SqlHandler(props.commandType)
     this.dataModel = Container.get(DataModel)
     this.dataModel.tabContentControllerMap.set(props.commandType, this)
     this.dataModel.setCommandValid(this.props.commandType, false)
@@ -72,7 +76,7 @@ export class SqlContentController extends React.Component<ISqlContentControllerP
       const promistList: Promise<JSX.Element | null>[] = []
       this.mainConfig.groupSettingMap.keys().forEach(groupType => {
         const promise = new Promise<JSX.Element | null>(resolve => {
-          this.sqlHandler.getItem<ICommandData[] | null>(groupType + '-command').then((commands) => {
+          this.sqlHandler.getItem<ICommandData[]>(groupType + '-command').then((commands) => {
             if (!commands) {
               commands = []
             }
@@ -107,7 +111,7 @@ export class SqlContentController extends React.Component<ISqlContentControllerP
 
     let isGroupExist = true
 
-    await this.sqlHandler.getItem<ICommandData[] | null>(groupType + '-command').then((commands) => {
+    await this.sqlHandler.getItem<ICommandData[]>(groupType + '-command').then((commands) => {
       if (!commands) {
         isGroupExist = false
         this.dataModel.setCommandValid(this.props.commandType, false)
